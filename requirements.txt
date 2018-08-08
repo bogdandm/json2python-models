@@ -1,0 +1,4 @@
+aiohttp==3.3.*
+python-dateutil==2.7.*
+attrs==18.1.*
+inflection==0.3.*
