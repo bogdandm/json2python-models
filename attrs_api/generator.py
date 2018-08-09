@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import Optional, Callable, Iterable, Tuple, Any, List, Union
+from typing import Optional, Callable, Iterable, Any, List, Union
 
-import attr
 import inflection
 
-from .dynamic_typing import DList, DUnion, BaseType, DOptional
+from .dynamic_typing import DList, DUnion, BaseType, DOptional, StringSerializable, STRING_CONVERTERS
 
 
 class Hierarchy(Enum):
@@ -34,21 +33,17 @@ no_value = object()
 class Generator:
     META_TYPE = Union[type, BaseType, dict, List[dict]]
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
-    converters: Iterable[Tuple[META_TYPE, CONVERTER_TYPE]] = (
-        (int, int),
-        (float, float),
-        (bool, lambda v: {"true": True, "false": False}.get(v.lower(), no_value))
-    )
+    DEFAULT_STRING_CONVERTERS = STRING_CONVERTERS
 
     def __init__(self,
                  sep_style: SepStyle = SepStyle.Underscore,
                  hierarchy: Hierarchy = Hierarchy.Nested,
                  fpolicy: OptionalFieldsPolicy = OptionalFieldsPolicy.Optional,
-                 converters: Iterable[Tuple[META_TYPE, CONVERTER_TYPE]] = None):
+                 converters: Iterable[StringSerializable] = None):
         self.sep_style = sep_style
         self.hierarchy = hierarchy
         self.fpolicy = fpolicy
-        self.converters = converters if converters is not None else self.converters
+        self.converters = converters if converters is not None else self.DEFAULT_STRING_CONVERTERS
 
     def generate(self, *data_variants: dict):
         fields_sets = [self._convert(data) for data in data_variants]
@@ -56,65 +51,60 @@ class Generator:
     def _convert(self, data: dict):
         fields = dict()
         for key, value in data.items():
-            key = inflection.underscore(key)
-            if isinstance(value, dict):
-                a = self._convert(value)
-            else:
-                a = self.get_attrib(value)
-            fields[key] = a
+            fields[inflection.underscore(key)] = self._detect_type(value)
         return fields
 
     # def get_model(self, data: dict):
 
-    def get_attrib(self, value, complex_type=no_value):
-        t, converter = complex_type if complex_type is not no_value else self._detect_type(value)
-        if isinstance(t, type):
-            return attr.ib(type=t, converter=converter)
-        else:
-            return t
+    # def get_attrib(self, value, complex_type=no_value):
+    #     t = complex_type if complex_type is not no_value else self._detect_type(value)
+    #     if isinstance(t, type):
+    #         return attr.ib(type=t)
+    #     else:
+    #         return t
 
-    def _detect_type(self, value, convert_dict=True) -> Tuple[META_TYPE, CONVERTER_TYPE]:
+    def _detect_type(self, value, convert_dict=True) -> META_TYPE:
         # Simple types
         if isinstance(value, float):
-            return float, None
+            return float
         elif isinstance(value, bool):
-            return bool, None
+            return bool
         elif isinstance(value, int):
-            return int, None
+            return int
 
         # List trying to yield nested type
         elif isinstance(value, list):
             if value:
                 types = []
                 for item in value:
-                    t, _ = self._detect_type(item, convert_dict)
+                    t = self._detect_type(item, convert_dict)
                     types.append(t)
                 if len(types) > 1:
-                    return DList(DUnion(*types)), None
+                    return DList(DUnion(*types))
                 else:
-                    return DList(*types), None
+                    return DList(*types)
             else:
-                return list, None
+                return list
 
-        # Dict should be processed as another model in _convert else they interpreted as is
+        # Dict should be processed as another model if convert_dict is enabled
         elif isinstance(value, dict):
             if convert_dict:
-                return self._convert(value), None
+                return self._convert(value)
             else:
-                return dict, None
+                return dict
 
         # null interpreted as Optional and will be processed later on merge stage
         elif value is None:
-            return DOptional(Any), None
+            return DOptional(Any)
 
         # string types trying to convert to other types
         else:  # string
-            for t, converter in self.converters:
+            for converter in self.converters:
                 try:
-                    value = converter(value)
+                    value = converter.to_internal_value(value)
                     if value is no_value:
                         continue
                 except ValueError:
                     continue
-                return t, converter
-            return str, None
+                return converter
+            return str
