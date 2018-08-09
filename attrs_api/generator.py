@@ -1,10 +1,15 @@
 from collections import OrderedDict
 from enum import Enum
-from typing import Optional, Callable, Iterable, Any, List, Union
+from typing import Optional, Callable, Any, List, Union
 
 import inflection
 
-from .dynamic_typing import DList, DUnion, BaseType, DOptional, StringSerializable, STRING_CONVERTERS, NoneType
+from attrs_api.dynamic_typing import ComplexType
+from .dynamic_typing import (
+    BaseType, SingleType,
+    DList, DUnion, DOptional, NoneType,
+    StringSerializableRegistry, registry
+)
 
 
 class Hierarchy(Enum):
@@ -32,24 +37,23 @@ no_value = object()
 # TODO: List of lists handler
 
 class Generator:
-    META_TYPE = Union[type, BaseType, dict, List[dict]]
+    META_TYPE = Union[type, BaseType, dict]
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
-    DEFAULT_STRING_CONVERTERS = STRING_CONVERTERS
 
     def __init__(self,
                  sep_style: SepStyle = SepStyle.Underscore,
                  hierarchy: Hierarchy = Hierarchy.Nested,
                  fpolicy: OptionalFieldsPolicy = OptionalFieldsPolicy.Optional,
-                 converters: Iterable[StringSerializable] = None):
+                 str_types_registry: StringSerializableRegistry = None):
         self.sep_style = sep_style
         self.hierarchy = hierarchy
         self.fpolicy = fpolicy
-        self.converters = converters if converters is not None else self.DEFAULT_STRING_CONVERTERS
+        self.str_types_registry = str_types_registry if str_types_registry is not None else registry
 
     def generate(self, *data_variants: dict) -> dict:
         fields_sets = [self._convert(data) for data in data_variants]
         fields = self._merge_field_sets(fields_sets)
-        return fields
+        return self._optimize_type(fields)
 
     def _convert(self, data: dict):
         fields = dict()
@@ -58,6 +62,9 @@ class Generator:
         return fields
 
     def _detect_type(self, value, convert_dict=True) -> META_TYPE:
+        """
+        Converts json value to meta-type
+        """
         # Simple types
         if isinstance(value, float):
             return float
@@ -96,17 +103,20 @@ class Generator:
 
         # string types trying to convert to other types
         else:  # string
-            for converter in self.converters:
+            for t in self.str_types_registry:
                 try:
-                    value = converter.to_internal_value(value)
+                    value = t.to_internal_value(value)
                     if value is no_value:
                         continue
                 except ValueError:
                     continue
-                return converter
+                return t
             return str
 
-    def _merge_field_sets(self, field_sets: List[dict]) -> dict:
+    def _merge_field_sets(self, field_sets: List[dict]) -> OrderedDict:
+        """
+        Merges fields sets into one set of pairs key - meta-type
+        """
         fields = OrderedDict()
 
         first = True
@@ -122,8 +132,6 @@ class Generator:
                         *(field.types if isinstance(field, DUnion) else [field]),
                         *(fields[name].types if isinstance(fields[name], DUnion) else [fields[name]])
                     )
-                    if len(fields[name]) == 1:
-                        fields[name] = fields[name].types[0]
 
             for name in fields_diff:
                 if not isinstance(fields[name], DOptional):
@@ -131,3 +139,47 @@ class Generator:
 
             first = False
         return fields
+
+    def _optimize_type(self, t: META_TYPE) -> META_TYPE:
+        """
+        Finds some redundant types and replace them with simple one
+        """
+        if isinstance(t, dict):
+            fields = OrderedDict()
+
+            for k, v in t.items():
+                fields[k] = self._optimize_type(v)
+            return fields
+
+        elif isinstance(t, DUnion):
+            # Replace DUnion of 1 element with this element
+            if len(t) == 1:
+                return t.types[0]
+
+            # Optimize nested types and merge str pseudo-types
+            new_types = []
+            str_types = []
+            for item in t.types:
+                if item in self.str_types_registry:
+                    str_types.append(item)
+                else:
+                    new_types.append(self._optimize_type(item))
+            if int in new_types and float in new_types:
+                new_types.remove(int)
+
+            str_types = self.str_types_registry.resolve(*str_types)
+
+            # Replace str pseudo-types with <class 'str'> when they can not be resolved into single type
+            if len(str_types) > 1:
+                str_types = [str]
+
+            return DUnion(*new_types, *str_types)
+
+        elif isinstance(t, SingleType):
+            # Optimize nested types
+            return t.__class__(self._optimize_type(t.type))
+
+        elif isinstance(t, ComplexType):
+            # Optimize all nested types
+            return t.__class__(*(self._optimize_type(item.type) for item in t.types))
+        return t

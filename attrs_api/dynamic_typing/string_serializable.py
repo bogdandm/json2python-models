@@ -1,5 +1,5 @@
 from itertools import permutations
-from typing import Set, Iterable, Tuple, Type
+from typing import Set, Iterable, Tuple, Type, List, Collection
 
 from .base import BaseType
 
@@ -12,7 +12,9 @@ class StringSerializable(BaseType):
     def to_representation(self) -> str:
         raise NotImplementedError()
 
+
 T_StringSerializable = Type[StringSerializable]
+
 
 class StringSerializableRegistry:
     @classmethod
@@ -20,12 +22,18 @@ class StringSerializableRegistry:
         pass
 
     def __init__(self, *types: T_StringSerializable):
-        self.types: Set[T_StringSerializable] = set(types)
+        self.types: List[T_StringSerializable] = list(types)
         self.replaces: Set[Tuple[T_StringSerializable, T_StringSerializable]] = set()
+
+    def __iter__(self):
+        return iter(self.types)
+
+    def __contains__(self, item):
+        return item in self.types
 
     def add(self, replace_types: Iterable[T_StringSerializable] = (), cls: type = None):
         def decorator(cls):
-            self.types.add(cls)
+            self.types.append(cls)
             for t in replace_types:
                 self.replaces.add((t, cls))
             return cls
@@ -36,7 +44,9 @@ class StringSerializableRegistry:
 
         return decorator
 
-    def resolve(self, *types: T_StringSerializable) -> Iterable[T_StringSerializable]:
+    def resolve(self, *types: T_StringSerializable) -> Collection[T_StringSerializable]:
+        # TODO: Resolve common type of 2 different types (e.g str from float and bool)
+        # Do it by getting all childs of each class with their level then merge it into one list and find one with min(max(levels) for c n childs)
         types = set(types)
         flag = True
         while flag:
