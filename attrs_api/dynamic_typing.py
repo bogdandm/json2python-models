@@ -14,6 +14,9 @@ class Single(BaseType):
     def __str__(self):
         return f"{self.__class__.__name__}[{self.type}]"
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.type == other.type
+
 
 class Many(BaseType):
     __slots__ = ["types"]
@@ -25,13 +28,21 @@ class Many(BaseType):
         items = ', '.join(map(str, self.types))
         return f"{self.__class__.__name__}[{items}]"
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and all(t1 == t2 for t1, t2 in zip(self.types, other.types))
+
 
 class DOptional(Single):
     pass
 
 
 class DUnion(Many):
-    pass
+    def __init__(self, *types: Union[type, BaseType]):
+        unique_types = []
+        for t in types:
+            if t not in unique_types:
+                unique_types.append(t)
+        super().__init__(*unique_types)
 
 
 class DTuple(Many):

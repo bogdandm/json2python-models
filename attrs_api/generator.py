@@ -80,7 +80,10 @@ class Generator:
                     t = self._detect_type(item, convert_dict)
                     types.append(t)
                 if len(types) > 1:
-                    return DList(DUnion(*types))
+                    union = DUnion(*types)
+                    if len(union.types) == 1:
+                        return DList(*union.types)
+                    return DList(union)
                 else:
                     return DList(*types)
             else:
