@@ -25,7 +25,8 @@ test_data = [
     {
         "not_required": 2,
         "null_or_bool": False,
-        "str_number": "6.6"
+        "str_number": "6.6",
+        "child": None
     },
     {
         "null_or_bool": True,

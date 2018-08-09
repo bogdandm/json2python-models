@@ -26,11 +26,11 @@ def pprint_gen(value, key=None, lvl=0, empty_line=True):
         # raise ValueError(value)
 
     elif isinstance(value, Single):
-        yield f"{value.__class__.__name__}[]:"
+        yield f"{value.__class__.__name__}:"
         yield from pprint_gen(value.type, lvl=lvl, empty_line=False)
 
     elif isinstance(value, Many):
-        yield f"{value.__class__.__name__}[]:"
+        yield f"{value.__class__.__name__}:"
 
         for t in value.types:
             yield from pprint_gen(t, lvl=lvl + 1)
@@ -44,8 +44,6 @@ def pprint_gen(value, key=None, lvl=0, empty_line=True):
 
 if __name__ == '__main__':
     gen = Generator()
-    for d in test_data:
-        fields = gen._convert(d)
-        for s in pprint_gen(fields):
-            print(s, end='')
-        print('\n' + '-' * 10, end='')
+    for s in pprint_gen(gen.generate(*test_data)):
+        print(s, end='')
+    print('\n' + '-' * 10, end='')

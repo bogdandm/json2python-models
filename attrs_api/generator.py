@@ -1,9 +1,10 @@
+from collections import OrderedDict
 from enum import Enum
 from typing import Optional, Callable, Iterable, Any, List, Union
 
 import inflection
 
-from .dynamic_typing import DList, DUnion, BaseType, DOptional, StringSerializable, STRING_CONVERTERS
+from .dynamic_typing import DList, DUnion, BaseType, DOptional, StringSerializable, STRING_CONVERTERS, NoneType
 
 
 class Hierarchy(Enum):
@@ -45,23 +46,16 @@ class Generator:
         self.fpolicy = fpolicy
         self.converters = converters if converters is not None else self.DEFAULT_STRING_CONVERTERS
 
-    def generate(self, *data_variants: dict):
+    def generate(self, *data_variants: dict) -> dict:
         fields_sets = [self._convert(data) for data in data_variants]
+        fields = self._merge_field_sets(fields_sets)
+        return fields
 
     def _convert(self, data: dict):
         fields = dict()
         for key, value in data.items():
             fields[inflection.underscore(key)] = self._detect_type(value)
         return fields
-
-    # def get_model(self, data: dict):
-
-    # def get_attrib(self, value, complex_type=no_value):
-    #     t = complex_type if complex_type is not no_value else self._detect_type(value)
-    #     if isinstance(t, type):
-    #         return attr.ib(type=t)
-    #     else:
-    #         return t
 
     def _detect_type(self, value, convert_dict=True) -> META_TYPE:
         # Simple types
@@ -96,9 +90,9 @@ class Generator:
             else:
                 return dict
 
-        # null interpreted as Optional and will be processed later on merge stage
+        # null interpreted as is and will be processed later on Union merge stage
         elif value is None:
-            return DOptional(Any)
+            return NoneType
 
         # string types trying to convert to other types
         else:  # string
@@ -111,3 +105,29 @@ class Generator:
                     continue
                 return converter
             return str
+
+    def _merge_field_sets(self, field_sets: List[dict]) -> dict:
+        fields = OrderedDict()
+
+        first = True
+        for model in field_sets:
+            fields_diff = set(fields.keys())
+
+            for name, field in model.items():
+                if name not in fields:
+                    fields[name] = field if first or isinstance(field, DOptional) else DOptional(field)
+                else:
+                    fields_diff.remove(name)
+                    fields[name] = DUnion(
+                        *(field.types if isinstance(field, DUnion) else [field]),
+                        *(fields[name].types if isinstance(fields[name], DUnion) else [fields[name]])
+                    )
+                    if len(fields[name]) == 1:
+                        fields[name] = fields[name].types[0]
+
+            for name in fields_diff:
+                if not isinstance(fields[name], DOptional):
+                    fields[name] = DOptional(fields[name])
+
+            first = False
+        return fields

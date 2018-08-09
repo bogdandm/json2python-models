@@ -5,6 +5,14 @@ class BaseType:
     pass
 
 
+class UnknownType(BaseType):
+    def __str__(self):
+        return "Unknown"
+
+
+Unknown = UnknownType()
+
+
 class Single(BaseType):
     __slots__ = ["type"]
 
@@ -30,6 +38,9 @@ class Many(BaseType):
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and all(t1 == t2 for t1, t2 in zip(self.types, other.types))
+
+    def __len__(self):
+        return len(self.types)
 
 
 class DOptional(Single):
@@ -95,3 +106,5 @@ class BooleanString(StringSerializable, int):
 
 
 STRING_CONVERTERS = (IntString, FloatString, BooleanString)
+
+NoneType = type(None)
