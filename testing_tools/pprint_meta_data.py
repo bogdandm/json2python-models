@@ -1,6 +1,6 @@
 from inspect import isclass
 
-from attrs_api.dynamic_typing import Single, Many, StringSerializable
+from attrs_api.dynamic_typing import SingleType, ComplexType, StringSerializable
 from attrs_api.generator import Generator
 from testing_tools.data import test_data
 
@@ -25,11 +25,11 @@ def pprint_gen(value, key=None, lvl=0, empty_line=True):
             yield from pprint_gen(t, lvl=lvl + 1)
         # raise ValueError(value)
 
-    elif isinstance(value, Single):
+    elif isinstance(value, SingleType):
         yield f"{value.__class__.__name__}:"
         yield from pprint_gen(value.type, lvl=lvl, empty_line=False)
 
-    elif isinstance(value, Many):
+    elif isinstance(value, ComplexType):
         yield f"{value.__class__.__name__}:"
 
         for t in value.types:
