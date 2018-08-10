@@ -1,0 +1,21 @@
+- Functional
+    - [X] Data variant converting
+    - [X] Data variant merging
+    - [ ] Create and register models
+    - [ ] Merge models and extract common ones
+    - [ ] Save models as python code
+        - [ ] attrs classes
+        - [ ] dataclasses
+    - [ ] Implement existing models registration
+    - [ ] Generate OpenAPI spec
+- Testing
+    - [ ] Start with pytest
+    - [ ] Test data converter
+    - [ ] Test metadata merge
+    - [ ] ...
+- Build, Deploy, CI
+    - [ ] setup.py
+    - [ ] setup.py + pytest integration
+    - [ ] Tox integration
+    - [ ] TravisCI integration
+    - [ ] pip package
