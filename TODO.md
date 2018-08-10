@@ -1,3 +1,4 @@
+- [ ] Choose cool name for repo :)
 - Functional
     - [X] Data variant converting
     - [X] Data variant merging
@@ -12,7 +13,7 @@
     - [ ] Start with pytest
     - [ ] Test data converter
     - [ ] Test metadata merge
-    - [ ] ...
+    - ...
 - Build, Deploy, CI
     - [ ] setup.py
     - [ ] setup.py + pytest integration
