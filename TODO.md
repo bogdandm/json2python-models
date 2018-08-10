@@ -1,19 +1,56 @@
 - [ ] Choose cool name for repo :)
-- Functional
-    - [X] Data variant converting
-    - [X] Data variant merging
-    - [ ] Create and register models
-    - [ ] Merge models and extract common ones
-    - [ ] Save models as python code
-        - [ ] attrs classes
-        - [ ] dataclasses
-    - [ ] Implement existing models registration
-    - [ ] Generate OpenAPI spec
+- Features
+    - Models layer
+        - [X] Data variant converting
+        - [X] Data variant merging
+        - [ ] Create and register models
+        - [ ] Merge meta-models and extract common ones
+        - [ ] Convert meta-models to actual python classes
+            - [ ] attrs
+            - [ ] dataclasses
+        - [ ] Save models *(or meta-models, don't know yet what would be easier)* as python code
+            - [ ] attrs
+            - [ ] dataclasses
+            - [ ] generate from_json/to_json converters
+        - [ ] Model class -> Meta format converter
+            - [ ] attrs
+            - [ ] dataclasses
+        - [ ] Implement existing models registration
+            - [ ] attrs
+            - [ ] dataclasses
+    - API Layer
+        - [ ] Route object
+        - [ ] Register model as route in/out data spec
+    - Generate OpenAPI spec
+        - [ ] Meta-model -> OpenAPI model converter
+        - [ ] Route -> OpenAPI converter
+        
 - Testing
-    - [ ] Start with pytest
-    - [ ] Test data converter
-    - [ ] Test metadata merge
-    - ...
+    - Models layer
+        - [ ] Data variant converting
+        - [ ] Data variant merging
+        - [ ] Create and register models
+        - [ ] Merge meta-models and extract common ones
+        - [ ] Convert meta-models to actual python classes
+            - [ ] attrs
+            - [ ] dataclasses
+        - [ ] Save (meta-)models as python code
+            - [ ] attrs
+            - [ ] dataclasses
+            - [ ] generate from_json/to_json converters
+        - [ ] Model class -> Meta format converter
+            - [ ] attrs
+            - [ ] dataclasses
+        - [ ] Implement existing models registration
+            - [ ] attrs
+            - [ ] dataclasses
+    - API Layer
+        - [ ] Route object
+        - [ ] Register model as route in/out data spec
+    - Generate OpenAPI spec
+        - [ ] Meta-model -> OpenAPI model converter
+        - [ ] Route -> OpenAPI converter
+            
 - Build, Deploy, CI
     - [ ] setup.py
     - [ ] setup.py + pytest integration
