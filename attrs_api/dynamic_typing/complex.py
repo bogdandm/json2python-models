@@ -16,7 +16,7 @@ class DUnion(ComplexType):
     """
     Same as typing.Union. Nested types are unique.
     """
-    def __init__(self, *types: Union[type, BaseType]):
+    def __init__(self, *types: Union[type, BaseType, dict]):
         unique_types = []
         for t in types:
             if t not in unique_types:

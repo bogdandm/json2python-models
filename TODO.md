@@ -26,8 +26,8 @@
         
 - Testing
     - Models layer
-        - [ ] Data variant converting
-        - [ ] Data variant merging
+        - [X] Data variant converting
+        - [X] Data variant merging
         - [ ] Create and register models
         - [ ] Merge meta-models and extract common ones
         - [ ] Convert meta-models to actual python classes

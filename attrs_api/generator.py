@@ -4,7 +4,7 @@ from typing import Optional, Callable, Any, List, Union
 
 import inflection
 
-from attrs_api.dynamic_typing import ComplexType
+from attrs_api.dynamic_typing import ComplexType, Unknown
 from .dynamic_typing import (
     BaseType, SingleType,
     DList, DUnion, DOptional, NoneType,
@@ -30,11 +30,6 @@ class SepStyle(Enum):
     def __str__(self):
         return self.value
 
-
-no_value = object()
-
-
-# TODO: List of lists handler
 
 class Generator:
     META_TYPE = Union[type, BaseType, dict]
@@ -88,7 +83,7 @@ class Generator:
                 else:
                     return DList(*types)
             else:
-                return list
+                return DList(Unknown)
 
         # Dict should be processed as another model if convert_dict is enabled
         elif isinstance(value, dict):
@@ -106,8 +101,6 @@ class Generator:
             for t in self.str_types_registry:
                 try:
                     value = t.to_internal_value(value)
-                    if value is no_value:
-                        continue
                 except ValueError:
                     continue
                 return t
@@ -125,13 +118,14 @@ class Generator:
 
             for name, field in model.items():
                 if name not in fields:
-                    fields[name] = field if first or isinstance(field, DOptional) else DOptional(field)
+                    field = field if first or isinstance(field, DOptional) else DOptional(field)
                 else:
                     fields_diff.remove(name)
-                    fields[name] = DUnion(
+                    field = DUnion(
                         *(field.types if isinstance(field, DUnion) else [field]),
                         *(fields[name].types if isinstance(fields[name], DUnion) else [fields[name]])
                     )
+                fields[name] = field
 
             for name in fields_diff:
                 if not isinstance(fields[name], DOptional):
@@ -157,23 +151,33 @@ class Generator:
                 return t.types[0]
 
             # Optimize nested types and merge str pseudo-types
-            new_types = []
             str_types = []
+            types_to_merge = []
+            other_types = []
             for item in t.types:
-                if item in self.str_types_registry:
+                if isinstance(item, dict):
+                    types_to_merge.append(item)
+                elif item in self.str_types_registry:
                     str_types.append(item)
                 else:
-                    new_types.append(self._optimize_type(item))
-            if int in new_types and float in new_types:
-                new_types.remove(int)
+                    other_types.append(self._optimize_type(item))
+
+            if int in other_types and float in other_types:
+                other_types.remove(int)
+
+            if types_to_merge:
+                types_to_merge = [self._optimize_type(self._merge_field_sets(types_to_merge))]
 
             str_types = self.str_types_registry.resolve(*str_types)
-
             # Replace str pseudo-types with <class 'str'> when they can not be resolved into single type
             if len(str_types) > 1:
                 str_types = [str]
 
-            return DUnion(*new_types, *str_types)
+            types = [*other_types, *str_types, *types_to_merge]
+            if len(types) > 1:
+                return DUnion(*types)
+            else:
+                return types[0]
 
         elif isinstance(t, SingleType):
             # Optimize nested types

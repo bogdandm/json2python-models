@@ -29,6 +29,9 @@ class SingleType(BaseType):
     def __str__(self):
         return f"{self.__class__.__name__}[{self.type}]"
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} [{self.type}]>"
+
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.type == other.type
 
@@ -43,8 +46,20 @@ class ComplexType(BaseType):
         items = ', '.join(map(str, self.types))
         return f"{self.__class__.__name__}[{items}]"
 
+    def __repr__(self):
+        items = ', '.join(map(str, self.types))
+        return f"<{self.__class__.__name__} [{items}]>"
+
+    def _sort_key(self, item):
+        if isinstance(item, dict):
+            return f"Dict#{sorted(item.keys())}"
+        else:
+            return str(item)
+
     def __eq__(self, other):
-        return isinstance(other, self.__class__) and all(t1 == t2 for t1, t2 in zip(self.types, other.types))
+        return isinstance(other, self.__class__) and all(t1 == t2 for t1, t2 in zip(
+            sorted(self.types, key=self._sort_key), sorted(other.types, key=self._sort_key)
+        ))
 
     def __len__(self):
         return len(self.types)
