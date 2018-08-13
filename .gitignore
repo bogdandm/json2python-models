@@ -3,6 +3,9 @@
 venv/
 /test.py
 
+htmlcov/
+.coverage
+
 *.pyc
 *.log
 *.tmp
