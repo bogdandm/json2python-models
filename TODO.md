@@ -1,4 +1,3 @@
-- [ ] Choose cool name for repo :)
 - Features
     - Models layer
         - [X] Data variant converting
