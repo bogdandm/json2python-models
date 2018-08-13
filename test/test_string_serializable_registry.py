@@ -1,6 +1,6 @@
 import pytest
 
-from attrs_api.dynamic_typing.string_serializable import StringSerializable, StringSerializableRegistry
+from rest_client_gen.dynamic_typing.string_serializable import StringSerializable, StringSerializableRegistry
 
 r = StringSerializableRegistry()
 

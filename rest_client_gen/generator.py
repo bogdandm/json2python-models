@@ -4,11 +4,11 @@ from typing import Optional, Callable, Any, List, Union
 
 import inflection
 
-from attrs_api.dynamic_typing import ComplexType, Unknown
 from .dynamic_typing import (
     BaseType, SingleType,
     DList, DUnion, DOptional, NoneType,
-    StringSerializableRegistry, registry
+    StringSerializableRegistry, registry,
+    ComplexType, Unknown
 )
 
 

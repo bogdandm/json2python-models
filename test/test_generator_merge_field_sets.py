@@ -3,8 +3,8 @@ from random import shuffle
 
 import pytest
 
-from attrs_api.dynamic_typing import DOptional, DUnion, NoneType
-from attrs_api.generator import Generator
+from rest_client_gen.dynamic_typing import DOptional, DUnion
+from rest_client_gen.generator import Generator
 
 test_data = [
     pytest.param(

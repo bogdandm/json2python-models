@@ -1,9 +1,7 @@
-from collections import OrderedDict
-
 import pytest
 
-from attrs_api.dynamic_typing import DUnion, NoneType
-from attrs_api.generator import Generator
+from rest_client_gen.dynamic_typing import DUnion, NoneType
+from rest_client_gen.generator import Generator
 
 test_data = [
     pytest.param(DUnion(int), int, id="single_DUnion"),

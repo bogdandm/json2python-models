@@ -1,7 +1,7 @@
 from inspect import isclass
 
-from attrs_api.dynamic_typing import SingleType, ComplexType, StringSerializable
-from attrs_api.generator import Generator
+from rest_client_gen.dynamic_typing import SingleType, ComplexType, StringSerializable
+from rest_client_gen.generator import Generator
 from testing_tools.data import test_data
 
 

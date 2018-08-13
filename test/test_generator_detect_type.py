@@ -1,7 +1,7 @@
 import pytest
 
-from attrs_api.dynamic_typing import DList, Unknown, DUnion, NoneType, IntString, FloatString, BooleanString
-from attrs_api.generator import Generator
+from rest_client_gen.dynamic_typing import DList, Unknown, DUnion, NoneType, IntString, FloatString, BooleanString
+from rest_client_gen.generator import Generator
 
 test_data = [
     pytest.param(1.0, float, id="float"),

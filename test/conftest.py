@@ -1,6 +1,6 @@
 import pytest
 
-from attrs_api.generator import Generator
+from rest_client_gen.generator import Generator
 
 
 @pytest.fixture(scope="module")
