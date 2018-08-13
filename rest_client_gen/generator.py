@@ -185,5 +185,5 @@ class Generator:
 
         elif isinstance(t, ComplexType):
             # Optimize all nested types
-            return t.__class__(*(self._optimize_type(item.type) for item in t.types))
+            return t.__class__(*map(self._optimize_type, t.types))
         return t
