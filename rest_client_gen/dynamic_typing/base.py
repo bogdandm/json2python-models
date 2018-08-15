@@ -1,8 +1,18 @@
-from typing import Any, Union, Iterable
+from typing import Any, Union, Iterable, List
 
 
 class BaseType:
     def __iter__(self) -> Iterable['MetaData']:
+        raise NotImplementedError()
+
+    def replace(self, t: Union['MetaData', List['MetaData']], **kwargs) -> 'BaseType':
+        """
+        Replace nested type in-place
+
+        :param t: Meta type
+        :param kwargs: Other args
+        :return:
+        """
         raise NotImplementedError()
 
     def to_static_type(self) -> type:
@@ -17,6 +27,9 @@ class UnknownType(BaseType):
 
     def __iter__(self) -> Iterable['MetaData']:
         return ()
+
+    def replace(self, t: 'MetaData', **kwargs) -> 'UnknownType':
+        return self
 
     def to_static_type(self):
         return Any
@@ -45,12 +58,16 @@ class SingleType(BaseType):
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.type == other.type
 
+    def replace(self, t: 'MetaData', **kwargs) -> 'SingleType':
+        self.type = t
+        return self
+
 
 class ComplexType(BaseType):
     __slots__ = ["types"]
 
     def __init__(self, *types: MetaData):
-        self.types = types
+        self.types = list(types)
 
     def __str__(self):
         items = ', '.join(map(str, self.types))
@@ -76,3 +93,12 @@ class ComplexType(BaseType):
 
     def __len__(self):
         return len(self.types)
+
+    def replace(self, t: Union['MetaData', List['MetaData']], index=None, **kwargs) -> 'ComplexType':
+        if index is None and isinstance(t, list):
+            self.types = t
+        elif index is not None and not isinstance(t, list):
+            self.types[index] = t
+        else:
+            raise ValueError(f"Unsupported arguments t={t} index={index} kwargs={kwargs}")
+        return self

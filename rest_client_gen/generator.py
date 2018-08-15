@@ -1,14 +1,13 @@
 from collections import OrderedDict
 from enum import Enum
-from typing import Optional, Callable, Any, List, Union
+from typing import Optional, Callable, Any, List
 
 import inflection
 
 from .dynamic_typing import (
-    BaseType, SingleType,
+    MetaData, SingleType, ComplexType, Unknown,
     DList, DUnion, DOptional, NoneType,
-    StringSerializableRegistry, registry,
-    ComplexType, Unknown
+    StringSerializableRegistry, registry
 )
 
 
@@ -32,17 +31,13 @@ class SepStyle(Enum):
 
 
 class Generator:
-    META_TYPE = Union[type, BaseType, dict]
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 
-    def __init__(self,
-                 sep_style: SepStyle = SepStyle.Underscore,
-                 hierarchy: Hierarchy = Hierarchy.Nested,
-                 fpolicy: OptionalFieldsPolicy = OptionalFieldsPolicy.Optional,
-                 str_types_registry: StringSerializableRegistry = None):
-        self.sep_style = sep_style
-        self.hierarchy = hierarchy
-        self.fpolicy = fpolicy
+    # TODO: sep_style: SepStyle = SepStyle.Underscore
+    # TODO: hierarchy: Hierarchy = Hierarchy.Nested
+    # TODO: fpolicy: OptionalFieldsPolicy = OptionalFieldsPolicy.Optional
+
+    def __init__(self, str_types_registry: StringSerializableRegistry = None):
         self.str_types_registry = str_types_registry if str_types_registry is not None else registry
 
     def generate(self, *data_variants: dict) -> dict:
@@ -56,7 +51,7 @@ class Generator:
             fields[inflection.underscore(key)] = self._detect_type(value)
         return fields
 
-    def _detect_type(self, value, convert_dict=True) -> META_TYPE:
+    def _detect_type(self, value, convert_dict=True) -> MetaData:
         """
         Converts json value to meta-type
         """
@@ -106,7 +101,7 @@ class Generator:
                 return t
             return str
 
-    def _merge_field_sets(self, field_sets: List[dict]) -> OrderedDict:
+    def _merge_field_sets(self, field_sets: List[MetaData]) -> MetaData:
         """
         Merges fields sets into one set of pairs key - meta-type
         """
@@ -134,7 +129,7 @@ class Generator:
             first = False
         return fields
 
-    def _optimize_type(self, t: META_TYPE) -> META_TYPE:
+    def _optimize_type(self, t: MetaData) -> MetaData:
         """
         Finds some redundant types and replace them with simple one
         """
@@ -180,10 +175,10 @@ class Generator:
                 return types[0]
 
         elif isinstance(t, SingleType):
-            # Optimize nested types
-            return t.__class__(self._optimize_type(t.type))
+            # Optimize nested type
+            return t.replace(self._optimize_type(t.type))
 
         elif isinstance(t, ComplexType):
             # Optimize all nested types
-            return t.__class__(*map(self._optimize_type, t))
+            return t.replace([self._optimize_type(nested) for nested in t])
         return t

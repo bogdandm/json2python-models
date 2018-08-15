@@ -5,6 +5,9 @@ from .base import BaseType
 
 
 class StringSerializable(BaseType):
+    def to_static_type(self) -> type:
+        return type(self)
+
     @classmethod
     def to_internal_value(cls, value: str) -> 'StringSerializable':
         raise NotImplementedError()
