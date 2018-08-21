@@ -9,3 +9,5 @@ htmlcov/
 *.pyc
 *.log
 *.tmp
+
+testing_tools/real_apis/*/

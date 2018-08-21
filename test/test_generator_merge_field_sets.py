@@ -9,7 +9,7 @@ from rest_client_gen.generator import Generator
 test_data = [
     pytest.param(
         [{'a': int}, {'a': int, 'b': int}],
-        {'a': DUnion(int), 'b': DOptional(int)},
+        {'a': int, 'b': DOptional(int)},
         id="optional_fields"
     ),
     pytest.param(
@@ -26,6 +26,11 @@ test_data = [
         [{'a': DUnion(str, bool)}, {'a': DUnion(int, float)}],
         {'a': DUnion(str, bool, int, float)},
         id="merge_unions2"
+    ),
+    pytest.param(
+        [{'a': int}, {}, {'a': int}, {}],
+        {'a': DOptional(int)},
+        id="merge_optional_int"
     ),
     # This functional is moved to _optimize_type
     # pytest.param(

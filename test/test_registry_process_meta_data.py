@@ -129,7 +129,7 @@ def check_type(meta: MetaData, expected: MetaData):
 
 
 @pytest.mark.parametrize("value,expected", test_data)
-def test_detect_type(models_registry: ModelRegistry, value, expected):
+def test_registry_process_meta_data(models_registry: ModelRegistry, value, expected):
     models_registry.process_meta_data(value)
     assert len(models_registry.models) == len(expected)
     for model, expected_model in zip(models_registry.models, expected):

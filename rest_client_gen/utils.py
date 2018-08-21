@@ -1,3 +1,6 @@
+import json
+
+
 class Index:
     def __init__(self):
         self.ch = 'A'
@@ -12,3 +15,6 @@ class Index:
             self.ch = 'A'
             self.i += 1
         return value
+
+def json_format(x) -> str:
+    return json.dumps(x, indent=4, default=str, ensure_ascii=False)

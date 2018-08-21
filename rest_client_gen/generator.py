@@ -1,14 +1,11 @@
 from collections import OrderedDict
 from enum import Enum
-from typing import Optional, Callable, Any, List
+from typing import Any, Callable, List, Optional, Union
 
 import inflection
 
-from .dynamic_typing import (
-    MetaData, SingleType, ComplexType, Unknown,
-    DList, DUnion, DOptional, NoneType,
-    StringSerializableRegistry, registry
-)
+from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, NoneType, SingleType,
+                             StringSerializableRegistry, StringSerializable, Unknown, registry)
 
 
 class Hierarchy(Enum):
@@ -113,16 +110,36 @@ class Generator:
 
             for name, field in model.items():
                 if name not in fields:
+                    # New field
                     field = field if first or isinstance(field, DOptional) else DOptional(field)
                 else:
+                    field_original = fields[name]
                     fields_diff.remove(name)
-                    field = DUnion(
-                        *(field.types if isinstance(field, DUnion) else [field]),
-                        *(fields[name].types if isinstance(fields[name], DUnion) else [fields[name]])
-                    )
+                    if isinstance(field_original, DOptional):
+                        # Existing optional field
+                        field_original = field_original.type
+                        if field_original == field:
+                            continue
+                        field = DOptional(DUnion(
+                            *(field.types if isinstance(field, DUnion) else [field]),
+                            *(field_original.types if isinstance(field_original, DUnion) else [field_original])
+                        ))
+                        if len(field.type) == 1:
+                            field.type = field.type.types[0]
+                    else:
+                        if fields[name] == field:
+                            continue
+                        field = DUnion(
+                            *(field.types if isinstance(field, DUnion) else [field]),
+                            *(field_original.types if isinstance(field_original, DUnion) else [field_original])
+                        )
+                        if len(field) == 1:
+                            field = field.types[0]
+
                 fields[name] = field
 
             for name in fields_diff:
+                # Missing fields becomes optionals
                 if not isinstance(fields[name], DOptional):
                     fields[name] = DOptional(fields[name])
 
@@ -141,38 +158,7 @@ class Generator:
             return fields
 
         elif isinstance(t, DUnion):
-            # Replace DUnion of 1 element with this element
-            if len(t) == 1:
-                return t.types[0]
-
-            # Optimize nested types and merge str pseudo-types
-            str_types = []
-            types_to_merge = []
-            other_types = []
-            for item in t.types:
-                if isinstance(item, dict):
-                    types_to_merge.append(item)
-                elif item in self.str_types_registry:
-                    str_types.append(item)
-                else:
-                    other_types.append(self._optimize_type(item))
-
-            if int in other_types and float in other_types:
-                other_types.remove(int)
-
-            if types_to_merge:
-                types_to_merge = [self._optimize_type(self._merge_field_sets(types_to_merge))]
-
-            str_types = self.str_types_registry.resolve(*str_types)
-            # Replace str pseudo-types with <class 'str'> when they can not be resolved into single type
-            if len(str_types) > 1:
-                str_types = [str]
-
-            types = [*other_types, *str_types, *types_to_merge]
-            if len(types) > 1:
-                return DUnion(*types)
-            else:
-                return types[0]
+            return self._optimize_union(t)
 
         elif isinstance(t, SingleType):
             # Optimize nested type
@@ -182,3 +168,45 @@ class Generator:
             # Optimize all nested types
             return t.replace([self._optimize_type(nested) for nested in t])
         return t
+
+    def _optimize_union(self, t: DUnion):
+        # Replace DUnion of 1 element with this element
+        if len(t) == 1:
+            return t.types[0]
+
+        # Split nested types into categories
+        str_types: List[Union[type, StringSerializable]] = []
+        types_to_merge: List[dict] = []
+        list_types: List[DList] = []
+        other_types: List[MetaData] = []
+        for item in t.types:
+            if isinstance(item, dict):
+                types_to_merge.append(item)
+            elif item in self.str_types_registry or item is str:
+                str_types.append(item)
+            elif isinstance(item, DList):
+                list_types.append(item)
+            else:
+                other_types.append(item)
+
+        if int in other_types and float in other_types:
+            other_types.remove(int)
+
+        if types_to_merge:
+            other_types.append(self._merge_field_sets(types_to_merge))
+
+        if list_types:
+            other_types.append(DList(DUnion(*(
+                t.type for t in list_types
+            ))))
+
+        if str_types:
+            str_types = self.str_types_registry.resolve(*str_types)
+            # Replace str pseudo-types with <class 'str'> when they can not be resolved into single type
+            other_types.append(str if len(str_types) > 1 else next(iter(str_types)))
+
+        types = [self._optimize_type(t) for t in other_types]
+        if len(types) > 1:
+            return DUnion(*types)
+        else:
+            return types[0]

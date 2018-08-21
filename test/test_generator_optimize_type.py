@@ -39,6 +39,16 @@ test_data = [
         DTuple(str, int),
         id="str_types_merge_not_resolved_complex_wrapper"
     ),
+    pytest.param(
+        DUnion(FloatString, str),
+        str,
+        id="union_str_str_based"
+    ),
+    pytest.param(
+        DUnion(DList(int), DList(str), str),
+        DUnion(DList(DUnion(int, str)), str),
+        id="union_of_lists"
+    ),
 ]
 
 
