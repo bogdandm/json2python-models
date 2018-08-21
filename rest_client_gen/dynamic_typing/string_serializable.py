@@ -75,7 +75,7 @@ class IntString(StringSerializable, int):
         return cls(value)
 
     def to_representation(self) -> str:
-        raise str(self)
+        return str(self)
 
 
 @registry.add(replace_types=(IntString,))
@@ -85,7 +85,7 @@ class FloatString(StringSerializable, float):
         return cls(value)
 
     def to_representation(self) -> str:
-        raise str(self)
+        return str(self)
 
 
 @registry.add()
@@ -100,4 +100,4 @@ class BooleanString(StringSerializable, int):
         return cls(b)
 
     def to_representation(self) -> str:
-        raise str(bool(self)).lower()
+        return str(bool(self)).lower()

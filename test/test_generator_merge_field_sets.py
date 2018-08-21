@@ -32,6 +32,21 @@ test_data = [
         {'a': DOptional(int)},
         id="merge_optional_int"
     ),
+    pytest.param(
+        [{'a': str}, {}, {'a': int}, {}],
+        {'a': DOptional(DUnion(str, int))},
+        id="merge_optional_str_int"
+    ),
+    pytest.param(
+        [{'a': DUnion(int)}, {}, {'a': int}, {}],
+        {'a': DOptional(int)},
+        id="merge_optional_single_union"
+    ),
+    pytest.param(
+        [{'a': DUnion(int)}, {'a': int}],
+        {'a': int},
+        id="merge_single_union"
+    ),
     # This functional is moved to _optimize_type
     # pytest.param(
     #     [{'d': {'x': int}}, {'d': {'x': NoneType}}],

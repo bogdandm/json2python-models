@@ -41,6 +41,7 @@
         - [X] Data variant converting
         - [X] Data variant merging
         - [ ] Create and register models
+            - [ ] Test pointers in the models registry
         - [ ] Merge meta-models and extract common ones
         - [ ] Convert meta-models to actual python classes
             - [ ] attrs
