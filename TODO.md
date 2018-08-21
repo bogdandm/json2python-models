@@ -19,6 +19,7 @@
             - [ ] dataclasses
         - Features
             - [ ] Word separator style
+            - [ ] Decode unicode in keys
             - Nesting models generation
                 - [ ] Cascade
                 - [ ] Flat
