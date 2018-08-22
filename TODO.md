@@ -4,7 +4,8 @@
         - [X] Data variant merging
         - [X] Create and register models
         - [ ] Merge meta-models and extract common ones
-        - [ ] Convert meta-models to actual python classes
+        - [ ] Convert meta-models to actual python classes 
+              (not sure about actual application of this, maybe I will skip this point)
             - [ ] attrs
             - [ ] dataclasses
         - [ ] Save models *(or meta-models, don't know yet what would be easier)* as python code
@@ -18,18 +19,18 @@
             - [ ] attrs
             - [ ] dataclasses
         - Features
-            - [ ] Word separator style
+            - [ ] Keys separator style
             - [ ] Decode unicode in keys
             - Nesting models generation
-                - [ ] Cascade
+                - Cascade (default)
                 - [ ] Flat
             - OptionalFieldsPolicy
-                - [X] Merge (optional)
+                - Merge (default)
                 - [ ] Field sets
                 - [ ] Key as data (does not process json dict as a model but process it as a python dict)
             - [ ] Complex python types annotation
-                - Decorator to specify field metatype
-                - OR specify metatype in attr/dataclass argument (if dataclasses has such)
+                - [ ] Decorator to specify field metatype
+                - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
     - API Layer
         - [ ] Route object
         - [ ] Register model as route in/out data spec
@@ -41,8 +42,8 @@
     - Models layer
         - [X] Data variant converting
         - [X] Data variant merging
-        - [ ] Create and register models
-            - [ ] Test pointers in the models registry
+        - [X] Create and register models
+            - [X] Test pointers in the models registry
         - [ ] Merge meta-models and extract common ones
         - [ ] Convert meta-models to actual python classes
             - [ ] attrs
