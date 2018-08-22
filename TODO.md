@@ -1,3 +1,4 @@
+- (!) README.md
 - Features
     - Models layer
         - [X] Data variant converting
@@ -18,7 +19,7 @@
         - [ ] Implement existing models registration
             - [ ] attrs
             - [ ] dataclasses
-        - Features
+        - Other features
             - [ ] Keys separator style
             - [ ] Decode unicode in keys
             - Nesting models generation
@@ -28,7 +29,7 @@
                 - Merge (default)
                 - [ ] Field sets
                 - [ ] Key as data (does not process json dict as a model but process it as a python dict)
-            - [ ] Complex python types annotation
+            - [ ] Complex python types annotations
                 - [ ] Decorator to specify field metatype
                 - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
     - API Layer
