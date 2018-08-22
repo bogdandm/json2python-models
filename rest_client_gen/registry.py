@@ -1,8 +1,7 @@
 from collections import OrderedDict
-from inspect import isclass
 from typing import Dict
 
-from .dynamic_typing import BaseType, SingleType, MetaData
+from .dynamic_typing import BaseType, MetaData, SingleType
 from .utils import Index
 
 
@@ -35,8 +34,9 @@ class ModelPtr(SingleType):
     """
     type: ModelMeta
 
-    def __init__(self, meta: ModelMeta):
+    def __init__(self, meta: ModelMeta, parent: ModelMeta = None):
         super().__init__(meta)
+        self.parent = parent
         meta.connect(self)
 
     def __hash__(self):
@@ -63,45 +63,41 @@ class ModelRegistry:
     def models_map(self):
         return self._registry
 
-    def process_meta_data(self, meta: MetaData, parent: MetaData = None, **kwargs):
+    def process_meta_data(
+            self, meta: MetaData,
+            parent: MetaData = None,
+            parent_model: ModelMeta = None,
+            replace_kwargs=None
+    ):
+        replace_kwargs = replace_kwargs or {}
         ptr = None
-        if isinstance(meta, dict):
-            model_meta = self.register(meta)
-            ptr = ModelPtr(model_meta)
-            if parent:
-                parent.replace(ptr, **kwargs)
-        if not isclass(meta):
-            self._process_nested_meta_data(meta)
-        return ptr
 
-    def _process_nested_meta_data(self, meta: MetaData):
-        if isinstance(meta, BaseType):
-            for i, nested_meta in enumerate(meta):
-                self.process_meta_data(nested_meta, parent=meta, index=i)
-        elif isinstance(meta, dict):
+        if isinstance(meta, dict):
+            # Register model
+            model_meta = self.register(meta)
+            ptr = ModelPtr(model_meta, parent=parent_model)
+            if parent:
+                parent.replace(ptr, **replace_kwargs)
+
+            # Process nested data
             for key, value in meta.items():
-                ptr = self.process_meta_data(value)
+                ptr = self.process_meta_data(value, parent_model=model_meta)
                 if ptr:
                     meta[key] = ptr
+
+        elif isinstance(meta, BaseType):
+            # Process other non-atomic types
+            for i, nested_meta in enumerate(meta):
+                self.process_meta_data(
+                    nested_meta,
+                    parent=meta,
+                    parent_model=parent_model,
+                    replace_kwargs={'parent': meta, 'index': i}
+                )
+
+        return ptr
 
     def register(self, meta: MetaData):
         model_meta = ModelMeta(meta, self._index())
         self._registry[model_meta.index] = model_meta
         return model_meta
-
-    # def get_similar(self, model_meta: ModelMeta):
-    #     # noinspection PyDataclass
-    #     fields = attr.fields(model_meta.model)
-    #     field_names = {f.name for f in fields}
-    #     for m in self.registry:
-    #         # noinspection PyDataclass
-    #         existing_fields = attr.fields(m.model)
-    #         existing_field_names = {f.name for f in existing_fields}
-    #         name_intersection = field_names & existing_field_names
-    #         name_intersection_len = len(name_intersection)
-    #
-    #         if (
-    #                 name_intersection_len > self.n or
-    #                 name_intersection_len / max(len(field_names), len(existing_field_names)) > self.k
-    #         ):
-    #             yield m

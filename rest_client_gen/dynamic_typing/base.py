@@ -100,5 +100,5 @@ class ComplexType(BaseType):
         elif index is not None and not isinstance(t, list):
             self.types[index] = t
         else:
-            raise ValueError(f"Unsupported arguments t={t} index={index} kwargs={kwargs}")
+            raise ValueError(f"Unsupported arguments: t={t} index={index} kwargs={kwargs}")
         return self

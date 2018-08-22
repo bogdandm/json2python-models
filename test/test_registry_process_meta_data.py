@@ -2,8 +2,8 @@ from collections import OrderedDict
 
 import pytest
 
-from rest_client_gen.dynamic_typing import DOptional, MetaData, SingleType, ComplexType, DTuple
-from rest_client_gen.registry import ModelRegistry, ModelMeta, ModelPtr
+from rest_client_gen.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, SingleType
+from rest_client_gen.registry import ModelMeta, ModelPtr, ModelRegistry
 
 test_data = [
     pytest.param(
@@ -54,7 +54,10 @@ test_data = [
             ]))),
             ('nested_complex', DTuple(
                 OrderedDict([
-                    ('e', int),
+                    ('nested_2', DOptional(OrderedDict([
+                        ('x', int),
+                        ('y', float)
+                    ]))),
                     ('f', float)
                 ]),
                 OrderedDict([
@@ -64,6 +67,7 @@ test_data = [
             ))
         ]),
         [
+            # 1A
             OrderedDict([
                 ('nested', OrderedDict([
                     ('a', int),
@@ -75,7 +79,10 @@ test_data = [
                 ]))),
                 ('nested_complex', DTuple(
                     OrderedDict([
-                        ('e', int),
+                        ('nested_2', DOptional(OrderedDict([
+                            ('x', int),
+                            ('y', float)
+                        ]))),
                         ('f', float)
                     ]),
                     OrderedDict([
@@ -84,18 +91,30 @@ test_data = [
                     ]),
                 ))
             ]),
+            # 1B
             OrderedDict([
                 ('a', int),
                 ('b', float)
             ]),
+            # 1C
             OrderedDict([
                 ('c', int),
                 ('d', float)
             ]),
+            # 1D
             OrderedDict([
-                ('e', int),
+                ('nested_2', DOptional(OrderedDict([
+                    ('x', int),
+                    ('y', float)
+                ]))),
                 ('f', float)
             ]),
+            # 1E
+            OrderedDict([
+                ('x', int),
+                ('y', float)
+            ]),
+            # 1F
             OrderedDict([
                 ('g', int),
                 ('h', float)
@@ -134,3 +153,27 @@ def test_registry_process_meta_data(models_registry: ModelRegistry, value, expec
     assert len(models_registry.models) == len(expected)
     for model, expected_model in zip(models_registry.models, expected):
         check_type(model, expected_model)
+
+
+expected_pointers = OrderedDict([
+    ("1A", None),
+    ("1B", "1A"),
+    ("1C", "1A"),
+    ("1D", "1A"),
+    ("1E", "1D"),
+    ("1F", "1A")
+])
+
+
+@pytest.mark.parametrize("value,expected", (pytest.param(
+    test_data[2].values[0],
+    expected_pointers,
+    id="base_test"
+),))
+def test_registry_pointers(models_registry: ModelRegistry, value, expected):
+    models_registry.process_meta_data(value)
+    assert len(models_registry.models) == len(expected)
+    for model, (index, parent) in zip(models_registry.models, expected.items()):
+        assert model.index == index
+        ptr = next(iter(model.pointers))
+        assert ptr.parent.index if ptr.parent else None == parent
