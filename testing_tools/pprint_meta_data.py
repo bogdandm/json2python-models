@@ -3,7 +3,7 @@ from inspect import isclass
 from rest_client_gen.dynamic_typing import SingleType, ComplexType, StringSerializable
 from rest_client_gen.generator import Generator
 from testing_tools.data import test_data
-
+from rest_client_gen.registry import ModelRegistry
 
 def pprint_gen(value, key=None, lvl=0, empty_line=True):
     if empty_line:
@@ -44,6 +44,9 @@ def pprint_gen(value, key=None, lvl=0, empty_line=True):
 
 if __name__ == '__main__':
     gen = Generator()
-    for s in pprint_gen(gen.generate(*test_data)):
+    reg = ModelRegistry()
+    fields = gen.generate(*test_data)
+    model = reg.process_meta_data(fields)
+    for s in pprint_gen(model):
         print(s, end='')
     print('\n' + '-' * 10, end='')

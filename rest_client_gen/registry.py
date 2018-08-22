@@ -81,9 +81,9 @@ class ModelRegistry:
 
             # Process nested data
             for key, value in meta.items():
-                ptr = self.process_meta_data(value, parent_model=model_meta)
-                if ptr:
-                    meta[key] = ptr
+                nested_ptr = self.process_meta_data(value, parent_model=model_meta)
+                if nested_ptr:
+                    meta[key] = nested_ptr
 
         elif isinstance(meta, BaseType):
             # Process other non-atomic types
