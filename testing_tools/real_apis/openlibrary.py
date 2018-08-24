@@ -2,10 +2,8 @@ import requests
 
 from rest_client_gen.generator import Generator
 from rest_client_gen.registry import ModelRegistry
-from rest_client_gen.utils import json_format
 from testing_tools.pprint_meta_data import pprint_gen
 from testing_tools.real_apis import dump_response
-
 
 session = requests.Session()
 
@@ -50,7 +48,7 @@ def main():
             print(s, end='')
         print('\n' + '-' * 10, end='')
 
-        model = reg.register(fields)
+        model = reg.process_meta_data(fields)
         for s in pprint_gen(model):
             print(s, end='')
         print('\n' + '-' * 10, end='')

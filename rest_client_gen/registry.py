@@ -74,7 +74,7 @@ class ModelRegistry:
 
         if isinstance(meta, dict):
             # Register model
-            model_meta = self.register(meta)
+            model_meta = self._register(meta)
             ptr = ModelPtr(model_meta, parent=parent_model)
             if parent:
                 parent.replace(ptr, **replace_kwargs)
@@ -87,17 +87,22 @@ class ModelRegistry:
 
         elif isinstance(meta, BaseType):
             # Process other non-atomic types
-            for i, nested_meta in enumerate(meta):
-                self.process_meta_data(
-                    nested_meta,
-                    parent=meta,
-                    parent_model=parent_model,
-                    replace_kwargs={'parent': meta, 'index': i}
-                )
+            try:
+                meta_iter = iter(meta)
+            except TypeError:
+                pass
+            else:
+                for i, nested_meta in enumerate(meta_iter):
+                    self.process_meta_data(
+                        nested_meta,
+                        parent=meta,
+                        parent_model=parent_model,
+                        replace_kwargs={'parent': meta, 'index': i}
+                    )
 
         return ptr
 
-    def register(self, meta: MetaData):
+    def _register(self, meta: MetaData):
         model_meta = ModelMeta(meta, self._index())
         self._registry[model_meta.index] = model_meta
         return model_meta
