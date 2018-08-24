@@ -1,3 +1,8 @@
+"""
+Example uses the following APIs:
+- CHRONICLING API (https://chroniclingamerica.loc.gov/about/api/)
+- Launch Library Reading API (https://launchlibrary.net/docs/1.3/api.html)
+"""
 import requests
 
 from rest_client_gen.generator import Generator

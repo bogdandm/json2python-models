@@ -1,3 +1,6 @@
+"""
+Example uses Open Library Books API (https://openlibrary.org/dev/docs/api/books)
+"""
 import requests
 
 from rest_client_gen.generator import Generator
