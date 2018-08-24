@@ -1,6 +1,7 @@
 import pytest
 
-from rest_client_gen.dynamic_typing import DUnion, NoneType, FloatString, IntString, BooleanString, DList, DTuple
+from rest_client_gen.dynamic_typing import (DUnion, NoneType, FloatString, IntString, BooleanString, DList, DTuple,
+                                            Unknown, DOptional)
 from rest_client_gen.generator import Generator
 
 test_data = [
@@ -16,7 +17,7 @@ test_data = [
             {'a': DUnion({'b': float}, {'b': int})},
             {'a': NoneType},
         )},
-        {'1': {'a': DUnion(NoneType, {'b': float})}},
+        {'1': {'a': DOptional({'b': float})}},
         id="merge_nested_dicts"
     ),
     pytest.param(
@@ -48,6 +49,56 @@ test_data = [
         DUnion(DList(int), DList(str), str),
         DUnion(DList(DUnion(int, str)), str),
         id="union_of_lists"
+    ),
+    pytest.param(
+        DUnion(Unknown, str),
+        str,
+        id="unknown_vs_single"
+    ),
+    pytest.param(
+        DUnion(Unknown, str, int),
+        DUnion(str, int),
+        id="unknown_vs_multi"
+    ),
+    pytest.param(
+        DUnion(DList(Unknown), DList(str)),
+        DList(str),
+        id="list_unknown_vs_single"
+    ),
+    pytest.param(
+        DUnion(DList(Unknown), DList(str), DList(int)),
+        DList(DUnion(str, int)),
+        id="list_unknown_vs_multi"
+    ),
+    pytest.param(
+        DUnion(NoneType, str),
+        DOptional(str),
+        id="optional_str"
+    ),
+    pytest.param(
+        DUnion(NoneType, DList(str)),
+        DOptional(DList(str)),
+        id="optional_list"
+    ),
+    pytest.param(
+        DList(DUnion(NoneType, str)),
+        DList(DOptional(str)),
+        id="list_of_optional_strings"
+    ),
+    pytest.param(
+        DUnion(NoneType, DList(str), int),
+        DOptional(DUnion(DList(str), int)),
+        id="optional_list_or_int"
+    ),
+    pytest.param(
+        DUnion(NoneType, DList(DUnion(str, int))),
+        DOptional(DList(DUnion(str, int))),
+        id="optional_list_of_str_or_int"
+    ),
+    pytest.param(
+        DList(DUnion(NoneType, str, int)),
+        DList(DOptional(DUnion(str, int))),
+        id="list_of_optional_strings_ot_int"
     ),
 ]
 

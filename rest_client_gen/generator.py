@@ -133,7 +133,7 @@ class Generator:
                         if len(field.type) == 1:
                             field.type = field.type.types[0]
                     else:
-                        if fields[name] == field:
+                        if field_original == field:
                             continue
                         field = DUnion(
                             *(field.types if isinstance(field, DUnion) else [field]),
@@ -212,7 +212,18 @@ class Generator:
             other_types.append(str if len(str_types) > 1 else next(iter(str_types)))
 
         types = [self._optimize_type(t) for t in other_types]
+
+        if Unknown in types:
+            types.remove(Unknown)
+
         if len(types) > 1:
+            if NoneType in types:
+                types.remove(NoneType)
+                if len(types) > 1:
+                    return DOptional(DUnion(*types))
+                else:
+                    return DOptional(types[0])
             return DUnion(*types)
+
         else:
             return types[0]

@@ -9,6 +9,7 @@ from testing_tools.real_apis import dump_response
 
 session = requests.Session()
 
+
 def search(s: str) -> dict:
     print(f"Search {s}")
     return session.get("http://openlibrary.org/search.json", params={
