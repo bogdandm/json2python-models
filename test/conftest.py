@@ -4,7 +4,7 @@ from rest_client_gen.generator import Generator
 from rest_client_gen.registry import ModelRegistry
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def models_generator():
     return Generator()
 

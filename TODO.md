@@ -4,7 +4,7 @@
         - [X] Data variant converting
         - [X] Data variant merging
         - [X] Create and register models
-        - [ ] Merge meta-models and extract common ones
+        - [X] Merge meta-models and extract common ones
         - [ ] Convert meta-models to actual python classes 
               (not sure about actual application of this, maybe I will skip this point)
             - [ ] attrs
@@ -32,6 +32,10 @@
             - [ ] Complex python types annotations
                 - [ ] Decorator to specify field metatype
                 - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
+            - String based types
+                - [ ] ISO date
+                - [ ] ISO time
+                - [ ] ISO datetime
     - API Layer
         - [ ] Route object
         - [ ] Register model as route in/out data spec

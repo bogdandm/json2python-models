@@ -44,12 +44,6 @@ class X(StringSerializable):
 class Y(StringSerializable):
     pass
 
-
-print(r.resolve(A, B))
-print(r.resolve(A, B, C))
-print(r.resolve(A, B, D))
-print(r.resolve(X, B))
-
 test_data = [
     pytest.param((A, B), {B}),
     pytest.param((A, B, C), {C}),
