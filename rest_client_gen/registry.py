@@ -4,6 +4,7 @@ from typing import Dict, List, Set, Tuple
 
 from ordered_set import OrderedSet
 
+from rest_client_gen.dynamic_typing import DOptional
 from .dynamic_typing import BaseType, DUnion, MetaData
 from .models_meta import ModelMeta, ModelPtr
 from .utils import Index
@@ -137,7 +138,8 @@ class ModelRegistry:
         replaces = []
         for group in groups:
             model_meta = self._merge(*group)
-            generator.optimize_type(model_meta)
+            if generator:
+                generator.optimize_type(model_meta)
             replaces.append((model_meta, group))
         return replaces
 
@@ -149,10 +151,19 @@ class ModelRegistry:
 
         metadata = OrderedDict()
         for field in fields:
-            orig_meta = [model.type[field] for model in models if field in model.type]
+            is_optional = False
+            orig_meta = []
+            for model in models:
+                if field in model.type:
+                    orig_meta.append(model.type[field])
+                else:
+                    is_optional = True
+
             meta = DUnion(*orig_meta)
             if len(meta) == 1:
                 meta = meta.types[0]
+            if is_optional:
+                meta = DOptional(meta)
             metadata[field] = meta
 
         model_meta = ModelMeta(metadata, self._index(), original_fields)

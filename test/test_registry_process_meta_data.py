@@ -3,8 +3,8 @@ from collections import OrderedDict
 import pytest
 
 from rest_client_gen.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, SingleType
-from rest_client_gen.registry import ModelRegistry
 from rest_client_gen.models_meta import ModelMeta, ModelPtr
+from rest_client_gen.registry import ModelRegistry
 
 test_data = [
     pytest.param(
@@ -125,9 +125,14 @@ test_data = [
     ),
 ]
 
+# use it as value in expected model dict to mark this field as cycle reference
+cycle_ref = object()
 
 def check_type(meta: MetaData, expected: MetaData):
-    if isinstance(meta, dict):
+    if expected is cycle_ref:
+        assert isinstance(meta, ModelMeta) or isinstance(meta, ModelPtr)
+
+    elif isinstance(meta, dict):
         assert isinstance(expected, dict)
         for k, v in meta.items():
             check_type(v, expected[k])

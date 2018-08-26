@@ -36,6 +36,7 @@
                 - [ ] ISO date
                 - [ ] ISO time
                 - [ ] ISO datetime
+            - [ ] Decorator to mark class as exclude from models merge
     - API Layer
         - [ ] Route object
         - [ ] Register model as route in/out data spec
@@ -49,7 +50,7 @@
         - [X] Data variant merging
         - [X] Create and register models
             - [X] Test pointers in the models registry
-        - [ ] Merge meta-models and extract common ones
+        - [X] Merge meta-models and extract common ones
         - [ ] Convert meta-models to actual python classes
             - [ ] attrs
             - [ ] dataclasses
