@@ -5,6 +5,7 @@ from typing import Any, Callable, List, Optional, Union
 import inflection
 from unidecode import unidecode
 
+from rest_client_gen.models_meta import ModelPtr
 from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, NoneType, SingleType,
                              StringSerializableRegistry, StringSerializable, Unknown, registry)
 
@@ -41,7 +42,7 @@ class Generator:
     def generate(self, *data_variants: dict) -> dict:
         fields_sets = [self._convert(data) for data in data_variants]
         fields = self._merge_field_sets(fields_sets)
-        return self._optimize_type(fields)
+        return self.optimize_type(fields)
 
     def _convert(self, data: dict):
         fields = dict()
@@ -152,28 +153,31 @@ class Generator:
             first = False
         return fields
 
-    def _optimize_type(self, t: MetaData) -> MetaData:
+    def optimize_type(self, meta: MetaData, process_model_ptr=False) -> MetaData:
         """
         Finds some redundant types and replace them with simple one
+
+        :param process_model_ptr: Control whether process ModelPtr instances or not.
+            Default is False to prevent recursion cycles.
         """
-        if isinstance(t, dict):
+        if isinstance(meta, dict):
             fields = OrderedDict()
 
-            for k, v in t.items():
-                fields[k] = self._optimize_type(v)
+            for k, v in meta.items():
+                fields[k] = self.optimize_type(v)
             return fields
 
-        elif isinstance(t, DUnion):
-            return self._optimize_union(t)
+        elif isinstance(meta, DUnion):
+            return self._optimize_union(meta)
 
-        elif isinstance(t, SingleType):
+        elif isinstance(meta, SingleType) and (process_model_ptr or not isinstance(meta, ModelPtr)):
             # Optimize nested type
-            return t.replace(self._optimize_type(t.type))
+            return meta.replace(self.optimize_type(meta.type))
 
-        elif isinstance(t, ComplexType):
+        elif isinstance(meta, ComplexType):
             # Optimize all nested types
-            return t.replace([self._optimize_type(nested) for nested in t])
-        return t
+            return meta.replace([self.optimize_type(nested) for nested in meta])
+        return meta
 
     def _optimize_union(self, t: DUnion):
         # Replace DUnion of 1 element with this element
@@ -211,7 +215,7 @@ class Generator:
             # Replace str pseudo-types with <class 'str'> when they can not be resolved into single type
             other_types.append(str if len(str_types) > 1 else next(iter(str_types)))
 
-        types = [self._optimize_type(t) for t in other_types]
+        types = [self.optimize_type(t) for t in other_types]
 
         if Unknown in types:
             types.remove(Unknown)

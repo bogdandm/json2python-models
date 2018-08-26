@@ -1,57 +1,48 @@
-from collections import OrderedDict
-from typing import Dict
+from collections import OrderedDict, defaultdict
+from itertools import chain, combinations
+from typing import Dict, List, Set, Tuple
 
-from .dynamic_typing import BaseType, MetaData, SingleType
+from ordered_set import OrderedSet
+
+from .dynamic_typing import BaseType, DUnion, MetaData
+from .models_meta import ModelMeta, ModelPtr
 from .utils import Index
 
 
-class ModelMeta(SingleType):
-    def __init__(self, t: MetaData, index):
-        super().__init__(t)
-        self.index = index
-        # TODO: Test pointers
-        self.pointers = set()
-
-    def __str__(self):
-        return f"Model#{self.index}"
-
-    def __eq__(self, other):
-        if isinstance(other, dict):
-            return self.type == other
-        else:
-            return super().__eq__(other)
-
-    def connect(self, ptr: 'ModelPtr'):
-        self.pointers.add(ptr)
-
-    def disconnect(self, ptr: 'ModelPtr'):
-        self.pointers.remove(ptr)
+class ModelCmp:
+    def cmp(self, fields_a: set, fields_b: set) -> bool:
+        raise NotImplementedError()
 
 
-class ModelPtr(SingleType):
-    """
-    Model wrapper (pointer)
-    """
-    type: ModelMeta
+class ModelFieldsEquals(ModelCmp):
+    def cmp(self, fields_a: set, fields_b: set) -> bool:
+        return fields_a == fields_b
 
-    def __init__(self, meta: ModelMeta, parent: ModelMeta = None):
-        super().__init__(meta)
-        self.parent = parent
-        meta.connect(self)
 
-    def __hash__(self):
-        return id(self)
+class ModelFieldsPercentMatch(ModelCmp):
+    def __init__(self, percent_fields: float = .7):
+        self.percent_fields = percent_fields
+
+    def cmp(self, fields_a: set, fields_b: set) -> bool:
+        return len(fields_a & fields_b) / len(fields_a | fields_b) >= self.percent_fields
+
+
+class ModelFieldsNumberMatch(ModelCmp):
+    def __init__(self, number_fields: int = 10):
+        self.number_fields = number_fields
+
+    def cmp(self, fields_a: set, fields_b: set) -> bool:
+        return len(fields_a & fields_b) >= self.number_fields
 
 
 class ModelRegistry:
-    def __init__(self, k=.7, n=10):
-        """
+    DEFAULT_MODELS_CMP = (ModelFieldsPercentMatch(), ModelFieldsNumberMatch())
 
-        :param k: Required percent of fields to merge models
-        :param n: Required number of fields to merge models
+    def __init__(self, *models_cmp: ModelCmp):
         """
-        self.k = k
-        self.n = n
+        :param models_cmp: list of model comparators. If you want merge only equals models pass ModelFieldsEquals()
+        """
+        self._models_cmp = models_cmp or self.DEFAULT_MODELS_CMP
         self._registry: Dict[str, ModelMeta] = OrderedDict()
         self._index = Index()
 
@@ -66,7 +57,7 @@ class ModelRegistry:
     def process_meta_data(
             self, meta: MetaData,
             parent: MetaData = None,
-            parent_model: ModelMeta = None,
+            parent_model: Tuple[ModelMeta, str] = (None, None),
             replace_kwargs=None
     ):
         replace_kwargs = replace_kwargs or {}
@@ -75,13 +66,13 @@ class ModelRegistry:
         if isinstance(meta, dict):
             # Register model
             model_meta = self._register(meta)
-            ptr = ModelPtr(model_meta, parent=parent_model)
+            ptr = ModelPtr(model_meta, parent=parent_model[0], parent_field_name=parent_model[1])
             if parent:
                 parent.replace(ptr, **replace_kwargs)
 
             # Process nested data
             for key, value in meta.items():
-                nested_ptr = self.process_meta_data(value, parent_model=model_meta)
+                nested_ptr = self.process_meta_data(value, parent_model=(model_meta, key))
                 if nested_ptr:
                     meta[key] = nested_ptr
 
@@ -103,6 +94,72 @@ class ModelRegistry:
         return ptr
 
     def _register(self, meta: MetaData):
-        model_meta = ModelMeta(meta, self._index())
+        model_meta = ModelMeta(meta, self._index()) if not isinstance(meta, ModelMeta) else meta
         self._registry[model_meta.index] = model_meta
+        return model_meta
+
+    def _unregister(self, model_meta: ModelMeta):
+        del self._registry[model_meta.index]
+
+    def _models_cmp_fn(self, model_a: ModelMeta, model_b: ModelMeta) -> bool:
+        fields_a = set(model_a.type.keys())
+        fields_b = set(model_b.type.keys())
+        return any(cmp.cmp(fields_a, fields_b) for cmp in self._models_cmp)
+
+    def merge_models(self, generator=None, strict=False) -> List[Tuple[ModelMeta, Set[ModelMeta]]]:
+        """
+        Optimize whole models registry by merging same or similar models
+
+        :param generator: Generator instance that will be used to final models optimization
+        :param strict: if True ALL models in merge group should meet the conditions
+            else groups will form from pairs of models as is.
+        :return: pairs of (new model, set of old models)
+        """
+        models2merge: Dict[ModelMeta, Set[ModelMeta]] = defaultdict(set)
+        for model_a, model_b in combinations(self.models, 2):
+            if self._models_cmp_fn(model_a, model_b):
+                models2merge[model_a].add(model_b)
+                models2merge[model_b].add(model_a)
+
+        groups: List[Set[ModelMeta]] = [{model, *models} for model, models in models2merge.items()]
+        flag = True
+        while flag:
+            flag = False
+            new_groups: Set[Set[ModelMeta]] = set()
+            for gr1, gr2 in combinations(groups, 2):
+                if gr1 & gr2:
+                    tmp_len = len(new_groups)
+                    new_groups.add(frozenset(gr1 | gr2))
+                    flag = flag or tmp_len < len(new_groups)
+            if flag:
+                groups = new_groups
+
+        replaces = []
+        for group in groups:
+            model_meta = self._merge(*group)
+            generator.optimize_type(model_meta)
+            replaces.append((model_meta, group))
+        return replaces
+
+    def _merge(self, *models: ModelMeta):
+        original_fields = list(chain(model.original_fields for model in models))
+        fields = OrderedSet()
+        for model in models:
+            fields.update(model.type.keys())
+
+        metadata = OrderedDict()
+        for field in fields:
+            orig_meta = [model.type[field] for model in models if field in model.type]
+            meta = DUnion(*orig_meta)
+            if len(meta) == 1:
+                meta = meta.types[0]
+            metadata[field] = meta
+
+        model_meta = ModelMeta(metadata, self._index(), original_fields)
+        for model in models:
+            self._unregister(model)
+            for ptr in tuple(model.pointers):
+                ptr.replace(model_meta)
+        self._register(model_meta)
+
         return model_meta

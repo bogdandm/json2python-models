@@ -105,5 +105,5 @@ test_data = [
 
 @pytest.mark.parametrize("value,expected", test_data)
 def test_optimize_type(models_generator: Generator, value, expected):
-    result = models_generator._optimize_type(value)
+    result = models_generator.optimize_type(value)
     assert result == expected

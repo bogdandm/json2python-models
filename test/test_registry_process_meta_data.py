@@ -3,7 +3,8 @@ from collections import OrderedDict
 import pytest
 
 from rest_client_gen.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, SingleType
-from rest_client_gen.registry import ModelMeta, ModelPtr, ModelRegistry
+from rest_client_gen.registry import ModelRegistry
+from rest_client_gen.models_meta import ModelMeta, ModelPtr
 
 test_data = [
     pytest.param(
