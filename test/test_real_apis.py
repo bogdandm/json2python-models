@@ -38,3 +38,13 @@ def test_randomapis():
         main()
     except (OSError, requests.HTTPError, json.JSONDecodeError):
         pass
+
+
+@pytest.mark.no_expected
+@pytest.mark.slow_http
+def test_randomapis():
+    from testing_tools.real_apis.pathofexile import main
+    try:
+        main()
+    except (OSError, requests.HTTPError, json.JSONDecodeError):
+        pass

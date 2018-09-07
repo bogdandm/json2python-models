@@ -50,6 +50,7 @@
         - [X] Data variant merging
         - [X] Create and register models
             - [X] Test pointers in the models registry
+            - [ ] Test whats going on with strict/non-strict merging
         - [X] Merge meta-models and extract common ones
         - [ ] Convert meta-models to actual python classes
             - [ ] attrs
