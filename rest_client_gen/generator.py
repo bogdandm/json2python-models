@@ -6,8 +6,8 @@ import inflection
 from unidecode import unidecode
 
 from rest_client_gen.models_meta import ModelPtr
-from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, NoneType, SingleType,
-                             StringSerializableRegistry, StringSerializable, Unknown, registry)
+from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, NoneType, SingleType, StringSerializable,
+                             StringSerializableRegistry, Unknown, registry)
 
 
 class Hierarchy(Enum):
@@ -210,7 +210,9 @@ class Generator:
                 t.type for t in list_types
             ))))
 
-        if str_types:
+        if str in str_types:
+            other_types.append(str)
+        elif str_types:
             str_types = self.str_types_registry.resolve(*str_types)
             # Replace str pseudo-types with <class 'str'> when they can not be resolved into single type
             other_types.append(str if len(str_types) > 1 else next(iter(str_types)))

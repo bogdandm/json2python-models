@@ -1,7 +1,7 @@
 import pytest
 
-from rest_client_gen.dynamic_typing import (DUnion, NoneType, FloatString, IntString, BooleanString, DList, DTuple,
-                                            Unknown, DOptional)
+from rest_client_gen.dynamic_typing import (BooleanString, DList, DOptional, DTuple, DUnion, FloatString, IntString,
+                                            NoneType, Unknown)
 from rest_client_gen.generator import Generator
 
 test_data = [
@@ -99,6 +99,11 @@ test_data = [
         DList(DUnion(NoneType, str, int)),
         DList(DOptional(DUnion(str, int))),
         id="list_of_optional_strings_ot_int"
+    ),
+    pytest.param(
+        DList(DUnion(str, int, FloatString, IntString)),
+        DList(DUnion(str, int)),
+        id="union_of_str_int_FloatString"
     ),
 ]
 

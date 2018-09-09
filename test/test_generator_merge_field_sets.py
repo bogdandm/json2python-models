@@ -3,7 +3,7 @@ from random import shuffle
 
 import pytest
 
-from rest_client_gen.dynamic_typing import DOptional, DUnion
+from rest_client_gen.dynamic_typing import DOptional, DUnion, FloatString, IntString
 from rest_client_gen.generator import Generator
 
 test_data = [
@@ -46,6 +46,22 @@ test_data = [
         [{'a': DUnion(int)}, {'a': int}],
         {'a': int},
         id="merge_single_union"
+    ),
+    pytest.param(
+        [
+            {'a': DUnion(int, str)},
+            {'a': DUnion(int, FloatString)},
+            {'a': DUnion(int, IntString)},
+            {'a': DUnion(int, str)},
+            {'a': DUnion(int, IntString)},
+            {'a': DUnion(int, str)},
+            {'a': DUnion(int, FloatString)},
+            {'a': DUnion(int, IntString)},
+            {'a': DUnion(int, str)},
+            {'a': DUnion(int, IntString)},
+        ],
+        {'a': DUnion(int, str, FloatString, IntString)},
+        id="merge_unions_of_pseudo_strings"
     ),
     # This functional is moved to _optimize_type
     # pytest.param(
