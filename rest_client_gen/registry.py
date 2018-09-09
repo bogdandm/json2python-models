@@ -4,8 +4,7 @@ from typing import Dict, List, Set, Tuple
 
 from ordered_set import OrderedSet
 
-from rest_client_gen.dynamic_typing import DOptional
-from .dynamic_typing import BaseType, DUnion, MetaData
+from .dynamic_typing import BaseType, MetaData
 from .models_meta import ModelMeta, ModelPtr
 from .utils import Index
 
@@ -107,11 +106,11 @@ class ModelRegistry:
         fields_b = set(model_b.type.keys())
         return any(cmp.cmp(fields_a, fields_b) for cmp in self._models_cmp)
 
-    def merge_models(self, generator=None, strict=False) -> List[Tuple[ModelMeta, Set[ModelMeta]]]:
+    def merge_models(self, generator, strict=False) -> List[Tuple[ModelMeta, Set[ModelMeta]]]:
         """
         Optimize whole models registry by merging same or similar models
 
-        :param generator: Generator instance that will be used to final models optimization
+        :param generator: Generator instance that will be used to metadata merging and optimization
         :param strict: if True ALL models in merge group should meet the conditions
             else groups will form from pairs of models as is.
         :return: pairs of (new model, set of old models)
@@ -138,35 +137,18 @@ class ModelRegistry:
 
         replaces = []
         for group in groups:
-            model_meta = self._merge(*group)
-            if generator:
-                generator.optimize_type(model_meta)
+            model_meta = self._merge(generator, *group)
+            generator.optimize_type(model_meta)
             replaces.append((model_meta, group))
         return replaces
 
-    def _merge(self, *models: ModelMeta):
+    def _merge(self, generator, *models: ModelMeta):
         original_fields = list(chain(model.original_fields for model in models))
         fields = OrderedSet()
         for model in models:
             fields.update(model.type.keys())
 
-        metadata = OrderedDict()
-        for field in fields:
-            is_optional = False
-            orig_meta = []
-            for model in models:
-                if field in model.type:
-                    orig_meta.append(model.type[field])
-                else:
-                    is_optional = True
-
-            meta = DUnion(*orig_meta)
-            if len(meta) == 1:
-                meta = meta.types[0]
-            if is_optional:
-                meta = DOptional(meta)
-            metadata[field] = meta
-
+        metadata = generator.merge_field_sets([model.type for model in models])
         model_meta = ModelMeta(metadata, self._index(), original_fields)
         for model in models:
             self._unregister(model)

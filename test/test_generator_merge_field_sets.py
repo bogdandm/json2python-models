@@ -66,8 +66,8 @@ test_data = [
     pytest.param(
         [
             {'a': int},
-            {'a': DOptional(int)},
             {},
+            {'a': DOptional(int)},
         ],
         {'a': DOptional(int)},
         id="merge_optionals_and_nulls"
@@ -86,7 +86,7 @@ def test_merge_field_sets(models_generator: Generator, value, expected):
     shuffled = value[:]
     shuffle(shuffled)
     for v in (value, reversed(value), shuffled):
-        result = models_generator._merge_field_sets(v)
+        result = models_generator.merge_field_sets(v)
         if isinstance(result, OrderedDict):
             result = dict(result)
         assert result == expected

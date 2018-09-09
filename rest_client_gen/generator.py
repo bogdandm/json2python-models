@@ -41,7 +41,7 @@ class Generator:
 
     def generate(self, *data_variants: dict) -> dict:
         fields_sets = [self._convert(data) for data in data_variants]
-        fields = self._merge_field_sets(fields_sets)
+        fields = self.merge_field_sets(fields_sets)
         return self.optimize_type(fields)
 
     def _convert(self, data: dict):
@@ -105,7 +105,7 @@ class Generator:
                 return t
             return str
 
-    def _merge_field_sets(self, field_sets: List[MetaData]) -> MetaData:
+    def merge_field_sets(self, field_sets: List[MetaData]) -> MetaData:
         """
         Merges fields sets into one set of pairs key - meta-type
         """
@@ -124,9 +124,9 @@ class Generator:
                     fields_diff.remove(name)
                     if isinstance(field_original, DOptional):
                         # Existing optional field
-                        field_original = field_original.type
-                        if field_original == field:
+                        if field_original == field or field_original.type == field:
                             continue
+                        field_original = field_original.type
                         field = DOptional(DUnion(
                             *(field.types if isinstance(field, DUnion) else [field]),
                             *(field_original.types if isinstance(field_original, DUnion) else [field_original])
@@ -203,7 +203,7 @@ class Generator:
             other_types.remove(int)
 
         if types_to_merge:
-            other_types.append(self._merge_field_sets(types_to_merge))
+            other_types.append(self.merge_field_sets(types_to_merge))
 
         if list_types:
             other_types.append(DList(DUnion(*(
