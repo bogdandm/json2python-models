@@ -32,11 +32,13 @@ def main():
         print("\n" + "=" * 20, end='')
         print("".join(pprint_gen(model)))
 
-        print("\n" + "-" * 10 + " replace " + "-" * 10, end='')
+        print("\n" + "-" * 10 + " replaces " + "-" * 10, end='')
         for old_model in group:
             print("".join(pprint_gen(old_model)))
 
     print("\n" + "=" * 20, end='')
+    for model in reg.models:
+        model.update_base_name()
     print("".join(pprint_gen(next(iter(reg.models)))))
 
 

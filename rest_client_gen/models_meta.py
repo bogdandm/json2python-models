@@ -1,6 +1,23 @@
-from typing import List, Set
+from typing import List, Optional, Set
 
-from .dynamic_typing import SingleType, MetaData
+import inflection
+
+from .dynamic_typing import MetaData, SingleType
+
+try:
+    # https://www.clips.uantwerpen.be/pages/pattern-en#pluralization
+    from pattern.text.en import singularize
+except ImportError:
+    try:
+        # https://www.nodebox.net/code/index.php/Linguistics#pluralization
+        from en.noun import singular as singularize
+    except ImportError:
+        def singularize(word: str) -> str:
+            if word.endswith('ies'):
+                return word[:-3] + "y"
+            if word.endswith('s'):
+                return word[:-1]
+            return word
 
 
 class ModelMeta(SingleType):
@@ -9,9 +26,10 @@ class ModelMeta(SingleType):
         self.original_fields: List[List[str]] = _original_fields or [list(self.type.keys())]
         self.index = index
         self.pointers: Set[ModelPtr] = set()
+        self._name: Optional[str] = None
 
     def __str__(self):
-        return f"Model#{self.index}"
+        return f"Model#{self.index}" + ("-" + self._name if self._name else "")
 
     def __eq__(self, other):
         if isinstance(other, dict):
@@ -21,6 +39,42 @@ class ModelMeta(SingleType):
 
     def __hash__(self):
         return hash(self.index)
+
+    def update_base_name(self):
+        # TODO: Tests
+        base_names = {singularize(inflection.underscore(ptr.parent_field_name))
+                      for ptr in self.pointers if ptr.parent is not None}
+        filtered_names = set()
+        for name in base_names:
+            if filtered_names:
+                for other in list(filtered_names):
+                    if name in other:
+                        filtered_names.add(name)
+                        filtered_names.remove(other)
+                        break
+                    elif other in name:
+                        break
+                    else:
+                        filtered_names.add(name)
+            else:
+                filtered_names.add(name)
+        names = [inflection.camelize(name)
+                 for name in sorted(filtered_names)]
+        self._name = "_".join(names)
+
+    @property
+    def base_name(self) -> str:
+        if self._name is None:
+            self.update_base_name()
+        return self._name
+
+    @base_name.setter
+    def base_name(self, value: str):
+        self._name = value
+
+    @base_name.deleter
+    def base_name(self):
+        self._name = None
 
     def connect(self, ptr: 'ModelPtr'):
         self.pointers.add(ptr)

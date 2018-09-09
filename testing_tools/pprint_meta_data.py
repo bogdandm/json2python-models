@@ -1,10 +1,10 @@
 from inspect import isclass
 
-from rest_client_gen.dynamic_typing import SingleType, ComplexType, StringSerializable
+from rest_client_gen.dynamic_typing import ComplexType, SingleType, StringSerializable
 from rest_client_gen.generator import Generator
-from testing_tools.data import test_data
-from rest_client_gen.registry import ModelRegistry
 from rest_client_gen.models_meta import ModelMeta, ModelPtr
+from rest_client_gen.registry import ModelRegistry
+from testing_tools.data import test_data
 
 
 def pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
@@ -31,7 +31,7 @@ def pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
         yield f"Model#{value.type.index}: ..."
 
     elif isinstance(value, ModelMeta):
-        yield f"Model#{value.index}:"
+        yield str(value) + ":"
         for key, value in value.type.items():
             yield from pprint_gen(value, key, lvl=lvl + 1, ignore_ptr=ignore_ptr)
 
