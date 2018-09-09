@@ -191,7 +191,29 @@ test_data = base_test_data + [
             }
         ],
         id="not_merge_models"
-    )
+    ),
+    pytest.param(
+        [
+            {
+                "field" + str(i): int for i in range(10)
+            },
+            {
+                "field" + str(i): (int if i < 9 else DOptional(int)) for i in range(10)
+            },
+            {
+                "field" + str(i): int for i in range(9)
+            }
+        ],
+        [
+            {
+                **{
+                    "field" + str(i): int for i in range(9)
+                },
+                "field9": DOptional(int),
+            }
+        ],
+        id="merge_models_with_optional_field"
+    ),
 ]
 
 

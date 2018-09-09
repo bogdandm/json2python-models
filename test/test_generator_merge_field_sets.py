@@ -63,6 +63,15 @@ test_data = [
         {'a': DUnion(int, str, FloatString, IntString)},
         id="merge_unions_of_pseudo_strings"
     ),
+    pytest.param(
+        [
+            {'a': int},
+            {'a': DOptional(int)},
+            {},
+        ],
+        {'a': DOptional(int)},
+        id="merge_optionals_and_nulls"
+    ),
     # This functional is moved to _optimize_type
     # pytest.param(
     #     [{'d': {'x': int}}, {'d': {'x': NoneType}}],

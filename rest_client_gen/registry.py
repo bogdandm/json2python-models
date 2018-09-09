@@ -129,9 +129,10 @@ class ModelRegistry:
             new_groups: Set[Set[ModelMeta]] = set()
             for gr1, gr2 in combinations(groups, 2):
                 if gr1 & gr2:
-                    tmp_len = len(new_groups)
+                    old_len = len(new_groups)
                     new_groups.add(frozenset(gr1 | gr2))
-                    flag = flag or tmp_len < len(new_groups)
+                    added = old_len < len(new_groups)
+                    flag = flag or added
             if flag:
                 groups = new_groups
 

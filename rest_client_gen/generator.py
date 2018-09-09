@@ -134,7 +134,7 @@ class Generator:
                         if len(field.type) == 1:
                             field.type = field.type.types[0]
                     else:
-                        if field_original == field:
+                        if field_original == field or (isinstance(field, DOptional) and field_original == field.type):
                             continue
                         field = DUnion(
                             *(field.types if isinstance(field, DUnion) else [field]),
