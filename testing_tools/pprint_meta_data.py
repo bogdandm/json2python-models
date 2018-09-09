@@ -32,8 +32,10 @@ def pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
 
     elif isinstance(value, ModelMeta):
         yield str(value) + ":"
-        for key, value in value.type.items():
-            yield from pprint_gen(value, key, lvl=lvl + 1, ignore_ptr=ignore_ptr)
+        for key, subvalue in value.type.items():
+            yield from pprint_gen(subvalue, key, lvl=lvl + 1, ignore_ptr=ignore_ptr)
+        if not value.type:
+            yield " <empty>"
 
     elif isinstance(value, SingleType):
         yield f"{value.__class__.__name__}:"

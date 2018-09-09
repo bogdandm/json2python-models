@@ -45,16 +45,15 @@ def main():
     gen = Generator()
     reg = ModelRegistry()
     for data in (search_result, books):
-        fields = gen.generate(*data)
+        reg.process_meta_data(gen.generate(*data))
+    reg.merge_models(generator=gen)
 
-        for s in pprint_gen(fields):
-            print(s, end='')
-        print('\n' + '-' * 10, end='')
-
-        model = reg.process_meta_data(fields)
-        for s in pprint_gen(model):
-            print(s, end='')
-        print('\n' + '-' * 10, end='')
+    print("\n" + "=" * 20, end='')
+    for model in reg.models:
+        model.update_base_name()
+    for model in reg.models:
+        print("".join(pprint_gen(model)))
+        print("\n" + "=" * 20, end='')
 
 
 if __name__ == '__main__':
