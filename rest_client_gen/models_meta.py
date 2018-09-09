@@ -46,16 +46,13 @@ class ModelMeta(SingleType):
                       for ptr in self.pointers if ptr.parent is not None}
         filtered_names = set()
         for name in base_names:
-            if filtered_names:
-                for other in list(filtered_names):
-                    if name in other:
-                        filtered_names.add(name)
-                        filtered_names.remove(other)
-                        break
-                    elif other in name:
-                        break
-                    else:
-                        filtered_names.add(name)
+            for other in list(filtered_names):
+                if name in other:
+                    filtered_names.add(name)
+                    filtered_names.remove(other)
+                    break
+                elif other in name:
+                    break
             else:
                 filtered_names.add(name)
         names = [inflection.camelize(name)
