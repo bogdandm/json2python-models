@@ -50,7 +50,7 @@ def main():
 
     print("\n" + "=" * 20, end='')
     for model in reg.models:
-        model.update_base_name()
+        model.generate_name()
     for model in reg.models:
         print(pretty_format_meta(model))
         print("\n" + "=" * 20, end='')

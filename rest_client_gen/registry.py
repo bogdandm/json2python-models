@@ -6,7 +6,7 @@ from ordered_set import OrderedSet
 
 from .dynamic_typing import BaseType, MetaData
 from .models_meta import ModelMeta, ModelPtr
-from .utils import Index
+from .utils import Index, distinct_words
 
 
 class ModelCmp:
@@ -144,12 +144,18 @@ class ModelRegistry:
 
     def _merge(self, generator, *models: ModelMeta):
         original_fields = list(chain(model.original_fields for model in models))
+        originals_names = []
         fields = OrderedSet()
         for model in models:
             fields.update(model.type.keys())
+            if not model.is_name_generated and model.name:
+                originals_names.append(model.name)
+        originals_names = distinct_words(*originals_names)
 
         metadata = generator.merge_field_sets([model.type for model in models])
         model_meta = ModelMeta(metadata, self._index(), original_fields)
+        if originals_names:
+            model_meta.name = ModelMeta.name_joiner(*originals_names)
         for model in models:
             self._unregister(model)
             for ptr in tuple(model.pointers):

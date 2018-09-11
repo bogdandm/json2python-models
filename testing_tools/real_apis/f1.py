@@ -1,6 +1,7 @@
 """
 Example uses Ergast Developer API (http://ergast.com/mrd/)
 """
+import inflection
 import requests
 
 from rest_client_gen.generator import Generator
@@ -27,31 +28,29 @@ def driver_standings(season='current', round_code='last'):
 def main():
     results_data = results()
     dump_response("f1", "results", results_data)
+    results_data = ("results", results_data)
 
     drivers_data = drivers()
     dump_response("f1", "drivers", drivers_data)
+    drivers_data = ("drivers", drivers_data)
 
     driver_standings_data = driver_standings()
     dump_response("f1", "driver_standings", driver_standings_data)
+    driver_standings_data = ("driver_standings", driver_standings_data)
 
     gen = Generator()
     reg = ModelRegistry()
-    for data in (results_data, drivers_data, driver_standings_data):
+    for name, data in (results_data, drivers_data, driver_standings_data):
         fields = gen.generate(*data)
-        model = reg.process_meta_data(fields)
+        model_ptr = reg.process_meta_data(fields)
+        model_ptr.type.set_raw_name(inflection.camelize(name))
+    reg.merge_models(generator=gen)
+    for model in reg.models:
+        model.generate_name()
+
+    for model in reg.models:
         print(pretty_format_meta(model))
-
-    result = reg.merge_models(generator=gen)
-    for model, group in result:
-        print("\n" + "=" * 20, end='')
-        print(pretty_format_meta(model))
-
-        print("\n" + "-" * 10 + " replaces " + "-" * 10, end='')
-        for old_model in group:
-            print(pretty_format_meta(old_model))
-
-    print("\n" + "=" * 20, end='')
-    print(pretty_format_meta(next(iter(reg.models))))
+        print("=" * 20, end='')
 
 
 if __name__ == '__main__':
