@@ -5,7 +5,7 @@ import requests
 
 from rest_client_gen.generator import Generator
 from rest_client_gen.registry import ModelRegistry
-from testing_tools.pprint_meta_data import pprint_gen
+from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
 
@@ -24,22 +24,22 @@ def main():
     fields = gen.generate(*tabs)
 
     model = reg.process_meta_data(fields)
-    print("".join(pprint_gen(model)))
+    print(pretty_format_meta(model))
     print('\n' + '-' * 10, end='')
 
     result = reg.merge_models(generator=gen)
     for model, group in result:
         print("\n" + "=" * 20, end='')
-        print("".join(pprint_gen(model)))
+        print(pretty_format_meta(model))
 
         print("\n" + "-" * 10 + " replaces " + "-" * 10, end='')
         for old_model in group:
-            print("".join(pprint_gen(old_model)))
+            print(pretty_format_meta(old_model))
 
     print("\n" + "=" * 20, end='')
     for model in reg.models:
         model.update_base_name()
-    print("".join(pprint_gen(next(iter(reg.models)))))
+    print(pretty_format_meta(next(iter(reg.models))))
 
 
 if __name__ == '__main__':

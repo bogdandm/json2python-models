@@ -7,7 +7,7 @@ import requests
 
 from rest_client_gen.generator import Generator
 from rest_client_gen.registry import ModelRegistry
-from testing_tools.pprint_meta_data import pprint_gen
+from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
 
@@ -31,14 +31,12 @@ def main():
     for data in ([chroniclingamerica_data], [launchlibrary_data]):
         fields = gen.generate(*data)
 
-        for s in pprint_gen(fields):
-            print(s, end='')
-        print('\n' + '-' * 10, end='')
+        print(pretty_format_meta(fields))
+        print('-' * 10)
 
         model = reg.process_meta_data(fields)
-        for s in pprint_gen(model):
-            print(s, end='')
-        print('\n' + '-' * 10, end='')
+        print(pretty_format_meta(model))
+        print('-' * 10)
 
 
 if __name__ == '__main__':

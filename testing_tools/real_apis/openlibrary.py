@@ -5,7 +5,7 @@ import requests
 
 from rest_client_gen.generator import Generator
 from rest_client_gen.registry import ModelRegistry
-from testing_tools.pprint_meta_data import pprint_gen
+from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
 session = requests.Session()
@@ -52,7 +52,7 @@ def main():
     for model in reg.models:
         model.update_base_name()
     for model in reg.models:
-        print("".join(pprint_gen(model)))
+        print(pretty_format_meta(model))
         print("\n" + "=" * 20, end='')
 
 
