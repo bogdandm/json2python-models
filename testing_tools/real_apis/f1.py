@@ -42,11 +42,11 @@ def main():
     reg = ModelRegistry()
     for name, data in (results_data, drivers_data, driver_standings_data):
         fields = gen.generate(*data)
-        model_ptr = reg.process_meta_data(fields)
-        model_ptr.type.set_raw_name(inflection.camelize(name))
+        reg.process_meta_data(fields, model_name=inflection.camelize(name))
     reg.merge_models(generator=gen)
     for model in reg.models:
-        model.generate_name()
+        if model.is_name_generated is None:
+            model.generate_name()
 
     for model in reg.models:
         print(pretty_format_meta(model))

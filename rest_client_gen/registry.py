@@ -56,6 +56,7 @@ class ModelRegistry:
 
     def process_meta_data(
             self, meta: MetaData,
+            model_name: str = None,
             parent: MetaData = None,
             parent_model: Tuple[ModelMeta, str] = (None, None),
             replace_kwargs=None
@@ -91,6 +92,8 @@ class ModelRegistry:
                         replace_kwargs={'parent': meta, 'index': i}
                     )
 
+        if model_name is not None:
+            ptr.type.set_raw_name(model_name)
         return ptr
 
     def _register(self, meta: MetaData):
