@@ -1,6 +1,7 @@
 import operator
 from collections import OrderedDict
 from inspect import isclass
+from itertools import chain
 from typing import Dict, Iterable, List, Set, Tuple, Union
 
 ImportPathList = List[Tuple[str, Union[Iterable[str], str]]]
@@ -138,7 +139,7 @@ class ComplexType(BaseType):
         imports, nested = zip(*map(metadata_to_typing, self))
         nested = ", ".join(nested)
         return (
-            imports,
+            list(chain(*imports)),
             f"[{nested}]"
         )
 

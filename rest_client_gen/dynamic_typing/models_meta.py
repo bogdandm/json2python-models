@@ -5,21 +5,6 @@ import inflection
 from .base import ImportPathList, MetaData, SingleType
 from ..utils import distinct_words
 
-try:
-    # https://www.clips.uantwerpen.be/pages/pattern-en#pluralization
-    from pattern.text.en import singularize
-except ImportError:
-    try:
-        # https://www.nodebox.net/code/index.php/Linguistics#pluralization
-        from en.noun import singular as singularize
-    except ImportError:
-        def singularize(word: str) -> str:
-            if word.endswith('ies'):
-                return word[:-3] + "y"
-            if word.endswith('s'):
-                return word[:-1]
-            return word
-
 
 class ModelMeta(SingleType):
     def __init__(self, t: MetaData, index, _original_fields=None):
@@ -44,7 +29,7 @@ class ModelMeta(SingleType):
 
     def generate_name(self):
         # TODO: Tests
-        base_names = (singularize(inflection.underscore(ptr.parent_field_name))
+        base_names = (inflection.singularize(inflection.underscore(ptr.parent_field_name))
                       for ptr in self.pointers if ptr.parent is not None)
         filtered_names = distinct_words(*base_names)
         new_name = self.name_joiner(*map(inflection.camelize, sorted(filtered_names)))
@@ -64,7 +49,7 @@ class ModelMeta(SingleType):
 
     @name.setter
     def name(self, name: str):
-        value = inflection.camelize(singularize(name))
+        value = inflection.camelize(inflection.singularize(name))
         self._name = value
         self._name_generated = False
 

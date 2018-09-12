@@ -44,8 +44,8 @@ class DUnion(ComplexType):
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = super().to_typing_code()
         return (
-            [*imports, ('typing', 'Optional')],
-            "Optional" + nested
+            [*imports, ('typing', 'Union')],
+            "Union" + nested
         )
 
 
