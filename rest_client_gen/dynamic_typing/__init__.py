@@ -1,6 +1,5 @@
-from .base import BaseType, SingleType, ComplexType, MetaData, NoneType, Unknown, UnknownType
-from .complex import DOptional, DUnion, DList, DTuple
-from .string_serializable import (
-    StringSerializable, StringSerializableRegistry, registry,
-    BooleanString, FloatString, IntString
-)
+from .base import BaseType, ComplexType, MetaData, NoneType, SingleType, Unknown, UnknownType
+from .complex import DList, DOptional, DTuple, DUnion
+from .models_meta import ModelMeta, ModelPtr
+from .string_serializable import (BooleanString, FloatString, IntString, StringSerializable, StringSerializableRegistry,
+                                  registry)

@@ -6,11 +6,9 @@
         - [X] Data variant merging
         - [X] Create and register models
         - [X] Merge meta-models and extract common ones
-        - [ ] Convert meta-models to actual python classes 
-              (not sure about actual application of this, maybe I will skip this point)
-            - [ ] attrs
-            - [ ] dataclasses
-        - [ ] Save models *(or meta-models, don't know yet what would be easier)* as python code
+        - [ ] Save meta-models as python code
+            - [ ] typing code generation
+                - [ ] (?) Extract to another module (by serializers for each dynamic typing class)
             - [ ] attrs
             - [ ] dataclasses
             - [ ] generate from_json/to_json converters
@@ -53,10 +51,8 @@
             - [X] Test pointers in the models registry
             - [ ] Test whats going on with strict/non-strict merging
         - [X] Merge meta-models and extract common ones
-        - [ ] Convert meta-models to actual python classes
-            - [ ] attrs
-            - [ ] dataclasses
-        - [ ] Save (meta-)models as python code
+        - [ ] Save meta-models as python code
+            - [ ] typing code generation
             - [ ] attrs
             - [ ] dataclasses
             - [ ] generate from_json/to_json converters

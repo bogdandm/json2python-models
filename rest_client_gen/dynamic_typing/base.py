@@ -1,4 +1,7 @@
-from typing import Iterable, List, Union
+from inspect import isclass
+from typing import Iterable, List, Tuple, Union
+
+ImportPath = List[Tuple[str, Union[Iterable[str], str]]]
 
 
 class BaseType:
@@ -15,6 +18,15 @@ class BaseType:
         """
         raise NotImplementedError()
 
+    def to_typing_code(self) -> Tuple[ImportPath, str]:
+        """
+        Return typing code that represents this metadata and import path of classes that are used in this code
+
+        :return: ((module_name, (class_name, ...)), code)
+        """
+        raise NotImplementedError()
+
+
 class UnknownType(BaseType):
     __slots__ = []
 
@@ -26,6 +38,10 @@ class UnknownType(BaseType):
 
     def replace(self, t: 'MetaData', **kwargs) -> 'UnknownType':
         return self
+
+    def to_typing_code(self) -> Tuple[ImportPath, str]:
+        return ([('typing', 'Any')], 'Any')
+
 
 Unknown = UnknownType()
 NoneType = type(None)
@@ -115,3 +131,19 @@ class ComplexType(BaseType):
         else:
             raise ValueError(f"Unsupported arguments: t={t} index={index} kwargs={kwargs}")
         return self
+
+    def to_typing_code(self) -> Tuple[ImportPath, str]:
+        imports, nested = zip(*map(metadata_to_typing, self))
+        nested = ", ".join(nested)
+        return (
+            imports,
+            f"[{nested}]"
+        )
+
+
+def metadata_to_typing(t: MetaData) -> Tuple[ImportPath, str]:
+    if isclass(t):
+        return ([], t.__name__)
+    elif isinstance(t, dict):
+        raise ValueError("Can not convert dict instance to typing code. It should be wrapped into ModelMeta instance")
+    return t.to_typing_code()

@@ -2,8 +2,7 @@ from collections import OrderedDict
 
 import pytest
 
-from rest_client_gen.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, SingleType
-from rest_client_gen.models_meta import ModelMeta, ModelPtr
+from rest_client_gen.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, ModelMeta, ModelPtr, SingleType
 from rest_client_gen.registry import ModelRegistry
 
 test_data = [
@@ -127,6 +126,7 @@ test_data = [
 
 # use it as value in expected model dict to mark this field as cycle reference
 cycle_ref = object()
+
 
 def check_type(meta: MetaData, expected: MetaData):
     if expected is cycle_ref:

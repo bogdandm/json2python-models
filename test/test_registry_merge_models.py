@@ -2,9 +2,8 @@ from typing import Iterable
 
 import pytest
 
-from rest_client_gen.dynamic_typing import DList, DOptional, Unknown
+from rest_client_gen.dynamic_typing import DList, DOptional, ModelMeta, Unknown
 from rest_client_gen.generator import Generator
-from rest_client_gen.models_meta import ModelMeta
 from rest_client_gen.registry import ModelRegistry
 from test.test_registry_process_meta_data import check_type, cycle_ref, test_data as base_test_data
 

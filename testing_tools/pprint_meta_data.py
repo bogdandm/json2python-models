@@ -1,8 +1,7 @@
 from inspect import isclass
 
-from rest_client_gen.dynamic_typing import ComplexType, SingleType, StringSerializable
+from rest_client_gen.dynamic_typing import ComplexType, ModelMeta, ModelPtr, SingleType, StringSerializable
 from rest_client_gen.generator import Generator
-from rest_client_gen.models_meta import ModelMeta, ModelPtr
 from rest_client_gen.registry import ModelRegistry
 from testing_tools.data import test_data
 
@@ -56,6 +55,7 @@ def _pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
 
 def pretty_format_meta(value, ignore_ptr=False):
     return "".join(_pprint_gen(value, ignore_ptr=ignore_ptr))
+
 
 if __name__ == '__main__':
     gen = Generator()

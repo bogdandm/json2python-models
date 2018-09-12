@@ -4,8 +4,7 @@ from typing import Dict, List, Set, Tuple
 
 from ordered_set import OrderedSet
 
-from .dynamic_typing import BaseType, MetaData
-from .models_meta import ModelMeta, ModelPtr
+from .dynamic_typing import BaseType, MetaData, ModelMeta, ModelPtr
 from .utils import Index, distinct_words
 
 

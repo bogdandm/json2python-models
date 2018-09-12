@@ -1,9 +1,9 @@
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 import inflection
 
-from .dynamic_typing import MetaData, SingleType
-from .utils import distinct_words
+from .base import ImportPath, MetaData, SingleType
+from ..utils import distinct_words
 
 try:
     # https://www.clips.uantwerpen.be/pages/pattern-en#pluralization
@@ -86,6 +86,11 @@ class ModelMeta(SingleType):
     def disconnect(self, ptr: 'ModelPtr'):
         self.pointers.remove(ptr)
 
+    def to_typing_code(self) -> Tuple[ImportPath, str]:
+        if self.name is None:
+            raise ValueError('Model without name can not be typed')
+        return [], self.name
+
 
 class ModelPtr(SingleType):
     """
@@ -106,3 +111,7 @@ class ModelPtr(SingleType):
         self.type.disconnect(self)
         super().replace(t, **kwargs)
         self.type.connect(self)
+
+    def to_typing_code(self) -> Tuple[ImportPath, str]:
+        imports, model = self.type.to_typing_code()
+        return imports, f"'{model}'"

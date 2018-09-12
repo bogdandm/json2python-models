@@ -5,9 +5,8 @@ from typing import Any, Callable, List, Optional, Union
 import inflection
 from unidecode import unidecode
 
-from rest_client_gen.models_meta import ModelPtr
-from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, NoneType, SingleType, StringSerializable,
-                             StringSerializableRegistry, Unknown, registry)
+from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
+                             StringSerializable, StringSerializableRegistry, Unknown, registry)
 
 
 class Hierarchy(Enum):
