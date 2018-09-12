@@ -1,7 +1,9 @@
+import operator
+from collections import OrderedDict
 from inspect import isclass
-from typing import Iterable, List, Tuple, Union
+from typing import Dict, Iterable, List, Set, Tuple, Union
 
-ImportPath = List[Tuple[str, Union[Iterable[str], str]]]
+ImportPathList = List[Tuple[str, Union[Iterable[str], str]]]
 
 
 class BaseType:
@@ -18,7 +20,7 @@ class BaseType:
         """
         raise NotImplementedError()
 
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         """
         Return typing code that represents this metadata and import path of classes that are used in this code
 
@@ -39,7 +41,7 @@ class UnknownType(BaseType):
     def replace(self, t: 'MetaData', **kwargs) -> 'UnknownType':
         return self
 
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         return ([('typing', 'Any')], 'Any')
 
 
@@ -132,7 +134,7 @@ class ComplexType(BaseType):
             raise ValueError(f"Unsupported arguments: t={t} index={index} kwargs={kwargs}")
         return self
 
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = zip(*map(metadata_to_typing, self))
         nested = ", ".join(nested)
         return (
@@ -141,9 +143,31 @@ class ComplexType(BaseType):
         )
 
 
-def metadata_to_typing(t: MetaData) -> Tuple[ImportPath, str]:
+def metadata_to_typing(t: MetaData) -> Tuple[ImportPathList, str]:
     if isclass(t):
         return ([], t.__name__)
     elif isinstance(t, dict):
         raise ValueError("Can not convert dict instance to typing code. It should be wrapped into ModelMeta instance")
     return t.to_typing_code()
+
+
+def compile_imports(imports: ImportPathList) -> str:
+    imports_map: Dict[str, Set[str]] = OrderedDict()
+    for module, classes in filter(None, imports):
+        classes_set = imports_map.get(module, set())
+        if isinstance(classes, str):
+            classes_set.add(classes)
+        else:
+            classes_set.update(classes)
+        imports_map[module] = classes_set
+
+    imports_map = OrderedDict(sorted(
+        ((module, sorted(classes)) for module, classes in imports_map.items()),
+        key=operator.itemgetter(0)
+    ))
+
+    imports_map_joined = OrderedDict()
+    for module, classes in imports_map.items():
+        imports_map_joined[module] = ", ".join(classes)
+
+    return "\n".join(f"from {module} import {classes}" for module, classes in imports_map_joined.items())

@@ -2,7 +2,7 @@ from typing import List, Optional, Set, Tuple
 
 import inflection
 
-from .base import ImportPath, MetaData, SingleType
+from .base import ImportPathList, MetaData, SingleType
 from ..utils import distinct_words
 
 try:
@@ -86,7 +86,7 @@ class ModelMeta(SingleType):
     def disconnect(self, ptr: 'ModelPtr'):
         self.pointers.remove(ptr)
 
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         if self.name is None:
             raise ValueError('Model without name can not be typed')
         return [], self.name
@@ -112,6 +112,6 @@ class ModelPtr(SingleType):
         super().replace(t, **kwargs)
         self.type.connect(self)
 
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, model = self.type.to_typing_code()
         return imports, f"'{model}'"

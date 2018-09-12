@@ -1,6 +1,6 @@
 from typing import Tuple, Union
 
-from .base import BaseType, ComplexType, ImportPath, SingleType, metadata_to_typing
+from .base import BaseType, ComplexType, ImportPathList, SingleType, metadata_to_typing
 
 
 class DOptional(SingleType):
@@ -8,7 +8,7 @@ class DOptional(SingleType):
     Field of this type may not be presented in JSON object
     """
 
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = metadata_to_typing(self.type)
         return (
             [*imports, ('typing', 'Optional')],
@@ -41,7 +41,7 @@ class DUnion(ComplexType):
             else:
                 yield t
 
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = super().to_typing_code()
         return (
             [*imports, ('typing', 'Optional')],
@@ -50,7 +50,7 @@ class DUnion(ComplexType):
 
 
 class DTuple(ComplexType):
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = super().to_typing_code()
         return (
             [*imports, ('typing', 'Tuple')],
@@ -59,7 +59,7 @@ class DTuple(ComplexType):
 
 
 class DList(SingleType):
-    def to_typing_code(self) -> Tuple[ImportPath, str]:
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = metadata_to_typing(self.type)
         return (
             [*imports, ('typing', 'List')],
