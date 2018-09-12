@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Union
+from typing import Iterable, List, Union
 
 
 class BaseType:
@@ -15,10 +15,6 @@ class BaseType:
         """
         raise NotImplementedError()
 
-    def to_static_type(self) -> type:
-        raise NotImplementedError()
-
-
 class UnknownType(BaseType):
     __slots__ = []
 
@@ -30,10 +26,6 @@ class UnknownType(BaseType):
 
     def replace(self, t: 'MetaData', **kwargs) -> 'UnknownType':
         return self
-
-    def to_static_type(self):
-        return Any
-
 
 Unknown = UnknownType()
 NoneType = type(None)

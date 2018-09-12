@@ -1,20 +1,13 @@
-from inspect import isclass
-from typing import List, Optional, Tuple, Union
+from typing import Union
 
-from .base import BaseType, ComplexType, MetaData, NoneType, SingleType
-
-
-def _get_static_type(t: MetaData) -> MetaData:
-    return t if isclass(t) or isinstance(t, dict) else t.to_static_type()
+from .base import BaseType, ComplexType, SingleType
 
 
 class DOptional(SingleType):
     """
     Field of this type may not be presented in JSON object
     """
-
-    def to_static_type(self):
-        return Optional[_get_static_type(self.type)]
+    pass
 
 
 class DUnion(ComplexType):
@@ -42,20 +35,10 @@ class DUnion(ComplexType):
             else:
                 yield t
 
-    def to_static_type(self):
-        optional = NoneType in self.types
-        t = tuple(_get_static_type(t) for t in self if t is not NoneType)
-        res = Union[t]
-        if optional:
-            res = Optional[res]
-        return res
-
 
 class DTuple(ComplexType):
-    def to_static_type(self):
-        return Tuple[tuple(_get_static_type(t) for t in self)]
+    pass
 
 
 class DList(SingleType):
-    def to_static_type(self):
-        return List[_get_static_type(self.type)]
+    pass
