@@ -4,7 +4,9 @@ Path of Exile API http://www.pathofexile.com/developer/docs/api-resource-public-
 import requests
 
 from rest_client_gen.generator import MetadataGenerator
+from rest_client_gen.models import compose_models
 from rest_client_gen.registry import ModelRegistry
+from rest_client_gen.utils import json_format
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
@@ -22,24 +24,15 @@ def main():
     gen = MetadataGenerator()
     reg = ModelRegistry()
     fields = gen.generate(*tabs)
+    reg.process_meta_data(fields)
+    reg.merge_models(generator=gen)
+    reg.generate_names()
 
-    model = reg.process_meta_data(fields)
-    print(pretty_format_meta(model))
-    print('\n' + '-' * 10, end='')
-
-    result = reg.merge_models(generator=gen)
-    for model, group in result:
-        print("\n" + "=" * 20, end='')
-        print(pretty_format_meta(model))
-
-        print("\n" + "-" * 10 + " replaces " + "-" * 10, end='')
-        for old_model in group:
-            print(pretty_format_meta(old_model))
-
-    print("\n" + "=" * 20, end='')
-    for model in reg.models:
-        model.generate_name()
     print(pretty_format_meta(next(iter(reg.models))))
+    print("\n" + "=" * 20, end='')
+
+    root = compose_models(reg.models_map)
+    print('\n', json_format(root))
 
 
 if __name__ == '__main__':

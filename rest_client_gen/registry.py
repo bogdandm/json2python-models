@@ -165,3 +165,15 @@ class ModelRegistry:
         self._register(model_meta)
 
         return model_meta
+
+    def fix_name_duplicates(self):
+        counter = defaultdict(int)
+        for model in self.models:
+            counter[model.name] += 1
+            if counter[model.name] > 1:
+                model.set_raw_name(model.name_joiner(model.name, model.index))
+
+    def generate_names(self):
+        for model in self.models:
+            model.generate_name()
+        self.fix_name_duplicates()

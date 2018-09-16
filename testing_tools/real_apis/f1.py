@@ -5,7 +5,9 @@ import inflection
 import requests
 
 from rest_client_gen.generator import MetadataGenerator
+from rest_client_gen.models import compose_models
 from rest_client_gen.registry import ModelRegistry
+from rest_client_gen.utils import json_format
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
@@ -44,13 +46,14 @@ def main():
         fields = gen.generate(*data)
         reg.process_meta_data(fields, model_name=inflection.camelize(name))
     reg.merge_models(generator=gen)
-    for model in reg.models:
-        if model.is_name_generated is None:
-            model.generate_name()
+    reg.generate_names()
 
     for model in reg.models:
         print(pretty_format_meta(model))
         print("=" * 20, end='')
+
+    root = compose_models(reg.models_map)
+    print('\n', json_format(root))
 
 
 if __name__ == '__main__':

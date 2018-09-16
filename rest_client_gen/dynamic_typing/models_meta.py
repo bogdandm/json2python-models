@@ -11,7 +11,7 @@ class ModelMeta(SingleType):
     def __init__(self, t: MetaData, index, _original_fields=None):
         super().__init__(t)
         self.original_fields: List[List[str]] = _original_fields or [list(self.type.keys())]
-        self.index = index
+        self.index: str = index
         self.pointers: Set[ModelPtr] = set()
         self._name: Optional[str] = None
         self._name_generated: Optional[bool] = None
