@@ -34,13 +34,14 @@ def distinct_words(*words: str) -> Set[str]:
     words = set(words)
     filtered_words = set()
     for name in words:
+        flag = True
         for other in list(filtered_words):
             if name in other:
                 filtered_words.add(name)
                 filtered_words.remove(other)
-                break
+                flag = False
             elif other in name:
-                break
-        else:
+                flag = False
+        if flag:
             filtered_words.add(name)
     return filtered_words

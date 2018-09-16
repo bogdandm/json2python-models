@@ -1,9 +1,9 @@
 from .base import (
-    BaseType, ComplexType, ImportPathList, MetaData, NoneType, SingleType, Unknown, UnknownType, compile_imports,
-    metadata_to_typing
+    BaseType, ImportPathList, MetaData, NoneType, Unknown, UnknownType
 )
-from .complex import DList, DOptional, DTuple, DUnion
+from .complex import ComplexType, DList, DOptional, DTuple, DUnion, SingleType
 from .models_meta import ModelMeta, ModelPtr
 from .string_serializable import (
     BooleanString, FloatString, IntString, StringSerializable, StringSerializableRegistry, registry
 )
+from .typing import compile_imports, metadata_to_typing

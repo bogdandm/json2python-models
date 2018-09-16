@@ -19,7 +19,8 @@ test_imports_compiler_data = [
             ('pytest', 'param'),
             ('typing', ('List', 'Tuple')),
         ],
-        "from pytest import param\nfrom typing import Any, List, Tuple",
+        "from pytest import param\n"
+        "from typing import Any, List, Tuple",
         id="basic"
     )
 ]
@@ -71,6 +72,17 @@ test_data = [
         DList(DList(DList(DList(DUnion(str, float))))),
         ('from typing import List, Union', List[List[List[List[Union[str, float]]]]]),
         id="deep_DList"
+    ),
+    pytest.param(
+        FloatString,
+        ('from rest_client_gen.dynamic_typing.string_serializable import FloatString', FloatString),
+        id="string_serializable"
+    ),
+    pytest.param(
+        DOptional(IntString),
+        ('from rest_client_gen.dynamic_typing.string_serializable import IntString\n'
+         'from typing import Optional', Optional[IntString]),
+        id="complex_string_serializable"
     )
 ]
 

@@ -1,19 +1,21 @@
 from itertools import permutations
-from typing import Set, Iterable, Tuple, Type, List, Collection
+from typing import Collection, Iterable, List, Set, Tuple, Type
 
-from .base import BaseType
+from .base import BaseType, ImportPathList
 
 
 class StringSerializable(BaseType):
-    def to_static_type(self) -> type:
-        return type(self)
-
     @classmethod
     def to_internal_value(cls, value: str) -> 'StringSerializable':
         raise NotImplementedError()
 
     def to_representation(self) -> str:
         raise NotImplementedError()
+
+    @classmethod
+    def to_typing_code(cls) -> Tuple[ImportPathList, str]:
+        cls_name = cls.__name__
+        return [('rest_client_gen.dynamic_typing.string_serializable', cls_name)], cls_name
 
 
 T_StringSerializable = Type[StringSerializable]

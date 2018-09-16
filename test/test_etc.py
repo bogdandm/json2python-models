@@ -1,3 +1,5 @@
+from random import shuffle
+
 import pytest
 from inflection import singularize
 
@@ -14,9 +16,11 @@ test_distinct_words_data = [
 @pytest.mark.parametrize("value,expected", test_distinct_words_data)
 def test_distinct_words(value, expected):
     shuffled = value[:]
+    shuffle(shuffled)
     for v in (value, reversed(value), shuffled):
+        v = list(v)
         words_set = distinct_words(*v)
-        assert words_set == expected
+        assert words_set == expected, f"Test case: {v}"
 
 
 def test_json_format():

@@ -2,7 +2,8 @@ from typing import List, Optional, Set, Tuple
 
 import inflection
 
-from .base import ImportPathList, MetaData, SingleType
+from .base import ImportPathList, MetaData
+from .complex import SingleType
 from ..utils import distinct_words
 
 
