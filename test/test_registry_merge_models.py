@@ -3,7 +3,7 @@ from typing import Iterable
 import pytest
 
 from rest_client_gen.dynamic_typing import DList, DOptional, ModelMeta, Unknown
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.registry import ModelRegistry
 from test.test_registry_process_meta_data import check_type, cycle_ref, test_data as base_test_data
 
@@ -226,7 +226,8 @@ def sort_models(models: Iterable[ModelMeta]):
 
 
 @pytest.mark.parametrize("value,expected", test_data)
-def test_registry_merge_models_base(models_generator: Generator, models_registry: ModelRegistry, value, expected):
+def test_registry_merge_models_base(models_generator: MetadataGenerator, models_registry: ModelRegistry, value,
+                                    expected):
     if isinstance(value, list):
         for v in value:
             models_registry.process_meta_data(v)

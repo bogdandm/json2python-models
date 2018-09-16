@@ -29,7 +29,7 @@ class SepStyle(Enum):
         return self.value
 
 
-class Generator:
+class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 
     # TODO: sep_style: SepStyle = SepStyle.Underscore

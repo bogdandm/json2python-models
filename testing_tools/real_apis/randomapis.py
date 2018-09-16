@@ -5,7 +5,7 @@ Example uses the following APIs:
 """
 import requests
 
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.registry import ModelRegistry
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
@@ -26,7 +26,7 @@ def main():
     launchlibrary_data = launchlibrary()
     dump_response("other", "launchlibrary", launchlibrary_data)
 
-    gen = Generator()
+    gen = MetadataGenerator()
     reg = ModelRegistry()
     for data in ([chroniclingamerica_data], [launchlibrary_data]):
         fields = gen.generate(*data)

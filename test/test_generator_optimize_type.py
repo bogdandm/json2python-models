@@ -2,7 +2,7 @@ import pytest
 
 from rest_client_gen.dynamic_typing import (BooleanString, DList, DOptional, DTuple, DUnion, FloatString, IntString,
                                             NoneType, Unknown)
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 
 test_data = [
     pytest.param(DUnion(int), int, id="single_DUnion"),
@@ -109,6 +109,6 @@ test_data = [
 
 
 @pytest.mark.parametrize("value,expected", test_data)
-def test_optimize_type(models_generator: Generator, value, expected):
+def test_optimize_type(models_generator: MetadataGenerator, value, expected):
     result = models_generator.optimize_type(value)
     assert result == expected

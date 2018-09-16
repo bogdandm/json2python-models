@@ -3,7 +3,7 @@ Example uses Open Library Books API (https://openlibrary.org/dev/docs/api/books)
 """
 import requests
 
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.registry import ModelRegistry
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
@@ -42,7 +42,7 @@ def main():
     ]
     dump_response("openlibrary", "book", books[0])
 
-    gen = Generator()
+    gen = MetadataGenerator()
     reg = ModelRegistry()
     for data in (search_result, books):
         reg.process_meta_data(gen.generate(*data))

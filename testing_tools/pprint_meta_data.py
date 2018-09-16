@@ -1,7 +1,7 @@
 from inspect import isclass
 
 from rest_client_gen.dynamic_typing import ComplexType, ModelMeta, ModelPtr, SingleType, StringSerializable
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.registry import ModelRegistry
 from testing_tools.data import test_data
 
@@ -58,7 +58,7 @@ def pretty_format_meta(value, ignore_ptr=False):
 
 
 if __name__ == '__main__':
-    gen = Generator()
+    gen = MetadataGenerator()
     reg = ModelRegistry()
     fields = gen.generate(*test_data)
     model = reg.process_meta_data(fields)

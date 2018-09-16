@@ -3,7 +3,7 @@ Path of Exile API http://www.pathofexile.com/developer/docs/api-resource-public-
 """
 import requests
 
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.registry import ModelRegistry
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
@@ -19,7 +19,7 @@ def main():
     tabs = tabs['stashes']
 
     print(f"Start model generation (data len = {len(tabs)})")
-    gen = Generator()
+    gen = MetadataGenerator()
     reg = ModelRegistry()
     fields = gen.generate(*tabs)
 

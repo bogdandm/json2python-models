@@ -1,7 +1,7 @@
 import pytest
 
-from rest_client_gen.dynamic_typing import DList, Unknown, DUnion, NoneType, IntString, FloatString, BooleanString
-from rest_client_gen.generator import Generator
+from rest_client_gen.dynamic_typing import BooleanString, DList, DUnion, FloatString, IntString, NoneType, Unknown
+from rest_client_gen.generator import MetadataGenerator
 
 test_data = [
     pytest.param(1.0, float, id="float"),
@@ -31,5 +31,5 @@ test_data += [
 
 
 @pytest.mark.parametrize("value,expected", test_data)
-def test_detect_type(models_generator: Generator, value, expected):
+def test_detect_type(models_generator: MetadataGenerator, value, expected):
     assert models_generator._detect_type(value) == expected

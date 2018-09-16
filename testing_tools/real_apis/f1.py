@@ -4,7 +4,7 @@ Example uses Ergast Developer API (http://ergast.com/mrd/)
 import inflection
 import requests
 
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.registry import ModelRegistry
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
@@ -38,7 +38,7 @@ def main():
     dump_response("f1", "driver_standings", driver_standings_data)
     driver_standings_data = ("driver_standings", driver_standings_data)
 
-    gen = Generator()
+    gen = MetadataGenerator()
     reg = ModelRegistry()
     for name, data in (results_data, drivers_data, driver_standings_data):
         fields = gen.generate(*data)

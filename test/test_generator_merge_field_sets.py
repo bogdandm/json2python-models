@@ -4,7 +4,7 @@ from random import shuffle
 import pytest
 
 from rest_client_gen.dynamic_typing import DOptional, DUnion, FloatString, IntString
-from rest_client_gen.generator import Generator
+from rest_client_gen.generator import MetadataGenerator
 
 test_data = [
     pytest.param(
@@ -82,7 +82,7 @@ test_data = [
 
 
 @pytest.mark.parametrize("value,expected", test_data)
-def test_merge_field_sets(models_generator: Generator, value, expected):
+def test_merge_field_sets(models_generator: MetadataGenerator, value, expected):
     shuffled = value[:]
     shuffle(shuffled)
     for v in (value, reversed(value), shuffled):
