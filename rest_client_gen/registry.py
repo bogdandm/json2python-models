@@ -157,7 +157,7 @@ class ModelRegistry:
         metadata = generator.merge_field_sets([model.type for model in models])
         model_meta = ModelMeta(metadata, self._index(), original_fields)
         if originals_names:
-            model_meta.name = ModelMeta.name_joiner(*originals_names)
+            model_meta.set_raw_name(ModelMeta.name_joiner(*originals_names))
         for model in models:
             self._unregister(model)
             for ptr in tuple(model.pointers):
@@ -171,9 +171,10 @@ class ModelRegistry:
         for model in self.models:
             counter[model.name] += 1
             if counter[model.name] > 1:
-                model.set_raw_name(model.name_joiner(model.name, model.index))
+                model.set_raw_name(model.name_joiner(model.name, model.index), generated=True)
 
     def generate_names(self):
         for model in self.models:
-            model.generate_name()
+            if model.is_name_generated is None:
+                model.generate_name()
         self.fix_name_duplicates()

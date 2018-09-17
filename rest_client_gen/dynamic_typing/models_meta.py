@@ -58,9 +58,9 @@ class ModelMeta(SingleType):
     def name(self):
         self._name = None
 
-    def set_raw_name(self, name):
+    def set_raw_name(self, name, generated=False):
         self._name = name
-        self._name_generated = False
+        self._name_generated = generated
 
     @property
     def is_name_generated(self):
