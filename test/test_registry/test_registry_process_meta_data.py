@@ -5,6 +5,7 @@ import pytest
 from rest_client_gen.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, ModelMeta, ModelPtr, SingleType
 from rest_client_gen.registry import ModelRegistry
 
+# MetaData | List of models
 test_data = [
     pytest.param(
         OrderedDict([

@@ -44,6 +44,8 @@ class X(StringSerializable):
 class Y(StringSerializable):
     pass
 
+
+# resolve args | resolved nodes
 test_data = [
     pytest.param((A, B), {B}),
     pytest.param((A, B, C), {C}),

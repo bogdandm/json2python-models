@@ -8,8 +8,8 @@
         - [X] Create and register models
         - [X] Merge meta-models and extract common ones
         - [ ] Save meta-models as python code
-            - [ ] typing code generation
-                - [ ] (?) Extract to another module (by serializers for each dynamic typing class)
+            - [X] typing code generation
+                - [ ] (Maybe in future) Extract to another module (by serializers for each dynamic typing class)
             - [ ] attrs
             - [ ] dataclasses
             - [ ] generate from_json/to_json converters
@@ -22,17 +22,17 @@
         - Other features
             - [ ] Keys separator style
             - [ ] Decode unicode in keys
-            - Nesting models generation
-                - Cascade (default)
+            - [ ] Nesting models generation
+                - [X] Cascade (default)
                 - [ ] Flat
-            - OptionalFieldsPolicy
-                - Merge (default)
+            - [ ] OptionalFieldsPolicy
+                - [X] Merge (default)
                 - [ ] Field sets
                 - [ ] Key as data (does not process json dict as a model but process it as a python dict)
             - [ ] Complex python types annotations
                 - [ ] Decorator to specify field metatype
                 - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
-            - String based types
+            - [ ] String based types
                 - [ ] ISO date
                 - [ ] ISO time
                 - [ ] ISO datetime
@@ -53,7 +53,7 @@
             - [ ] Test whats going on with strict/non-strict merging
         - [X] Merge meta-models and extract common ones
         - [ ] Save meta-models as python code
-            - [ ] typing code generation
+            - [X] typing code generation
             - [ ] attrs
             - [ ] dataclasses
             - [ ] generate from_json/to_json converters

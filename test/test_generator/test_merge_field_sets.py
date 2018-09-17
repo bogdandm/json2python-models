@@ -6,6 +6,7 @@ import pytest
 from rest_client_gen.dynamic_typing import DOptional, DUnion, FloatString, IntString
 from rest_client_gen.generator import MetadataGenerator
 
+# List of fields sets | result field set
 test_data = [
     pytest.param(
         [{'a': int}, {'a': int, 'b': int}],

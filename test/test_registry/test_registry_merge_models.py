@@ -9,6 +9,7 @@ from test.test_registry.test_registry_process_meta_data import check_type, cycle
 
 # Include test cases from `test_registry_process_meta_data.py`. They should be correct.
 # At least until their not contains any models with same keys.
+# Original MetaData | Merged models
 test_data = base_test_data + [
     pytest.param(
         [

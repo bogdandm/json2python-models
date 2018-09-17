@@ -2,6 +2,7 @@ import pytest
 
 from rest_client_gen.dynamic_typing import DUnion
 
+# *args | MetaData
 test_dunion= [
     pytest.param(
         [int, int],

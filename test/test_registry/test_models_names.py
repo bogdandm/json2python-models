@@ -5,6 +5,7 @@ import pytest
 from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.registry import ModelRegistry
 
+# Tuple[Root model name, JSON data] | Set[Tuple[model_name, is_generated]]
 test_data = [
     pytest.param(
         ("test_response", {

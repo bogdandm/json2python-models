@@ -4,6 +4,7 @@ from rest_client_gen.dynamic_typing import (BooleanString, DList, DOptional, DTu
                                             NoneType, Unknown)
 from rest_client_gen.generator import MetadataGenerator
 
+# MetaData | Optimized MetaData
 test_data = [
     pytest.param(DUnion(int), int, id="single_DUnion"),
     pytest.param(

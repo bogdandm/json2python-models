@@ -3,6 +3,7 @@ import pytest
 from rest_client_gen.dynamic_typing import BooleanString, DList, DUnion, FloatString, IntString, NoneType, Unknown
 from rest_client_gen.generator import MetadataGenerator
 
+# JSON data | MetaData
 test_data = [
     pytest.param(1.0, float, id="float"),
     pytest.param(1, int, id="int"),

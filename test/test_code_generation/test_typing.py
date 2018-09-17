@@ -42,6 +42,8 @@ def model(data: dict, name: str):
 class TestModel:
     pass
 
+
+# MetaData | Tuple[import_stmnt, type]
 test_data = [
     pytest.param(
         UnknownType(),
