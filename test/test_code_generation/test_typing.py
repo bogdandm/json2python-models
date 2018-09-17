@@ -1,3 +1,4 @@
+from random import randint
 from typing import Any, List, Optional, Tuple, Union
 
 import pytest
@@ -31,6 +32,15 @@ def test_imports_compiler(value: ImportPathList, expected):
     code = compile_imports(value)
     assert code == expected
 
+
+def model(data: dict, name: str):
+    meta = ModelMeta(data, str(randint(0, 1000)))
+    meta.set_raw_name(name)
+    return ModelPtr(meta)
+
+
+class TestModel:
+    pass
 
 test_data = [
     pytest.param(
@@ -83,6 +93,14 @@ test_data = [
         ('from rest_client_gen.dynamic_typing.string_serializable import IntString\n'
          'from typing import Optional', Optional[IntString]),
         id="complex_string_serializable"
+    ),
+    pytest.param(
+        model({'a': int}, "TestModel"),
+        ('', 'TestModel')
+    ),
+    pytest.param(
+        DOptional(model({'a': int}, "TestModel")),
+        ('from typing import Optional', Optional['TestModel'])
     )
 ]
 
