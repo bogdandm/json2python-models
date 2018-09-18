@@ -1,5 +1,4 @@
 - (!) README.md
-- Doc strings
 - Features
     - Models layer
         - [X] Data variant converting

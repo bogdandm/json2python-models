@@ -5,6 +5,9 @@ ImportPathList = List[Tuple[str, Union[Iterable[str], str]]]
 
 class BaseType:
     def __iter__(self) -> Iterable['MetaData']:
+        """
+        Yields nested metadata items
+        """
         raise NotImplementedError()
 
     def replace(self, t: Union['MetaData', List['MetaData']], **kwargs) -> 'BaseType':

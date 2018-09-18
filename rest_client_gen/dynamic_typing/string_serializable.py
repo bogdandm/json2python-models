@@ -5,15 +5,34 @@ from .base import BaseType, ImportPathList
 
 
 class StringSerializable(BaseType):
+    """
+    Mixin for classes which are used to (de-)serialize some values in a string form
+    """
     @classmethod
     def to_internal_value(cls, value: str) -> 'StringSerializable':
+        """
+        Factory method
+
+        :raises ValueError: if this class can not represent given value
+        :param value: some string literal
+        :return: Instance of this class
+        """
         raise NotImplementedError()
 
     def to_representation(self) -> str:
+        """
+        Convert instance to string literal
+
+        :return: string literal
+        """
         raise NotImplementedError()
 
     @classmethod
     def to_typing_code(cls) -> Tuple[ImportPathList, str]:
+        """
+        Unlike other BaseType's subclasses it's a class method because StringSerializable instance is not parameterized
+        as a metadata instance but contains actual data
+        """
         cls_name = cls.__name__
         return [('rest_client_gen.dynamic_typing.string_serializable', cls_name)], cls_name
 
@@ -22,10 +41,6 @@ T_StringSerializable = Type[StringSerializable]
 
 
 class StringSerializableRegistry:
-    @classmethod
-    def default(cls):
-        pass
-
     def __init__(self, *types: T_StringSerializable):
         self.types: List[T_StringSerializable] = list(types)
         self.replaces: Set[Tuple[T_StringSerializable, T_StringSerializable]] = set()
@@ -37,6 +52,13 @@ class StringSerializableRegistry:
         return item in self.types
 
     def add(self, replace_types: Iterable[T_StringSerializable] = (), cls: type = None):
+        """
+        Register decorated class in registry. Can be called as a method if cls argument is passed.
+
+        :param replace_types: List of classes that is the particular case of decorated one
+        :param cls: StringSerializable class
+        :return: decorator
+        """
         def decorator(cls):
             self.types.append(cls)
             for t in replace_types:
@@ -50,6 +72,12 @@ class StringSerializableRegistry:
         return decorator
 
     def resolve(self, *types: T_StringSerializable) -> Collection[T_StringSerializable]:
+        """
+        Return set of StringSerializable classes which can represent all classes from types argument.
+
+        :param types: Sequence of StringSerializable classes
+        :return: Set of StringSerializable
+        """
         # TODO: Resolve common type of 2 different types (e.g str from float and bool)
         # Do it by getting all childs of each class with their level then merge it into one list and find one with min(max(levels) for c n childs)
         types = set(types)
@@ -67,6 +95,7 @@ class StringSerializableRegistry:
         return types
 
 
+# Default registry
 registry = StringSerializableRegistry()
 
 

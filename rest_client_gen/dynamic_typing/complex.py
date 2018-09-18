@@ -130,6 +130,9 @@ class DUnion(ComplexType):
         super().__init__(*unique_types)
 
     def _extract_nested_types(self):
+        """
+        Same as ComplexType.__iter__ but "flatten" nested DUnions
+        """
         for t in self.types:
             if isinstance(t, DUnion):
                 yield from t._extract_nested_types()

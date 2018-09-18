@@ -40,11 +40,17 @@ class MetadataGenerator:
         self.str_types_registry = str_types_registry if str_types_registry is not None else registry
 
     def generate(self, *data_variants: dict) -> dict:
+        """
+        Convert given list of data variants to metadata dict
+        """
         fields_sets = [self._convert(data) for data in data_variants]
         fields = self.merge_field_sets(fields_sets)
         return self.optimize_type(fields)
 
     def _convert(self, data: dict):
+        """
+        Key and string value converting
+        """
         fields = dict()
         for key, value in data.items():
             # TODO: Check if is 0xC0000005 crash has a place at linux systems
@@ -57,7 +63,7 @@ class MetadataGenerator:
 
     def _detect_type(self, value, convert_dict=True) -> MetaData:
         """
-        Converts json value to meta-type
+        Converts json value to metadata
         """
         # Simple types
         if isinstance(value, float):
@@ -95,8 +101,8 @@ class MetadataGenerator:
         elif value is None:
             return NoneType
 
-        # string types trying to convert to other types
-        else:  # string
+        # string types trying to convert to other string-serializable types
+        else:
             for t in self.str_types_registry:
                 try:
                     value = t.to_internal_value(value)
@@ -107,9 +113,9 @@ class MetadataGenerator:
 
     def merge_field_sets(self, field_sets: List[MetaData]) -> MetaData:
         """
-        Merges fields sets into one set of pairs key - meta-type
+        Merge fields sets into one set of pairs (key, metadata)
         """
-        fields = OrderedDict()
+        fields: dict = OrderedDict()
 
         first = True
         for model in field_sets:
@@ -155,7 +161,7 @@ class MetadataGenerator:
 
     def optimize_type(self, meta: MetaData, process_model_ptr=False) -> MetaData:
         """
-        Finds some redundant types and replace them with simple one
+        Finds some redundant types and replace them with a simpler one
 
         :param process_model_ptr: Control whether process ModelPtr instances or not.
             Default is False to prevent recursion cycles.

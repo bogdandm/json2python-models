@@ -8,6 +8,11 @@ from .string_serializable import StringSerializable
 
 
 def metadata_to_typing(t: MetaData) -> Tuple[ImportPathList, str]:
+    """
+    Shortcut function to call ``to_typing_code`` method of BaseType instances or return name of type otherwise
+    :param t:
+    :return:
+    """
     if isclass(t):
         if issubclass(t, StringSerializable):
             return t.to_typing_code()
@@ -20,6 +25,9 @@ def metadata_to_typing(t: MetaData) -> Tuple[ImportPathList, str]:
 
 
 def compile_imports(imports: ImportPathList) -> str:
+    """
+    Merge list of imports path and convert them into list code (string)
+    """
     imports_map: Dict[str, Set[str]] = OrderedDict()
     for module, classes in filter(None, imports):
         classes_set = imports_map.get(module, set())
@@ -29,13 +37,10 @@ def compile_imports(imports: ImportPathList) -> str:
             classes_set.update(classes)
         imports_map[module] = classes_set
 
+    # Sort imports by package name and sort class names of each import
     imports_map = OrderedDict(sorted(
         ((module, sorted(classes)) for module, classes in imports_map.items()),
         key=operator.itemgetter(0)
     ))
 
-    imports_map_joined = OrderedDict()
-    for module, classes in imports_map.items():
-        imports_map_joined[module] = ", ".join(classes)
-
-    return "\n".join(f"from {module} import {classes}" for module, classes in imports_map_joined.items())
+    return "\n".join(f"from {module} import {', '.join(classes)}" for module, classes in imports_map.items())

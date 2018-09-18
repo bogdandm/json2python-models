@@ -8,6 +8,8 @@ from ..utils import distinct_words
 
 
 class ModelMeta(SingleType):
+    WORDS_SEPARATOR = "_"
+
     def __init__(self, t: MetaData, index, _original_fields=None):
         super().__init__(t)
         self.original_fields: List[List[str]] = _original_fields or [list(self.type.keys())]
@@ -29,6 +31,10 @@ class ModelMeta(SingleType):
         return hash(self.index)
 
     def generate_name(self):
+        """
+        Generate model name based on fields to which his model is assigned.
+        Will overwrite existed name so check is_name_generated before call this method
+        """
         # TODO: Tests
         base_names = (inflection.singularize(inflection.underscore(ptr.parent_field_name))
                       for ptr in self.pointers if ptr.parent is not None)
@@ -40,18 +46,21 @@ class ModelMeta(SingleType):
 
     @classmethod
     def name_joiner(cls, *names: str) -> str:
-        return "_".join(names)
+        """
+        Join words to form a model name. Uses in different places so override WORDS_SEPARATOR to change it globally.
+        """
+        return cls.WORDS_SEPARATOR.join(names)
 
     @property
     def name(self) -> str:
-        # if self._name is None:
-        #     self.generate_name()
         return self._name
 
     @name.setter
     def name(self, name: str):
-        value = inflection.camelize(inflection.singularize(name))
-        self._name = value
+        """
+        Convert given name to singular form and CamelCase format
+        """
+        self._name = inflection.camelize(inflection.singularize(name))
         self._name_generated = False
 
     @name.deleter
@@ -59,6 +68,9 @@ class ModelMeta(SingleType):
         self._name = None
 
     def set_raw_name(self, name, generated=False):
+        """
+        Set model name and is_name_generated flag as is without any conversion made
+        """
         self._name = name
         self._name_generated = generated
 

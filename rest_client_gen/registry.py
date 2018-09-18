@@ -9,6 +9,9 @@ from .utils import Index, distinct_words
 
 
 class ModelCmp:
+    """
+    Generic model comparator
+    """
     def cmp(self, fields_a: set, fields_b: set) -> bool:
         raise NotImplementedError()
 
@@ -59,7 +62,18 @@ class ModelRegistry:
             parent: MetaData = None,
             parent_model: Tuple[ModelMeta, str] = (None, None),
             replace_kwargs=None
-    ):
+    ) -> ModelPtr:
+        """
+        Convert metadata (dict) to model and return a pointer to this model
+
+        :param meta: Dict[str, MetaData] - usually result of MetadataGenerator.generate method call
+        :param model_name: Raw model name. Will be set as is.
+            It is recommended to set it for root level models because names can not be generated for such models
+        :param parent: System attribute for recursive call
+        :param parent_model: Pair of (ModelMeta, field name). System attribute for recursive call
+        :param replace_kwargs: System attribute for recursive call
+        :return:
+        """
         replace_kwargs = replace_kwargs or {}
         ptr = None
 
@@ -104,26 +118,33 @@ class ModelRegistry:
         del self._registry[model_meta.index]
 
     def _models_cmp_fn(self, model_a: ModelMeta, model_b: ModelMeta) -> bool:
+        """
+        Return True if ANY of comparators decided to merge pair of models
+        """
         fields_a = set(model_a.type.keys())
         fields_b = set(model_b.type.keys())
         return any(cmp.cmp(fields_a, fields_b) for cmp in self._models_cmp)
 
     def merge_models(self, generator, strict=False) -> List[Tuple[ModelMeta, Set[ModelMeta]]]:
         """
-        Optimize whole models registry by merging same or similar models
+        Optimize whole models registry by merging same or similar models (uses given models comparators)
 
         :param generator: Generator instance that will be used to metadata merging and optimization
         :param strict: if True ALL models in merge group should meet the conditions
             else groups will form from pairs of models as is.
         :return: pairs of (new model, set of old models)
         """
+        # TODO: Implement strict mode
         models2merge: Dict[ModelMeta, Set[ModelMeta]] = defaultdict(set)
         for model_a, model_b in combinations(self.models, 2):
             if self._models_cmp_fn(model_a, model_b):
                 models2merge[model_a].add(model_b)
                 models2merge[model_b].add(model_a)
 
+        # Groups of models to merge
         groups: List[Set[ModelMeta]] = [{model, *models} for model, models in models2merge.items()]
+        # Make groups non-overlapping.
+        # This is not optimal algorithm but it works and we probably will not have thousands of models here.
         flag = True
         while flag:
             flag = False
@@ -145,6 +166,10 @@ class ModelRegistry:
         return replaces
 
     def _merge(self, generator, *models: ModelMeta):
+        """
+        Merge models by generator.merge_field_sets method.
+        Also ensure that the new model will have all metadata from old ones
+        """
         original_fields = list(chain(model.original_fields for model in models))
         originals_names = []
         fields = OrderedSet()
@@ -167,6 +192,9 @@ class ModelRegistry:
         return model_meta
 
     def fix_name_duplicates(self):
+        """
+        Add model's index to all duplicate names
+        """
         counter = defaultdict(int)
         for model in self.models:
             counter[model.name] += 1
