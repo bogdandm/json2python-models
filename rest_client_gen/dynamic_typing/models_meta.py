@@ -15,6 +15,7 @@ class ModelMeta(SingleType):
         self.original_fields: List[List[str]] = _original_fields or [list(self.type.keys())]
         self.index: str = index
         self.pointers: Set[ModelPtr] = set()
+        self.child_pointers: Set[ModelPtr] = set()  # parent ref (pointers that have ptr.parent == self)
         self._name: Optional[str] = None
         self._name_generated: Optional[bool] = None
 
@@ -35,7 +36,6 @@ class ModelMeta(SingleType):
         Generate model name based on fields to which his model is assigned.
         Will overwrite existed name so check is_name_generated before call this method
         """
-        # TODO: Tests
         base_names = (inflection.singularize(inflection.underscore(ptr.parent_field_name))
                       for ptr in self.pointers if ptr.parent is not None)
         filtered_names = distinct_words(*base_names)
@@ -84,6 +84,12 @@ class ModelMeta(SingleType):
     def disconnect(self, ptr: 'ModelPtr'):
         self.pointers.remove(ptr)
 
+    def add_child_ref(self, ptr: 'ModelPtr'):
+        self.child_pointers.add(ptr)
+
+    def remove_child_ref(self, ptr: 'ModelPtr'):
+        self.child_pointers.remove(ptr)
+
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         if self.name is None:
             raise ValueError('Model without name can not be typed')
@@ -101,14 +107,23 @@ class ModelPtr(SingleType):
         self.parent = parent
         self.parent_field_name = parent_field_name
         meta.connect(self)
+        if parent:
+            parent.add_child_ref(self)
 
     def __hash__(self):
         return id(self)
 
-    def replace(self, t: ModelMeta, **kwargs):
+    def replace(self, t: ModelMeta, **kwargs) -> 'ModelPtr':
         self.type.disconnect(self)
         super().replace(t, **kwargs)
         self.type.connect(self)
+        return self
+
+    def replace_parent(self, t: ModelMeta, **kwargs) -> 'ModelPtr':
+        self.parent.remove_child_ref(self)
+        self.parent = t
+        self.parent.add_child_ref(self)
+        return self
 
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, model = self.type.to_typing_code()

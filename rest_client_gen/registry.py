@@ -182,11 +182,13 @@ class ModelRegistry:
         metadata = generator.merge_field_sets([model.type for model in models])
         model_meta = ModelMeta(metadata, self._index(), original_fields)
         if originals_names:
-            model_meta.set_raw_name(ModelMeta.name_joiner(*originals_names))
+            model_meta.set_raw_name(ModelMeta.name_joiner(*sorted(originals_names)))
         for model in models:
             self._unregister(model)
             for ptr in tuple(model.pointers):
                 ptr.replace(model_meta)
+            for ptr in tuple(model.child_pointers):
+                ptr.replace_parent(model_meta)
         self._register(model_meta)
 
         return model_meta

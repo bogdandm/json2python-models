@@ -3,7 +3,7 @@ from typing import Dict, List, Set, Tuple
 import pytest
 
 from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.models import ListEx, extract_root
+from rest_client_gen.models import ListEx, compose_models, extract_root
 from rest_client_gen.registry import ModelRegistry
 
 
@@ -60,6 +60,33 @@ test_extract_root_data = [
             'Item': {'TestModelA', 'TestModelB'},
             'TestModelA': set()
         }
+    ),
+    pytest.param(
+        [
+            ("TestModelA", {
+                "count": 1,
+                "items": [
+                    {
+                        "x": .5,
+                        "y": .1
+                    }
+                ]
+            }),
+            ("TestModelB", {
+                "count": 1,
+                "items": [
+                    {
+                        "x": .5,
+                        "y": .1
+                    }
+                ]
+            }),
+        ],
+        {
+            'Item': {'TestModelA_TestModelB'},
+            'TestModelA_TestModelB': set()
+        },
+        id="merge_root"
     )
 ]
 
@@ -78,3 +105,160 @@ def test_extract_root(models_generator: MetadataGenerator, models_registry: Mode
         meta = models_registry.models_map[names_map[model_name]]
         extracted_roots = {names_map[ix] for ix in extract_root(meta)}
         assert extracted_roots == roots
+
+
+base_dict = {"field_" + str(i): int for i in range(20)}
+
+# This test relies on model names as a some sort of models ids
+# List of Tuple[root_model_name, model-meta] | List[Tuple[model_name, nested_models]]]
+# where nested_models is a recursive definition
+test_compose_models_data = [
+    pytest.param(
+        [
+            ("A", {
+                "field1": int,
+                "item": {
+                    "another_field": float
+                }
+            })
+        ],
+        [
+            ("A", [
+                ("Item", [])
+            ])
+        ],
+        id="basic_test"
+    ),
+    pytest.param(
+        [
+            ("RootA", {
+                "item": {
+                    "field": float
+                }
+            }),
+            ("RootB", {
+                "item": {
+                    "field": float
+                },
+                "idontwantrootmodelstomerge": bool
+            })
+        ],
+        [
+            ("Item", []),
+            ("RootA", []),
+            ("RootB", [])
+        ],
+        id="global_nested_model"
+    ),
+    pytest.param(
+        [
+            ("RootA", {
+                "item": {
+                    "field": float
+                }
+            }),
+            ("RootB", {
+                "item": {
+                    "field": float
+                }
+            })
+        ],
+        [
+            ("RootA_RootB", [
+                ("Item", [])
+            ])
+        ],
+        id="roots_merge"
+    ),
+    pytest.param(
+        [
+            ("RootFirst", {
+                "root_field": float
+            }),
+            ("RootA", {
+                "item": {
+                    "field": float
+                }
+            }),
+            ("RootB", {
+                "item": {
+                    "field": float
+                },
+                "idontwantrootmodelstomerge": bool
+            })
+        ],
+        [
+            ("RootFirst", []),
+            ("Item", []),
+            ("RootA", []),
+            ("RootB", [])
+        ],
+        id="root_order"
+    ),
+    pytest.param(
+        [
+            ("Root", {
+                "model_a": {
+                    "field_a": {
+                        "field": float
+                    }
+                },
+                "model_b": {
+                    "field_b": {
+                        "field": float
+                    }
+                }
+            }),
+        ],
+        [
+            ("Root", [
+                ("FieldA_FieldB", []),
+                ("ModelA", []),
+                ("ModelB", []),
+            ])
+        ],
+        id="generic_in_nested_models"
+    ),
+    pytest.param(
+        [
+            ("Root", {
+                "item": {
+                    "field": float
+                }
+            }),
+            ("RootA", {
+                "item": {
+                    "field": float
+                },
+                **base_dict
+            }),
+            ("RootB", base_dict)
+        ],
+        [
+            ("Item", []),
+            ("Root", []),
+            ("RootA_RootB", [])
+        ],
+        id="merge"
+    )
+]
+
+
+@pytest.mark.parametrize("value,expected", test_compose_models_data)
+def test_compose_models(models_generator: MetadataGenerator, models_registry: ModelRegistry,
+                        value: List[Tuple[str, dict]], expected: List[Tuple[str, list]]):
+    for model_name, metadata in value:
+        models_registry.process_meta_data(metadata, model_name=model_name)
+    models_registry.merge_models(models_generator)
+    models_registry.generate_names()
+    names_map = {model.index: model.name for model in models_registry.models}
+    names_map.update({model.name: model.index for model in models_registry.models})
+    root = compose_models(models_registry.models_map)
+
+    def check(nested_value: List[dict], nested_expected: List[Tuple[str, list]]):
+        for model_dict, (model_name, nested) in zip(nested_value, nested_expected):
+            assert model_dict["model"].name == model_name
+            assert len(model_dict["nested"]) == len(nested)
+            check(model_dict["nested"], nested)
+
+    check(root, expected)
