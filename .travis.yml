@@ -4,7 +4,7 @@ language: python
 cache: pip
 install:
   - pip install -r requirements.txt
-  - pip install pytest pytest-coverage requests
+  - pip install pytest pytest-cov requests coveralls
 script:
   - pytest --cov-config .coveragerc --cov=rest_client_gen -m "not no_expected" test/
 after_success:
