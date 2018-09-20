@@ -1,0 +1,10 @@
+language: python
+python:
+- "3.7"
+- "3.7-dev"
+- "3.8-dev"
+install:
+- pip install -r requirements.txt
+- pip install pytest pytest-coverage
+script:
+- pytest -vv -m "not slow_http"
