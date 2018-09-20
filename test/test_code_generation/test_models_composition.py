@@ -221,10 +221,8 @@ test_compose_models_data = [
     ),
     pytest.param(
         [
-            ("Root", {
-                "item": {
-                    "field": float
-                }
+            ("RootItem", {
+                "field": float
             }),
             ("RootA", {
                 "item": {
@@ -235,12 +233,41 @@ test_compose_models_data = [
             ("RootB", base_dict)
         ],
         [
-            ("Item", []),
-            ("Root", []),
+            ("RootItem", []),
             ("RootA_RootB", [])
         ],
-        id="merge"
-    )
+        id="merge_with_root_model"
+    ),
+    pytest.param(
+        [
+            ("Root", {
+                "model_a": {
+                    "field_a": {
+                        "field": {
+                            "nested_field": float
+                        }
+                    }
+                },
+                "model_b": {
+                    "field_b": {
+                        "field": {
+                            "nested_field": float
+                        }
+                    }
+                }
+            }),
+        ],
+        [
+            ("Root", [
+                ("FieldA_FieldB", [
+                    ("Field", [])
+                ]),
+                ("ModelA", []),
+                ("ModelB", []),
+            ])
+        ],
+        id="generic_in_nested_models_with_nested_model"
+    ),
 ]
 
 
@@ -258,7 +285,7 @@ def test_compose_models(models_generator: MetadataGenerator, models_registry: Mo
     def check(nested_value: List[dict], nested_expected: List[Tuple[str, list]]):
         for model_dict, (model_name, nested) in zip(nested_value, nested_expected):
             assert model_dict["model"].name == model_name
-            assert len(model_dict["nested"]) == len(nested)
+            assert len(model_dict["nested"]) == len(nested), f"(Parent model is {model_name})"
             check(model_dict["nested"], nested)
 
     check(root, expected)

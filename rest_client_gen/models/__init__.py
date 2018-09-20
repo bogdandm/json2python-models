@@ -72,28 +72,30 @@ def compose_models(models_map: Dict[str, ModelMeta]):
 
     for key, model in models_map.items():
         pointers = list(filter_pointers(model))
-        if len(pointers) == 0:
+        has_root_pointers = len(pointers) != len(model.pointers)
+        if not pointers:
             # Root level model
+            if not has_root_pointers:
+                raise Exception(f'Model {model.name} has no pointers')
             root_models.append(structure_hash_table[key])
         else:
             parents = {ptr.parent.index for ptr in pointers}
-            if len(parents) > 1:
-                # Model is using by other models
-                struct = structure_hash_table[key]
-                if len(struct["roots"]) > 1:
-                    # Model is using by different root models
-                    try:
-                        root_models.insert_before(
-                            struct,
-                            *(structure_hash_table[parent_key] for parent_key in struct["roots"])
-                        )
-                    except ValueError:
-                        root_models.insert(root_nested_ix, struct)
-                        root_nested_ix += 1
-                else:
-                    # Model is using by single root model
-                    parent = structure_hash_table[struct["roots"][0]]
-                    parent["nested"].insert(0, struct)
+            struct = structure_hash_table[key]
+            # Model is using by other models
+            if has_root_pointers or len(parents) > 1 and len(struct["roots"]) > 1:
+                # Model is using by different root models
+                try:
+                    root_models.insert_before(
+                        struct,
+                        *(structure_hash_table[parent_key] for parent_key in struct["roots"])
+                    )
+                except ValueError:
+                    root_models.insert(root_nested_ix, struct)
+                    root_nested_ix += 1
+            elif len(parents) > 1 and len(struct["roots"]) == 1:
+                # Model is using by single root model
+                parent = structure_hash_table[struct["roots"][0]]
+                parent["nested"].insert(0, struct)
             else:
                 # Model is using by only one model
                 parent = structure_hash_table[next(iter(parents))]
