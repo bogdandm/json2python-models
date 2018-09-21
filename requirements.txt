@@ -2,3 +2,4 @@ python-dateutil==2.7.*
 inflection==0.3.*
 unidecode==1.0.*
 ordered-set==3.0.*
+chevron==0.12.*

@@ -1,5 +1,6 @@
-from typing import Dict, Generic, Iterable, List, Set, TypeVar
+from typing import Dict, Generic, Iterable, List, Set, Tuple, TypeVar
 
+from rest_client_gen.dynamic_typing import DOptional
 from ..dynamic_typing import ModelMeta, ModelPtr
 
 Index = str
@@ -59,7 +60,10 @@ def extract_root(model: ModelMeta) -> Set[Index]:
     return roots
 
 
-def compose_models(models_map: Dict[str, ModelMeta]):
+def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
+    """
+    Generate nested sorted models structure for internal usage.
+    """
     root_models = ListEx()
     root_nested_ix = 0
     structure_hash_table: Dict[Index, dict] = {
@@ -103,3 +107,19 @@ def compose_models(models_map: Dict[str, ModelMeta]):
                 parent["nested"].append(struct)
 
     return root_models
+
+
+def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:
+    """
+    Move optional fields to end of fields list
+    :return: two list of fields names: required fields, optional fields
+    """
+    fields = model_meta.type
+    required = []
+    optional = []
+    for key, meta in fields.items():
+        if isinstance(meta, DOptional):
+            optional.append(key)
+        else:
+            required.append(key)
+    return required, optional

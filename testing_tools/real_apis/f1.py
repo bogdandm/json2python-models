@@ -1,11 +1,13 @@
 """
 Example uses Ergast Developer API (http://ergast.com/mrd/)
 """
+
 import inflection
 import requests
 
 from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.models import compose_models
+from rest_client_gen.models.base import GenericModelCodeGenerator, generate_code
 from rest_client_gen.registry import ModelRegistry
 from rest_client_gen.utils import json_format
 from testing_tools.pprint_meta_data import pretty_format_meta
@@ -34,7 +36,7 @@ def main():
 
     drivers_data = drivers()
     dump_response("f1", "drivers", drivers_data)
-    drivers_data = ("drivers", drivers_data)
+    drivers_data = ("driver", drivers_data)
 
     driver_standings_data = driver_standings()
     dump_response("f1", "driver_standings", driver_standings_data)
@@ -54,6 +56,9 @@ def main():
 
     root = compose_models(reg.models_map)
     print('\n', json_format(root))
+    print("=" * 20)
+
+    print(generate_code(root, GenericModelCodeGenerator))
 
 
 if __name__ == '__main__':
