@@ -111,7 +111,8 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
 
 def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:
     """
-    Move optional fields to end of fields list
+    Split fields into required and optional groups
+
     :return: two list of fields names: required fields, optional fields
     """
     fields = model_meta.type
