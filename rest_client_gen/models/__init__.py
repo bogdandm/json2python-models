@@ -124,3 +124,14 @@ def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:
         else:
             required.append(key)
     return required, optional
+
+
+INDENT = " " * 4
+OBJECTS_DELIMITER = "\n" * 3  # 2 blank lines
+
+
+def indent(string: str, lvl: int = 1, indent: str = INDENT) -> str:
+    """
+    Indent all lines of string by ``indent * lvl``
+    """
+    return "\n".join(indent * lvl + line for line in string.split("\n"))

@@ -3,11 +3,9 @@ from typing import List, Tuple, Type
 from jinja2 import Template
 
 from rest_client_gen.dynamic_typing import compile_imports
-from . import sort_fields
+from rest_client_gen.models import INDENT, OBJECTS_DELIMITER
+from . import indent, sort_fields
 from ..dynamic_typing import ImportPathList, MetaData, ModelMeta, metadata_to_typing
-
-INDENT = " " * 4
-OBJECTS_DELIMITER = "\n" * 3  # 2 blank lines
 
 
 def template(pattern: str, indent: str = INDENT) -> Template:
@@ -51,12 +49,6 @@ class GenericModelCodeGenerator:
     def __init__(self, model: ModelMeta, **kwargs):
         self.model = model
 
-    @staticmethod
-    def indent(string: str, lvl: int = 1, indent: str = INDENT) -> str:
-        """
-        Indent all lines of string by ``indent * lvl``
-        """
-        return "\n".join(indent * lvl + line for line in string.split("\n"))
 
     def generate(self, nested_classes: List[str] = None) -> Tuple[ImportPathList, str]:
         """
@@ -70,7 +62,7 @@ class GenericModelCodeGenerator:
             "fields": fields
         }
         if nested_classes:
-            data["nested"] = [self.indent(s) for s in nested_classes]
+            data["nested"] = [indent(s) for s in nested_classes]
         return imports, self.BODY.render(**data)
 
     @property
@@ -158,4 +150,8 @@ def generate_code(structure: List[dict], class_generator: Type[GenericModelCodeG
     :return: Generated code
     """
     imports, classes = _generate_code(structure, class_generator, class_generator_kwargs or {})
-    return compile_imports(imports) + objects_delimiter + objects_delimiter.join(classes) + "\n"
+    if imports:
+        imports_str = compile_imports(imports) + objects_delimiter
+    else:
+        imports_str = ""
+    return imports_str + objects_delimiter.join(classes) + "\n"

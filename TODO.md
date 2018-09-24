@@ -1,4 +1,5 @@
 - (!) README.md
+- Remove OrderedDict (dictionaries in Python 3.7 are now ordered)
 - Features
     - Models layer
         - [X] Data variant converting
