@@ -60,9 +60,14 @@ def extract_root(model: ModelMeta) -> Set[Index]:
     return roots
 
 
-def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
+ModelsStructureType = Tuple[List[dict], Dict[ModelMeta, ModelMeta]]
+
+
+def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
     """
     Generate nested sorted models structure for internal usage.
+
+    :return: List of root models data, Map(child model -> root model) for absolute ref generation
     """
     root_models = ListEx()
     root_nested_ix = 0
@@ -70,9 +75,11 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
         key: {
             "model": model,
             "nested": ListEx(),
-            "roots": list(extract_root(model))
+            "roots": list(extract_root(model)),  # Indexes of root level models
         } for key, model in models_map.items()
     }
+    # TODO: Test path_injections
+    path_injections: Dict[ModelMeta, ModelMeta] = {}
 
     for key, model in models_map.items():
         pointers = list(filter_pointers(model))
@@ -85,10 +92,8 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
         else:
             parents = {ptr.parent.index for ptr in pointers}
             struct = structure_hash_table[key]
-            # FIXME: "Model is using by single root model" case for the time being will be disabled
-            # until solution to make typing ref such as 'Parent.Child' will be found
             # Model is using by other models
-            if has_root_pointers or len(parents) > 1:  # and len(struct["roots"]) > 1
+            if has_root_pointers or len(parents) > 1 and len(struct["roots"]) > 1:
                 # Model is using by different root models
                 try:
                     root_models.insert_before(
@@ -98,17 +103,18 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
                 except ValueError:
                     root_models.insert(root_nested_ix, struct)
                     root_nested_ix += 1
-            # elif len(parents) > 1 and len(struct["roots"]) == 1:
-            #    # Model is using by single root model
-            #    parent = structure_hash_table[struct["roots"][0]]
-            #    parent["nested"].insert(0, struct)
+            elif len(parents) > 1 and len(struct["roots"]) == 1:
+                # Model is using by single root model
+                parent = structure_hash_table[struct["roots"][0]]
+                parent["nested"].insert(0, struct)
+                path_injections[struct["model"]] = parent["model"]
             else:
                 # Model is using by only one model
                 parent = structure_hash_table[next(iter(parents))]
                 struct = structure_hash_table[key]
                 parent["nested"].append(struct)
 
-    return root_models
+    return root_models, path_injections
 
 
 def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:

@@ -32,11 +32,11 @@ def main():
     print(pretty_format_meta(next(iter(reg.models))))
     print("\n" + "=" * 20, end='')
 
-    root = compose_models(reg.models_map)
-    print('\n', json_format(root))
+    structure = compose_models(reg.models_map)
+    print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
     print("=" * 20)
 
-    print(generate_code(root, GenericModelCodeGenerator))
+    print(generate_code(structure, GenericModelCodeGenerator))
 
 
 if __name__ == '__main__':

@@ -195,31 +195,30 @@ test_compose_models_data = [
         ],
         id="root_order"
     ),
-    # Disable until rest_client_gen/models/__init__.py:86 will be fixed
-    # pytest.param(
-    #     [
-    #         ("Root", {
-    #             "model_a": {
-    #                 "field_a": {
-    #                     "field": float
-    #                 }
-    #             },
-    #             "model_b": {
-    #                 "field_b": {
-    #                     "field": float
-    #                 }
-    #             }
-    #         }),
-    #     ],
-    #     [
-    #         ("Root", [
-    #             ("FieldA_FieldB", []),
-    #             ("ModelA", []),
-    #             ("ModelB", []),
-    #         ])
-    #     ],
-    #     id="generic_in_nested_models"
-    # ),
+    pytest.param(
+        [
+            ("Root", {
+                "model_a": {
+                    "field_a": {
+                        "field": float
+                    }
+                },
+                "model_b": {
+                    "field_b": {
+                        "field": float
+                    }
+                }
+            }),
+        ],
+        [
+            ("Root", [
+                ("FieldA_FieldB", []),
+                ("ModelA", []),
+                ("ModelB", []),
+            ])
+        ],
+        id="generic_in_nested_models"
+    ),
     pytest.param(
         [
             ("RootItem", {
@@ -239,37 +238,36 @@ test_compose_models_data = [
         ],
         id="merge_with_root_model"
     ),
-    # Disable until rest_client_gen/models/__init__.py:86 will be fixed
-    # pytest.param(
-    #     [
-    #         ("Root", {
-    #             "model_a": {
-    #                 "field_a": {
-    #                     "field": {
-    #                         "nested_field": float
-    #                     }
-    #                 }
-    #             },
-    #             "model_b": {
-    #                 "field_b": {
-    #                     "field": {
-    #                         "nested_field": float
-    #                     }
-    #                 }
-    #             }
-    #         }),
-    #     ],
-    #     [
-    #         ("Root", [
-    #             ("FieldA_FieldB", [
-    #                 ("Field", [])
-    #             ]),
-    #             ("ModelA", []),
-    #             ("ModelB", []),
-    #         ])
-    #     ],
-    #     id="generic_in_nested_models_with_nested_model"
-    # ),
+    pytest.param(
+        [
+            ("Root", {
+                "model_a": {
+                    "field_a": {
+                        "field": {
+                            "nested_field": float
+                        }
+                    }
+                },
+                "model_b": {
+                    "field_b": {
+                        "field": {
+                            "nested_field": float
+                        }
+                    }
+                }
+            }),
+        ],
+        [
+            ("Root", [
+                ("FieldA_FieldB", [
+                    ("Field", [])
+                ]),
+                ("ModelA", []),
+                ("ModelB", []),
+            ])
+        ],
+        id="generic_in_nested_models_with_nested_model"
+    ),
 ]
 
 
@@ -282,7 +280,7 @@ def test_compose_models(models_generator: MetadataGenerator, models_registry: Mo
     models_registry.generate_names()
     names_map = {model.index: model.name for model in models_registry.models}
     names_map.update({model.name: model.index for model in models_registry.models})
-    root = compose_models(models_registry.models_map)
+    root, mapping = compose_models(models_registry.models_map)
 
     def check(nested_value: List[dict], nested_expected: List[Tuple[str, list]]):
         for model_dict, (model_name, nested) in zip(nested_value, nested_expected):

@@ -1,6 +1,7 @@
 from itertools import chain
 from typing import Iterable, List, Tuple, Union
 
+from rest_client_gen.lazy import keep_lazy
 from .base import BaseType, ImportPathList, MetaData
 from .typing import metadata_to_typing
 
@@ -103,6 +104,7 @@ class DOptional(SingleType):
     Field of this type may not be presented in JSON object
     """
 
+    @keep_lazy(tuple)
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = metadata_to_typing(self.type)
         return (
@@ -139,6 +141,7 @@ class DUnion(ComplexType):
             else:
                 yield t
 
+    @keep_lazy(tuple)
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = super().to_typing_code()
         return (
@@ -148,6 +151,7 @@ class DUnion(ComplexType):
 
 
 class DTuple(ComplexType):
+    @keep_lazy(tuple)
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = super().to_typing_code()
         return (
@@ -157,6 +161,7 @@ class DTuple(ComplexType):
 
 
 class DList(SingleType):
+    @keep_lazy(tuple)
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         imports, nested = metadata_to_typing(self.type)
         return (

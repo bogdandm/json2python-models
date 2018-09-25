@@ -172,5 +172,5 @@ def test_fields(value: ModelMeta, expected: dict):
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated(value: ModelMeta, expected: str):
-    generated = generate_code([{"model": value, "nested": []}], GenericModelCodeGenerator)
+    generated = generate_code(([{"model": value, "nested": []}], {}), GenericModelCodeGenerator)
     assert generated.rstrip() == expected, generated
