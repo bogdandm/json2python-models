@@ -85,8 +85,10 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
         else:
             parents = {ptr.parent.index for ptr in pointers}
             struct = structure_hash_table[key]
+            # FIXME: "Model is using by single root model" case for the time being will be disabled
+            # until solution to make typing ref such as 'Parent.Child' will be found
             # Model is using by other models
-            if has_root_pointers or len(parents) > 1 and len(struct["roots"]) > 1:
+            if has_root_pointers or len(parents) > 1:  # and len(struct["roots"]) > 1
                 # Model is using by different root models
                 try:
                     root_models.insert_before(
@@ -96,10 +98,10 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
                 except ValueError:
                     root_models.insert(root_nested_ix, struct)
                     root_nested_ix += 1
-            elif len(parents) > 1 and len(struct["roots"]) == 1:
-                # Model is using by single root model
-                parent = structure_hash_table[struct["roots"][0]]
-                parent["nested"].insert(0, struct)
+            # elif len(parents) > 1 and len(struct["roots"]) == 1:
+            #    # Model is using by single root model
+            #    parent = structure_hash_table[struct["roots"][0]]
+            #    parent["nested"].insert(0, struct)
             else:
                 # Model is using by only one model
                 parent = structure_hash_table[next(iter(parents))]
