@@ -1,5 +1,6 @@
-from typing import Dict, Generic, Iterable, List, Set, TypeVar
+from typing import Dict, Generic, Iterable, List, Set, Tuple, TypeVar
 
+from rest_client_gen.dynamic_typing import DOptional
 from ..dynamic_typing import ModelMeta, ModelPtr
 
 Index = str
@@ -59,7 +60,10 @@ def extract_root(model: ModelMeta) -> Set[Index]:
     return roots
 
 
-def compose_models(models_map: Dict[str, ModelMeta]):
+def compose_models(models_map: Dict[str, ModelMeta]) -> List[dict]:
+    """
+    Generate nested sorted models structure for internal usage.
+    """
     root_models = ListEx()
     root_nested_ix = 0
     structure_hash_table: Dict[Index, dict] = {
@@ -81,8 +85,10 @@ def compose_models(models_map: Dict[str, ModelMeta]):
         else:
             parents = {ptr.parent.index for ptr in pointers}
             struct = structure_hash_table[key]
+            # FIXME: "Model is using by single root model" case for the time being will be disabled
+            # until solution to make typing ref such as 'Parent.Child' will be found
             # Model is using by other models
-            if has_root_pointers or len(parents) > 1 and len(struct["roots"]) > 1:
+            if has_root_pointers or len(parents) > 1:  # and len(struct["roots"]) > 1
                 # Model is using by different root models
                 try:
                     root_models.insert_before(
@@ -92,10 +98,10 @@ def compose_models(models_map: Dict[str, ModelMeta]):
                 except ValueError:
                     root_models.insert(root_nested_ix, struct)
                     root_nested_ix += 1
-            elif len(parents) > 1 and len(struct["roots"]) == 1:
-                # Model is using by single root model
-                parent = structure_hash_table[struct["roots"][0]]
-                parent["nested"].insert(0, struct)
+            # elif len(parents) > 1 and len(struct["roots"]) == 1:
+            #    # Model is using by single root model
+            #    parent = structure_hash_table[struct["roots"][0]]
+            #    parent["nested"].insert(0, struct)
             else:
                 # Model is using by only one model
                 parent = structure_hash_table[next(iter(parents))]
@@ -103,3 +109,31 @@ def compose_models(models_map: Dict[str, ModelMeta]):
                 parent["nested"].append(struct)
 
     return root_models
+
+
+def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:
+    """
+    Split fields into required and optional groups
+
+    :return: two list of fields names: required fields, optional fields
+    """
+    fields = model_meta.type
+    required = []
+    optional = []
+    for key, meta in fields.items():
+        if isinstance(meta, DOptional):
+            optional.append(key)
+        else:
+            required.append(key)
+    return required, optional
+
+
+INDENT = " " * 4
+OBJECTS_DELIMITER = "\n" * 3  # 2 blank lines
+
+
+def indent(string: str, lvl: int = 1, indent: str = INDENT) -> str:
+    """
+    Indent all lines of string by ``indent * lvl``
+    """
+    return "\n".join(indent * lvl + line for line in string.split("\n"))
