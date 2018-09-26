@@ -2,6 +2,7 @@ from typing import Dict, List, Set, Tuple
 
 import pytest
 
+from rest_client_gen.dynamic_typing import ModelMeta
 from rest_client_gen.generator import MetadataGenerator
 from rest_client_gen.models import ListEx, compose_models, extract_root
 from rest_client_gen.registry import ModelRegistry
@@ -127,6 +128,7 @@ test_compose_models_data = [
                 ("Item", [])
             ])
         ],
+        {},
         id="basic_test"
     ),
     pytest.param(
@@ -148,6 +150,7 @@ test_compose_models_data = [
             ("RootA", []),
             ("RootB", [])
         ],
+        {},
         id="global_nested_model"
     ),
     pytest.param(
@@ -168,6 +171,7 @@ test_compose_models_data = [
                 ("Item", [])
             ])
         ],
+        {},
         id="roots_merge"
     ),
     pytest.param(
@@ -193,33 +197,34 @@ test_compose_models_data = [
             ("RootA", []),
             ("RootB", [])
         ],
+        {},
         id="root_order"
     ),
-    # Disable until rest_client_gen/models/__init__.py:86 will be fixed
-    # pytest.param(
-    #     [
-    #         ("Root", {
-    #             "model_a": {
-    #                 "field_a": {
-    #                     "field": float
-    #                 }
-    #             },
-    #             "model_b": {
-    #                 "field_b": {
-    #                     "field": float
-    #                 }
-    #             }
-    #         }),
-    #     ],
-    #     [
-    #         ("Root", [
-    #             ("FieldA_FieldB", []),
-    #             ("ModelA", []),
-    #             ("ModelB", []),
-    #         ])
-    #     ],
-    #     id="generic_in_nested_models"
-    # ),
+    pytest.param(
+        [
+            ("Root", {
+                "model_a": {
+                    "field_a": {
+                        "field": float
+                    }
+                },
+                "model_b": {
+                    "field_b": {
+                        "field": float
+                    }
+                }
+            }),
+        ],
+        [
+            ("Root", [
+                ("FieldA_FieldB", []),
+                ("ModelA", []),
+                ("ModelB", []),
+            ])
+        ],
+        {'FieldA_FieldB': 'Root'},
+        id="generic_in_nested_models"
+    ),
     pytest.param(
         [
             ("RootItem", {
@@ -237,52 +242,55 @@ test_compose_models_data = [
             ("RootItem", []),
             ("RootA_RootB", [])
         ],
+        {},
         id="merge_with_root_model"
     ),
-    # Disable until rest_client_gen/models/__init__.py:86 will be fixed
-    # pytest.param(
-    #     [
-    #         ("Root", {
-    #             "model_a": {
-    #                 "field_a": {
-    #                     "field": {
-    #                         "nested_field": float
-    #                     }
-    #                 }
-    #             },
-    #             "model_b": {
-    #                 "field_b": {
-    #                     "field": {
-    #                         "nested_field": float
-    #                     }
-    #                 }
-    #             }
-    #         }),
-    #     ],
-    #     [
-    #         ("Root", [
-    #             ("FieldA_FieldB", [
-    #                 ("Field", [])
-    #             ]),
-    #             ("ModelA", []),
-    #             ("ModelB", []),
-    #         ])
-    #     ],
-    #     id="generic_in_nested_models_with_nested_model"
-    # ),
+    pytest.param(
+        [
+            ("Root", {
+                "model_a": {
+                    "field_a": {
+                        "field": {
+                            "nested_field": float
+                        }
+                    }
+                },
+                "model_b": {
+                    "field_b": {
+                        "field": {
+                            "nested_field": float
+                        }
+                    }
+                }
+            }),
+        ],
+        [
+            ("Root", [
+                ("FieldA_FieldB", [
+                    ("Field", [])
+                ]),
+                ("ModelA", []),
+                ("ModelB", []),
+            ])
+        ],
+        {'FieldA_FieldB': 'Root'},
+        id="generic_in_nested_models_with_nested_model"
+    ),
 ]
 
 
-@pytest.mark.parametrize("value,expected", test_compose_models_data)
-def test_compose_models(models_generator: MetadataGenerator, models_registry: ModelRegistry,
-                        value: List[Tuple[str, dict]], expected: List[Tuple[str, list]]):
+@pytest.mark.parametrize("value,expected,expected_mapping", test_compose_models_data)
+def test_compose_models(
+        models_generator: MetadataGenerator, models_registry: ModelRegistry,
+        value: List[Tuple[str, dict]], expected: List[Tuple[str, list]], expected_mapping: Dict[str, str]
+):
     for model_name, metadata in value:
         models_registry.process_meta_data(metadata, model_name=model_name)
     models_registry.merge_models(models_generator)
     models_registry.generate_names()
     names_map = {model.index: model.name for model in models_registry.models}
     names_map.update({model.name: model.index for model in models_registry.models})
-    root = compose_models(models_registry.models_map)
+    root, mapping = compose_models(models_registry.models_map)
 
     def check(nested_value: List[dict], nested_expected: List[Tuple[str, list]]):
         for model_dict, (model_name, nested) in zip(nested_value, nested_expected):
@@ -291,3 +299,7 @@ def test_compose_models(models_generator: MetadataGenerator, models_registry: Mo
             check(model_dict["nested"], nested)
 
     check(root, expected)
+
+    name = lambda model: model.name if isinstance(model, ModelMeta) else model
+    mapping = {name(model): name(parent) for model, parent in mapping.items()}
+    assert mapping == expected_mapping

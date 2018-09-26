@@ -8,7 +8,7 @@ from rest_client_gen.dynamic_typing import *
 
 @pytest.mark.xfail(strict=True, raises=ValueError)
 def test_metadata_to_typing_with_dict():
-    metadata_to_typing({'a': 1})
+    assert metadata_to_typing({'a': 1})
 
 
 test_imports_compiler_data = [

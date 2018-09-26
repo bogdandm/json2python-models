@@ -2,7 +2,8 @@ from typing import Dict, List
 
 import pytest
 
-from rest_client_gen.dynamic_typing import DList, DOptional, IntString, ModelMeta, compile_imports
+from rest_client_gen.dynamic_typing import (AbsoluteModelRef, DList, DOptional, IntString, ModelMeta, ModelPtr,
+                                            compile_imports)
 from rest_client_gen.models import indent, sort_fields
 from rest_client_gen.models.base import GenericModelCodeGenerator, generate_code
 
@@ -172,5 +173,25 @@ def test_fields(value: ModelMeta, expected: dict):
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated(value: ModelMeta, expected: str):
-    generated = generate_code([{"model": value, "nested": []}], GenericModelCodeGenerator)
+    generated = generate_code(([{"model": value, "nested": []}], {}), GenericModelCodeGenerator)
     assert generated.rstrip() == expected, generated
+
+
+def test_absolute_model_ref():
+    test_model = ModelMeta({"field": int}, "A")
+    test_model.name = "test_model"
+    test_ptr = ModelPtr(test_model)
+    assert test_ptr.to_typing_code()[1] == "'TestModel'"
+    with AbsoluteModelRef.inject({test_model: "Parent"}):
+        assert test_ptr.to_typing_code()[1] == "'Parent.TestModel'"
+    assert test_ptr.to_typing_code()[1] == "'TestModel'"
+    with AbsoluteModelRef.inject({test_model: "Parent"}):
+        assert test_ptr.to_typing_code()[1] == "'Parent.TestModel'"
+        with AbsoluteModelRef.inject({test_model: "AnotherParent"}):
+            assert test_ptr.to_typing_code()[1] == "'AnotherParent.TestModel'"
+        assert test_ptr.to_typing_code()[1] == "'Parent.TestModel'"
+
+    wrapper = DList(DList(test_ptr))
+    assert wrapper.to_typing_code()[1] == "List[List['TestModel']]"
+    with AbsoluteModelRef.inject({test_model: test_model}):
+        assert wrapper.to_typing_code()[1] == "List[List['TestModel.TestModel']]"

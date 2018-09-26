@@ -1,4 +1,5 @@
-from typing import List, Optional, Set, Tuple
+import threading
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import inflection
 
@@ -126,5 +127,62 @@ class ModelPtr(SingleType):
         return self
 
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
-        imports, model = self.type.to_typing_code()
-        return imports, f"'{model}'"
+        return AbsoluteModelRef(self.type).to_typing_code()
+
+
+ContextInjectionType = Dict[ModelMeta, Union[ModelMeta, str]]
+
+
+class AbsoluteModelRef:
+    """
+    Model forward absolute references. Using ContextManager to inject real models paths into typing code.
+    Forward reference is the typing string like ``List['MyModel']``.
+    If the model is defined as child model and is used by another nested model
+    than the reference to this model should be an absolute path:
+
+    class Model:
+        class GenericChildModel:
+            ...
+
+        class NestedModel:
+            data: 'Model.GenericChildModel'  # <--- this
+
+    This information is only available at the models code generation stage
+    while typing code is generated from raw metadata and passing this absolute path as argument
+    to each ModelPtr would be annoying.
+    """
+
+    class Context:
+        data = threading.local()
+        data.context: ContextInjectionType = None
+
+        def __init__(self, patches: ContextInjectionType):
+            self.context: ContextInjectionType = patches
+            self._old: ContextInjectionType = None
+
+        def __enter__(self):
+            self._old = self.data.context
+            self.data.context = self.context
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self.data.context = self._old
+
+    @classmethod
+    def inject(cls, patches: ContextInjectionType):
+        context = cls.Context(patches)
+        return context
+
+    def __init__(self, model: ModelMeta):
+        self.model = model
+
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+        context_data = self.Context.data.context
+        if context_data:
+            model_path = context_data.get(self.model, "")
+            if isinstance(model_path, ModelMeta):
+                model_path = model_path.name
+        else:
+            model_path = ""
+        imports, model = self.model.to_typing_code()
+        s = ".".join(filter(None, (model_path, model)))
+        return imports, f"'{s}'"
