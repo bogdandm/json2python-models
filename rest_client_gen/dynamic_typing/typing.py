@@ -3,12 +3,10 @@ from collections import OrderedDict
 from inspect import isclass
 from typing import Dict, Set, Tuple
 
-from rest_client_gen.lazy import keep_lazy
 from .base import ImportPathList, MetaData
 from .string_serializable import StringSerializable
 
 
-@keep_lazy(tuple)
 def metadata_to_typing(t: MetaData) -> Tuple[ImportPathList, str]:
     """
     Shortcut function to call ``to_typing_code`` method of BaseType instances or return name of type otherwise

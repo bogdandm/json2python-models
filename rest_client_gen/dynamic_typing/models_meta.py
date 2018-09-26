@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import inflection
 
-from rest_client_gen.lazy import keep_lazy
 from .base import ImportPathList, MetaData
 from .complex import SingleType
 from ..utils import distinct_words
@@ -127,7 +126,6 @@ class ModelPtr(SingleType):
         self.parent.add_child_ref(self)
         return self
 
-    @keep_lazy(tuple)
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         return AbsoluteModelRef(self.type).to_typing_code()
 
@@ -177,7 +175,6 @@ class AbsoluteModelRef:
     def __init__(self, model: ModelMeta):
         self.model = model
 
-    @keep_lazy(tuple)
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         context_data = self.Context.data.context
         if context_data:
