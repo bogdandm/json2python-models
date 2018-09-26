@@ -149,7 +149,7 @@ class AbsoluteModelRef:
 
     This information is only available at the models code generation stage
     while typing code is generated from raw metadata and passing this absolute path as argument
-    to each ModelPtr would be really annoying.
+    to each ModelPtr would be annoying.
     """
 
     class Context:
