@@ -1,5 +1,6 @@
 from typing import List, Tuple, Type
 
+import inflection
 from jinja2 import Template
 
 from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER, indent, sort_fields
@@ -80,7 +81,7 @@ class GenericModelCodeGenerator:
         """
         imports, typing = metadata_to_typing(meta)
         data = {
-            "name": name,
+            "name": inflection.underscore(name),
             "type": typing
         }
         return imports, data

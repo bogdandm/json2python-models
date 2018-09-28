@@ -2,7 +2,6 @@ from collections import OrderedDict
 from enum import Enum
 from typing import Any, Callable, List, Optional, Union
 
-import inflection
 from unidecode import unidecode
 
 from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
@@ -56,8 +55,7 @@ class MetadataGenerator:
             # ! _detect_type function can crash at some complex data sets if value is unicode with some characters (maybe German)
             #   Crash does not produce any useful logs and can occur any time after bad string was processed
             #   It can be reproduced on real_apis tests (openlibrary API)
-            fields[inflection.underscore(key)] = self._detect_type(value if not isinstance(value, str)
-                                                                   else unidecode(value))
+            fields[key] = self._detect_type(value if not isinstance(value, str) else unidecode(value))
         return fields
 
     def _detect_type(self, value, convert_dict=True) -> MetaData:
