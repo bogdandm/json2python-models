@@ -30,10 +30,6 @@ class SepStyle(Enum):
 class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 
-    # TODO: sep_style: SepStyle = SepStyle.Underscore
-    # TODO: hierarchy: Hierarchy = Hierarchy.Nested
-    # TODO: fpolicy: OptionalFieldsPolicy = OptionalFieldsPolicy.Optional
-
     def __init__(self, str_types_registry: StringSerializableRegistry = None):
         self.str_types_registry = str_types_registry if str_types_registry is not None else registry
 
