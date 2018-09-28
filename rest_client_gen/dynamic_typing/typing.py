@@ -28,19 +28,31 @@ def compile_imports(imports: ImportPathList) -> str:
     """
     Merge list of imports path and convert them into list code (string)
     """
-    imports_map: Dict[str, Set[str]] = OrderedDict()
+    class_imports_map: Dict[str, Set[str]] = OrderedDict()
+    package_imports_set: Set[str] = set()
     for module, classes in filter(None, imports):
-        classes_set = imports_map.get(module, set())
-        if isinstance(classes, str):
-            classes_set.add(classes)
+        if classes is None:
+            package_imports_set.add(module)
         else:
-            classes_set.update(classes)
-        imports_map[module] = classes_set
+            classes_set = class_imports_map.get(module, set())
+            if isinstance(classes, str):
+                classes_set.add(classes)
+            else:
+                classes_set.update(classes)
+            class_imports_map[module] = classes_set
 
     # Sort imports by package name and sort class names of each import
-    imports_map = OrderedDict(sorted(
-        ((module, sorted(classes)) for module, classes in imports_map.items()),
+    class_imports_map = OrderedDict(sorted(
+        ((module, sorted(classes)) for module, classes in class_imports_map.items()),
         key=operator.itemgetter(0)
     ))
 
-    return "\n".join(f"from {module} import {', '.join(classes)}" for module, classes in imports_map.items())
+    class_imports = "\n".join(
+        f"from {module} import {', '.join(classes)}"
+        for module, classes in class_imports_map.items()
+    )
+    package_imports = "\n".join(
+        f"import {module}"
+        for module in sorted(package_imports_set)
+    )
+    return "\n".join(filter(None, (package_imports, class_imports)))

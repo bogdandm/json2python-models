@@ -23,7 +23,24 @@ test_imports_compiler_data = [
         "from pytest import param\n"
         "from typing import Any, List, Tuple",
         id="basic"
-    )
+    ),
+    pytest.param(
+        [
+            ('typing', ('List', 'Any')),
+            [],
+            ('typing', None),
+            [],
+            ('pytest', 'param'),
+            ('typing', ('List', 'Tuple')),
+            ('attr', None),
+            ('typing', None),
+        ],
+        "import attr\n"
+        "import typing\n"
+        "from pytest import param\n"
+        "from typing import Any, List, Tuple",
+        id="basic"
+    ),
 ]
 
 
