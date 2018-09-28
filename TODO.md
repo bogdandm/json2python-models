@@ -19,6 +19,7 @@
         - [ ] Implement existing models registration
             - [ ] attrs
             - [ ] dataclasses
+            - [ ] Decorator to mark class as exclude from models merge
         - Other features
             - [ ] Keys separator style
             - [ ] Decode unicode in keys
@@ -36,7 +37,6 @@
                 - [ ] ISO date
                 - [ ] ISO time
                 - [ ] ISO datetime
-            - [ ] Decorator to mark class as exclude from models merge
     - API Layer
         - [ ] Route object
         - [ ] Register model as route in/out data spec
@@ -74,5 +74,5 @@
     - [ ] setup.py
     - [ ] setup.py + pytest integration
     - [ ] Tox integration
-    - [ ] TravisCI integration
+    - [X] TravisCI integration
     - [ ] pip package
