@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import pytest
 
-from rest_client_gen.dynamic_typing import (DList, DOptional, FloatString, ModelMeta, compile_imports)
+from rest_client_gen.dynamic_typing import (DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
 from rest_client_gen.models import sort_fields
 from rest_client_gen.models.attr import AttrsModelCodeGenerator, METADATA_FIELD_NAME
 from rest_client_gen.models.base import generate_code
@@ -65,7 +65,7 @@ test_data = {
         "model": ("Test", {
             "foo": int,
             "baz": DOptional(DList(DList(str))),
-            # "bar": DOptional(IntString),
+            "bar": DOptional(IntString),
             "qwerty": FloatString,
             "asdfg": DOptional(int)
         }),
@@ -80,11 +80,11 @@ test_data = {
                 "type": "Optional[List[List[str]]]",
                 "body": f"attr.ib(factory=list, {field_meta('baz')})"
             },
-            # "bar": {
-            #     "name": "bar",
-            #     "type": "Optional[IntString]",
-            #     "body": f"attr.ib(converter=IntString, default=None, {field_meta('bar')})"
-            # },
+            "bar": {
+                "name": "bar",
+                "type": "Optional[IntString]",
+                "body": f"attr.ib(default=None, converter=optional(IntString), {field_meta('bar')})"
+            },
             "qwerty": {
                 "name": "qwerty",
                 "type": "FloatString",
@@ -98,7 +98,8 @@ test_data = {
         },
         "generated": trim(f"""
         import attr
-        from rest_client_gen.dynamic_typing.string_serializable import FloatString
+        from attr.converter import optional
+        from rest_client_gen.dynamic_typing.string_serializable import FloatString, IntString
         from typing import List, Optional
 
 
@@ -107,6 +108,7 @@ test_data = {
             foo: int = attr.ib({field_meta('foo')})
             qwerty: FloatString = attr.ib(converter=FloatString, {field_meta('qwerty')})
             baz: Optional[List[List[str]]] = attr.ib(factory=list, {field_meta('baz')})
+            bar: Optional[IntString] = attr.ib(default=None, converter=optional(IntString), {field_meta('bar')})
             asdfg: Optional[int] = attr.ib(default=None, {field_meta('asdfg')})
         """)
     }

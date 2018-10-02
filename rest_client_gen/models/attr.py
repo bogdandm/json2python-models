@@ -1,6 +1,5 @@
-import operator
 from inspect import isclass
-from typing import List, Tuple
+from typing import Iterable, List, Tuple
 
 from .base import GenericModelCodeGenerator, template
 from ..dynamic_typing import DList, DOptional, ImportPathList, MetaData, ModelMeta, StringSerializable
@@ -11,13 +10,28 @@ KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
                   "{% if not loop.last %}, {% endif %}" \
                   "{% endfor %}"
 
+DEFAULT_ORDER = (
+    ("default", "converter", "factory"),
+    "*",
+    ("metadata",)
+)
 
-def sort_kwargs(kwargs: dict) -> dict:
-    # TODO: Unify this function
-    meta = kwargs.pop("metadata", {})
-    sorted_dict = dict(sorted(kwargs.items(), key=operator.itemgetter(0)))
-    if meta:
-        sorted_dict["metadata"] = meta
+
+def sort_kwargs(kwargs: dict, ordering: Iterable[Iterable[str]] = DEFAULT_ORDER) -> dict:
+    sorted_dict_1 = {}
+    sorted_dict_2 = {}
+    current = sorted_dict_1
+    for group in ordering:
+        if isinstance(group, str):
+            if group != "*":
+                raise ValueError(f"Unknown kwarg group: {group}")
+            current = sorted_dict_2
+        else:
+            for item in group:
+                if item in kwargs:
+                    value = kwargs.pop(item)
+                    current[item] = value
+    sorted_dict = {**sorted_dict_1, **kwargs, **sorted_dict_2}
     return sorted_dict
 
 
@@ -72,8 +86,12 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
                 body_kwargs["factory"] = "list"
             else:
                 body_kwargs["default"] = "None"
-        if isclass(meta) and issubclass(meta, StringSerializable):
+                if isclass(meta.type) and issubclass(meta.type, StringSerializable):
+                    body_kwargs["converter"] = f"optional({meta.type.__name__})"
+                    imports.append(("attr.converter", "optional"))
+        elif isclass(meta) and issubclass(meta, StringSerializable):
             body_kwargs["converter"] = meta.__name__
+
         if not self.no_meta:
             body_kwargs["metadata"] = {METADATA_FIELD_NAME: name}
         data["body"] = self.ATTRIB.render(kwargs=sort_kwargs(body_kwargs))
