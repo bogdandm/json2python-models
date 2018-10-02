@@ -21,7 +21,6 @@ class SingleType(BaseType):
         yield self.type
 
     def __eq__(self, other):
-        # TODO: Try to cache this method (too many calls)
         return other.__class__ is self.__class__ and self.type == other.type
 
     def replace(self, t: 'MetaData', **kwargs) -> 'SingleType':
@@ -46,7 +45,6 @@ class ComplexType(BaseType):
 
     @property
     def sorted(self):
-        # TODO: Split into to methods and profile them
         """
         Getter of cached sorted types list
         """
@@ -74,7 +72,6 @@ class ComplexType(BaseType):
         yield from self.types
 
     def __eq__(self, other):
-        # TODO: Try to cache this method (too many calls)
         return other.__class__ is self.__class__ and self.sorted == other.sorted
 
     def __len__(self):

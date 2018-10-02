@@ -1,6 +1,8 @@
 """
 Path of Exile API http://www.pathofexile.com/developer/docs/api-resource-public-stash-tabs
 """
+from datetime import datetime
+
 import requests
 
 from rest_client_gen.generator import MetadataGenerator
@@ -23,6 +25,7 @@ def main():
     tabs = tabs['stashes']
 
     print(f"Start model generation (data len = {len(tabs)})")
+    start_t = datetime.now()
     gen = MetadataGenerator()
     reg = ModelRegistry()
     fields = gen.generate(*tabs)
@@ -38,6 +41,7 @@ def main():
     print("=" * 20)
 
     print(generate_code(structure, AttrsModelCodeGenerator))
+    print(f"{(datetime.now() - start_t).total_seconds():.4f} seconds")
 
 
 if __name__ == '__main__':
