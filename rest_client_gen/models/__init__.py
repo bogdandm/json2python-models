@@ -1,7 +1,6 @@
 from typing import Dict, Generic, Iterable, List, Set, Tuple, TypeVar
 
-from rest_client_gen.dynamic_typing import DOptional
-from ..dynamic_typing import ModelMeta, ModelPtr
+from ..dynamic_typing import DOptional, ModelMeta, ModelPtr
 
 Index = str
 T = TypeVar('T')

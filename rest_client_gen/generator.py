@@ -2,12 +2,10 @@ from collections import OrderedDict
 from enum import Enum
 from typing import Any, Callable, List, Optional, Union
 
-import inflection
 from unidecode import unidecode
 
-from rest_client_gen.dynamic_typing import ComplexType, SingleType
-from .dynamic_typing import (DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, StringSerializable,
-                             StringSerializableRegistry, Unknown, registry)
+from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
+                             StringSerializable, StringSerializableRegistry, Unknown, registry)
 
 
 class Hierarchy(Enum):
@@ -32,10 +30,6 @@ class SepStyle(Enum):
 class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 
-    # TODO: sep_style: SepStyle = SepStyle.Underscore
-    # TODO: hierarchy: Hierarchy = Hierarchy.Nested
-    # TODO: fpolicy: OptionalFieldsPolicy = OptionalFieldsPolicy.Optional
-
     def __init__(self, str_types_registry: StringSerializableRegistry = None):
         self.str_types_registry = str_types_registry if str_types_registry is not None else registry
 
@@ -57,8 +51,7 @@ class MetadataGenerator:
             # ! _detect_type function can crash at some complex data sets if value is unicode with some characters (maybe German)
             #   Crash does not produce any useful logs and can occur any time after bad string was processed
             #   It can be reproduced on real_apis tests (openlibrary API)
-            fields[inflection.underscore(key)] = self._detect_type(value if not isinstance(value, str)
-                                                                   else unidecode(value))
+            fields[key] = self._detect_type(value if not isinstance(value, str) else unidecode(value))
         return fields
 
     def _detect_type(self, value, convert_dict=True) -> MetaData:

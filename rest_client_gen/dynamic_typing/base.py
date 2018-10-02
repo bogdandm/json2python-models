@@ -1,6 +1,6 @@
 from typing import Iterable, List, Tuple, Union
 
-ImportPathList = List[Tuple[str, Union[Iterable[str], str]]]
+ImportPathList = List[Tuple[str, Union[Iterable[str], str, None]]]
 
 
 class BaseType:

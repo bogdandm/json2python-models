@@ -1,11 +1,10 @@
 from typing import List, Tuple, Type
 
+import inflection
 from jinja2 import Template
 
-from rest_client_gen.dynamic_typing import AbsoluteModelRef, compile_imports
-from rest_client_gen.models import INDENT, ModelsStructureType, OBJECTS_DELIMITER
-from . import indent, sort_fields
-from ..dynamic_typing import ImportPathList, MetaData, ModelMeta, metadata_to_typing
+from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER, indent, sort_fields
+from ..dynamic_typing import AbsoluteModelRef, ImportPathList, MetaData, ModelMeta, compile_imports, metadata_to_typing
 
 
 def template(pattern: str, indent: str = INDENT) -> Template:
@@ -82,7 +81,7 @@ class GenericModelCodeGenerator:
         """
         imports, typing = metadata_to_typing(meta)
         data = {
-            "name": name,
+            "name": inflection.underscore(name),
             "type": typing
         }
         return imports, data
