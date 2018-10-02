@@ -67,7 +67,7 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
         """
         :return: List of decorators code (without @)
         """
-        return [self.ATTRS.render(kwargs=sort_kwargs(self.attrs_kwargs))]
+        return [self.ATTRS.render(kwargs=self.attrs_kwargs)]
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
         """

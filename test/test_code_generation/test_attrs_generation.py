@@ -4,9 +4,29 @@ import pytest
 
 from rest_client_gen.dynamic_typing import (DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
 from rest_client_gen.models import sort_fields
-from rest_client_gen.models.attr import AttrsModelCodeGenerator, METADATA_FIELD_NAME
+from rest_client_gen.models.attr import AttrsModelCodeGenerator, METADATA_FIELD_NAME, sort_kwargs
 from rest_client_gen.models.base import generate_code
 from test.test_code_generation.test_models_code_generator import model_factory, trim
+
+
+def test_attrib_kwargs_sort():
+    sorted_kwargs = sort_kwargs(dict(
+        y=2,
+        metadata='b',
+        converter='a',
+        default=None,
+        x=1,
+    ))
+    expected = ['default', 'converter', 'y', 'x', 'metadata']
+    for k1, k2 in zip(sorted_kwargs.keys(), expected):
+        assert k1 == k2
+    try:
+        sort_kwargs({}, ['wrong_char'])
+    except ValueError as e:
+        assert e.args[0].endswith('wrong_char')
+    else:
+        assert 0, "XPass"
+
 
 
 def field_meta(original_name):
