@@ -7,6 +7,9 @@ from rest_client_gen.dynamic_typing import (AbsoluteModelRef, DList, DOptional, 
 from rest_client_gen.models import indent, sort_fields
 from rest_client_gen.models.base import GenericModelCodeGenerator, generate_code
 
+# Data structure:
+# (string, indent lvl, indent string)
+# result
 test_indent_data = [
     pytest.param(
         ("1", 1, " " * 4),
