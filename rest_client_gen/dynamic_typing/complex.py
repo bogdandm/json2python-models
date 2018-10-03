@@ -1,22 +1,12 @@
-from inspect import isclass
 from itertools import chain
 from typing import Iterable, List, Tuple, Union
 
-from .base import BaseType, ImportPathList, MetaData
+from .base import BaseType, ImportPathList, MetaData, get_hash_string
 from .typing import metadata_to_typing
 
 
-def get_hash_string(t: MetaData):
-    if isinstance(t, dict):
-        return str(hash(tuple((k, get_hash_string(v)) for k, v in t.items())))
-    elif isclass(t):
-        return str(t)
-    elif isinstance(t, BaseType):
-        return t.to_hash_string()
-
-
 class SingleType(BaseType):
-    __slots__ = ["_type"]
+    __slots__ = ["_type", "_hash"]
 
     def __init__(self, t: MetaData):
         self._type = t
@@ -47,14 +37,12 @@ class SingleType(BaseType):
         self.type = t
         return self
 
-    def to_hash_string(self) -> str:
-        if not self._hash:
-            self._hash = f"{type(self).__name__}/{get_hash_string(self.type)}"
-        return self._hash
+    def _to_hash_string(self) -> str:
+        return f"{type(self).__name__}/{get_hash_string(self.type)}"
 
 
 class ComplexType(BaseType):
-    __slots__ = ["_types"]
+    __slots__ = ["_types", "_sorted", "_hash"]
 
     def __init__(self, *types: MetaData):
         self._types = list(types)
@@ -125,10 +113,8 @@ class ComplexType(BaseType):
             f"[{nested}]"
         )
 
-    def to_hash_string(self) -> str:
-        if not self._hash:
-            self._hash = type(self).__name__ + "/" + ",".join(map(get_hash_string, self.types))
-        return self._hash
+    def _to_hash_string(self) -> str:
+        return type(self).__name__ + "/" + ",".join(map(get_hash_string, self.types))
 
 
 class DOptional(SingleType):

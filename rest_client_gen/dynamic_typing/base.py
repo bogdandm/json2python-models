@@ -1,3 +1,4 @@
+from inspect import isclass
 from typing import Iterable, List, Tuple, Union
 
 ImportPathList = List[Tuple[str, Union[Iterable[str], str, None]]]
@@ -31,10 +32,22 @@ class BaseType:
     def to_hash_string(self) -> str:
         """
         Return unique string that can be used to generate hash of type instance.
+        Caches hash value by default. If subclass can mutate (by default it always can)
+        then it should define setters to safely invalidate cached value.
 
         :return: hash string
         """
-        # NOTE: Do not override __hash__ function as BaseType instances could mutate
+        # NOTE: Do not override __hash__ function because BaseType instances isn't immutable
+        if not self._hash:
+            self._hash = self._to_hash_string()
+        return self._hash
+
+    def _to_hash_string(self) -> str:
+        """
+        Hash getter method to override
+
+        :return:
+        """
         raise NotImplementedError()
 
 
@@ -60,3 +73,12 @@ class UnknownType(BaseType):
 Unknown = UnknownType()
 NoneType = type(None)
 MetaData = Union[type, dict, BaseType]
+
+
+def get_hash_string(t: MetaData):
+    if isinstance(t, dict):
+        return str(hash(tuple((k, get_hash_string(v)) for k, v in t.items())))
+    elif isclass(t):
+        return str(t)
+    elif isinstance(t, BaseType):
+        return t.to_hash_string()

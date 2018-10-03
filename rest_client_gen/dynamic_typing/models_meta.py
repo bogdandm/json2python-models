@@ -121,6 +121,7 @@ class ModelPtr(SingleType):
         return self
 
     def replace_parent(self, t: ModelMeta, **kwargs) -> 'ModelPtr':
+        self._hash = None
         self.parent.remove_child_ref(self)
         self.parent = t
         self.parent.add_child_ref(self)
@@ -129,7 +130,7 @@ class ModelPtr(SingleType):
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         return AbsoluteModelRef(self.type).to_typing_code()
 
-    def to_hash_string(self) -> str:
+    def _to_hash_string(self) -> str:
         return f"{type(self).__name__}_#{self.type.index}"
 
 
@@ -153,6 +154,11 @@ class AbsoluteModelRef:
     This information is only available at the models code generation stage
     while typing code is generated from raw metadata and passing this absolute path as argument
     to each ModelPtr would be annoying.
+
+    Usage:
+
+    with AbsoluteModelRef.inject({TestModel: "ParentModelName"}):
+        <some code generation>
     """
 
     class Context:
