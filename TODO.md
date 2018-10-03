@@ -10,7 +10,7 @@
         - [ ] Save meta-models as python code
             - [X] typing code generation
                 - [ ] (Maybe in future) Extract to another module (by serializers for each dynamic typing class)
-            - [ ] attrs
+            - [X] attrs
             - [ ] dataclasses
             - [ ] generate from_json/to_json converters
         - [ ] Model class -> Meta format converter
@@ -21,7 +21,6 @@
             - [ ] dataclasses
             - [ ] Decorator to mark class as exclude from models merge
         - Other features
-            - [ ] Keys separator style
             - [ ] Decode unicode in keys
             - [ ] Nesting models generation
                 - [X] Cascade (default)
@@ -54,7 +53,7 @@
         - [X] Merge meta-models and extract common ones
         - [ ] Save meta-models as python code
             - [X] typing code generation
-            - [ ] attrs
+            - [X] attrs
             - [ ] dataclasses
             - [ ] generate from_json/to_json converters
         - [ ] Model class -> Meta format converter
