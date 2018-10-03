@@ -129,6 +129,9 @@ class ModelPtr(SingleType):
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         return AbsoluteModelRef(self.type).to_typing_code()
 
+    def to_hash_string(self) -> str:
+        return f"{type(self).__name__}_#{self.type.index}"
+
 
 ContextInjectionType = Dict[ModelMeta, Union[ModelMeta, str]]
 

@@ -37,11 +37,11 @@ def _pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
             yield " <empty>"
 
     elif isinstance(value, SingleType):
-        yield f"{value.__class__.__name__}:"
+        yield f"{type(value).__name__}:"
         yield from _pprint_gen(value.type, lvl=lvl, empty_line=False, ignore_ptr=ignore_ptr)
 
     elif isinstance(value, ComplexType):
-        yield f"{value.__class__.__name__}:"
+        yield f"{type(value).__name__}:"
 
         for t in value.types:
             yield from _pprint_gen(t, lvl=lvl + 1, ignore_ptr=ignore_ptr)

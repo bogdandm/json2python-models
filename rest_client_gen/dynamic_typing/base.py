@@ -28,6 +28,15 @@ class BaseType:
         """
         raise NotImplementedError()
 
+    def to_hash_string(self) -> str:
+        """
+        Return unique string that can be used to generate hash of type instance.
+
+        :return: hash string
+        """
+        # NOTE: Do not override __hash__ function as BaseType instances could mutate
+        raise NotImplementedError()
+
 
 class UnknownType(BaseType):
     __slots__ = []
@@ -43,6 +52,9 @@ class UnknownType(BaseType):
 
     def to_typing_code(self) -> Tuple[ImportPathList, str]:
         return ([('typing', 'Any')], 'Any')
+
+    def to_hash_string(self) -> str:
+        return "Unknown"
 
 
 Unknown = UnknownType()

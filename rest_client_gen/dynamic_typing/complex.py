@@ -1,8 +1,18 @@
+from inspect import isclass
 from itertools import chain
 from typing import Iterable, List, Tuple, Union
 
 from .base import BaseType, ImportPathList, MetaData
 from .typing import metadata_to_typing
+
+
+def get_hash_string(t: MetaData):
+    if isinstance(t, dict):
+        return str(hash(tuple((k, get_hash_string(v)) for k, v in t.items())))
+    elif isclass(t):
+        return str(t)
+    elif isinstance(t, BaseType):
+        return t.to_hash_string()
 
 
 class SingleType(BaseType):
@@ -12,20 +22,23 @@ class SingleType(BaseType):
         self.type = t
 
     def __str__(self):
-        return f"{self.__class__.__name__}[{self.type}]"
+        return f"{type(self).__name__}[{self.type}]"
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} [{self.type}]>"
+        return f"<{type(self).__name__} [{self.type}]>"
 
     def __iter__(self) -> Iterable['MetaData']:
         yield self.type
 
     def __eq__(self, other):
-        return other.__class__ is self.__class__ and self.type == other.type
+        return type(other) is type(self) and self.type == other.type
 
     def replace(self, t: 'MetaData', **kwargs) -> 'SingleType':
         self.type = t
         return self
+
+    def to_hash_string(self) -> str:
+        return f"{type(self).__name__}/{get_hash_string(self.type)}"
 
 
 class ComplexType(BaseType):
@@ -62,17 +75,17 @@ class ComplexType(BaseType):
 
     def __str__(self):
         items = ', '.join(map(str, self.types))
-        return f"{self.__class__.__name__}[{items}]"
+        return f"{type(self).__name__}[{items}]"
 
     def __repr__(self):
         items = ', '.join(map(str, self.types))
-        return f"<{self.__class__.__name__} [{items}]>"
+        return f"<{type(self).__name__} [{items}]>"
 
     def __iter__(self) -> Iterable['MetaData']:
         yield from self.types
 
     def __eq__(self, other):
-        return other.__class__ is self.__class__ and self.sorted == other.sorted
+        return type(other) is type(self) and self.sorted == other.sorted
 
     def __len__(self):
         return len(self.types)
@@ -97,6 +110,9 @@ class ComplexType(BaseType):
             f"[{nested}]"
         )
 
+    def to_hash_string(self) -> str:
+        return type(self).__name__ + "/" + ",".join(map(get_hash_string, self.types))
+
 
 class DOptional(SingleType):
     """
@@ -117,17 +133,22 @@ class DUnion(ComplexType):
     """
 
     def __init__(self, *types: Union[type, BaseType, dict]):
+        hashes = set()
         unique_types = []
-        # TODO: Rewrite it to hash table
+        # Ensure that types in union are unique
         for t in types:
             if isinstance(t, DUnion):
                 # Merging nested DUnions
                 for t2 in list(t._extract_nested_types()):
-                    if t2 not in unique_types:
+                    h = get_hash_string(t2)
+                    if h not in hashes:
                         unique_types.append(t2)
-            elif t not in unique_types:
-                # Ensure that types in union are unique
-                unique_types.append(t)
+                        hashes.add(h)
+            else:
+                h = get_hash_string(t)
+                if h not in hashes:
+                    hashes.add(h)
+                    unique_types.append(t)
         super().__init__(*unique_types)
 
     def _extract_nested_types(self):
