@@ -16,10 +16,20 @@ def get_hash_string(t: MetaData):
 
 
 class SingleType(BaseType):
-    __slots__ = ["type"]
+    __slots__ = ["_type"]
 
     def __init__(self, t: MetaData):
-        self.type = t
+        self._type = t
+        self._hash = None
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, t: MetaData):
+        self._type = t
+        self._hash = None
 
     def __str__(self):
         return f"{type(self).__name__}[{self.type}]"
@@ -38,7 +48,9 @@ class SingleType(BaseType):
         return self
 
     def to_hash_string(self) -> str:
-        return f"{type(self).__name__}/{get_hash_string(self.type)}"
+        if not self._hash:
+            self._hash = f"{type(self).__name__}/{get_hash_string(self.type)}"
+        return self._hash
 
 
 class ComplexType(BaseType):
@@ -46,6 +58,8 @@ class ComplexType(BaseType):
 
     def __init__(self, *types: MetaData):
         self._types = list(types)
+        self._sorted = None
+        self._hash = None
 
     @property
     def types(self):
@@ -55,6 +69,7 @@ class ComplexType(BaseType):
     def types(self, value):
         self._types = value
         self._sorted = None
+        self._hash = None
 
     @property
     def sorted(self):
@@ -111,7 +126,9 @@ class ComplexType(BaseType):
         )
 
     def to_hash_string(self) -> str:
-        return type(self).__name__ + "/" + ",".join(map(get_hash_string, self.types))
+        if not self._hash:
+            self._hash = type(self).__name__ + "/" + ",".join(map(get_hash_string, self.types))
+        return self._hash
 
 
 class DOptional(SingleType):
