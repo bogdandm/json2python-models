@@ -26,6 +26,7 @@ def main():
 
     print(f"Start model generation (data len = {len(tabs)})")
     start_t = datetime.now()
+    # register_datetime_classes()
     gen = MetadataGenerator()
     reg = ModelRegistry()
     fields = gen.generate(*tabs)

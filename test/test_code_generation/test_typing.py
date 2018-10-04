@@ -104,12 +104,12 @@ test_data = [
     ),
     pytest.param(
         FloatString,
-        ('from rest_client_gen.dynamic_typing.string_serializable import FloatString', FloatString),
+        ('from rest_client_gen.dynamic_typing import FloatString', FloatString),
         id="string_serializable"
     ),
     pytest.param(
         DOptional(IntString),
-        ('from rest_client_gen.dynamic_typing.string_serializable import IntString\n'
+        ('from rest_client_gen.dynamic_typing import IntString\n'
          'from typing import Optional', Optional[IntString]),
         id="complex_string_serializable"
     ),
