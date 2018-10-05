@@ -34,7 +34,7 @@ class StringSerializable(BaseType):
         as a metadata instance but contains actual data
         """
         cls_name = cls.__name__
-        return [('rest_client_gen.dynamic_typing.string_serializable', cls_name)], cls_name
+        return [('rest_client_gen.dynamic_typing', cls_name)], cls_name
 
 
 T_StringSerializable = Type[StringSerializable]
@@ -70,6 +70,17 @@ class StringSerializableRegistry:
             return
 
         return decorator
+
+    def remove(self, cls: type):
+        """
+        Unregister given class
+
+        :param cls: StringSerializable class
+        """
+        self.types.remove(cls)
+        for base, replace in list(self.replaces):
+            if replace is cls or base is cls:
+                self.replaces.remove((base, replace))
 
     def resolve(self, *types: T_StringSerializable) -> Collection[T_StringSerializable]:
         """

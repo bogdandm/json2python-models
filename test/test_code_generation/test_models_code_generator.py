@@ -118,7 +118,7 @@ test_data = {
             }
         },
         "fields": {
-            "imports": "from rest_client_gen.dynamic_typing.string_serializable import IntString\n"
+            "imports": "from rest_client_gen.dynamic_typing import IntString\n"
                        "from typing import List, Optional",
             "fields": [
                 "foo: int",
@@ -127,7 +127,7 @@ test_data = {
             ]
         },
         "generated": trim("""
-        from rest_client_gen.dynamic_typing.string_serializable import IntString
+        from rest_client_gen.dynamic_typing import IntString
         from typing import List, Optional
         
         

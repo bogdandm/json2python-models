@@ -3,6 +3,7 @@ from .base import (
 )
 from .complex import ComplexType, DList, DOptional, DTuple, DUnion, SingleType
 from .models_meta import AbsoluteModelRef, ModelMeta, ModelPtr
+from .string_datetime import IsoDateString, IsoDatetimeString, IsoTimeString, register_datetime_classes
 from .string_serializable import (
     BooleanString, FloatString, IntString, StringSerializable, StringSerializableRegistry, registry
 )
