@@ -119,7 +119,7 @@ test_data = {
         "generated": trim(f"""
         import attr
         from attr.converter import optional
-        from rest_client_gen.dynamic_typing.string_serializable import FloatString, IntString
+        from rest_client_gen.dynamic_typing import FloatString, IntString
         from typing import List, Optional
 
 
