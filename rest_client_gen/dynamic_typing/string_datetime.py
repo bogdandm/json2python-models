@@ -49,8 +49,8 @@ def is_date(s: str) -> Optional[date]:
 
 
 _check_values_time = (
-    datetime(2018, 10, 11, 0, 4, 5, 678, tzinfo=None),
-    datetime(2018, 12, 30, 0, 4, 5, 678, tzinfo=None)
+    datetime(2018, 10, 11),
+    datetime(2018, 12, 30)
 )
 
 
