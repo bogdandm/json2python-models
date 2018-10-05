@@ -79,7 +79,7 @@ class StringSerializableRegistry:
         """
         self.types.remove(cls)
         for base, replace in list(self.replaces):
-            if replace is cls:
+            if replace is cls or base is cls:
                 self.replaces.remove((base, replace))
 
     def resolve(self, *types: T_StringSerializable) -> Collection[T_StringSerializable]:
