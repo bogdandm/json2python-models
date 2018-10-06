@@ -2,10 +2,10 @@ from typing import Dict, List
 
 import pytest
 
-from rest_client_gen.dynamic_typing import (AbsoluteModelRef, DList, DOptional, IntString, ModelMeta, ModelPtr,
-                                            compile_imports)
-from rest_client_gen.models import indent, sort_fields
-from rest_client_gen.models.base import GenericModelCodeGenerator, generate_code
+from json_to_models.dynamic_typing import (AbsoluteModelRef, DList, DOptional, IntString, ModelMeta, ModelPtr,
+                                           compile_imports)
+from json_to_models.models import indent, sort_fields
+from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 
 # Data structure:
 # (string, indent lvl, indent string)
@@ -118,7 +118,7 @@ test_data = {
             }
         },
         "fields": {
-            "imports": "from rest_client_gen.dynamic_typing import IntString\n"
+            "imports": "from json_to_models.dynamic_typing import IntString\n"
                        "from typing import List, Optional",
             "fields": [
                 "foo: int",
@@ -127,7 +127,7 @@ test_data = {
             ]
         },
         "generated": trim("""
-        from rest_client_gen.dynamic_typing import IntString
+        from json_to_models.dynamic_typing import IntString
         from typing import List, Optional
         
         

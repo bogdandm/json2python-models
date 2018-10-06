@@ -2,8 +2,8 @@ from collections import OrderedDict
 
 import pytest
 
-from rest_client_gen.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, ModelMeta, ModelPtr, SingleType
-from rest_client_gen.registry import ModelRegistry
+from json_to_models.dynamic_typing import ComplexType, DOptional, DTuple, MetaData, ModelMeta, ModelPtr, SingleType
+from json_to_models.registry import ModelRegistry
 
 # MetaData | List of models
 test_data = [

@@ -1,8 +1,8 @@
 import pytest
 
-from rest_client_gen.dynamic_typing import (BooleanString, DList, DOptional, DTuple, DUnion, FloatString, IntString,
-                                            NoneType, Unknown)
-from rest_client_gen.generator import MetadataGenerator
+from json_to_models.dynamic_typing import (BooleanString, DList, DOptional, DTuple, DUnion, FloatString, IntString,
+                                           NoneType, Unknown)
+from json_to_models.generator import MetadataGenerator
 
 # MetaData | Optimized MetaData
 test_data = [

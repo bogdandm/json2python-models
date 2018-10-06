@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 omit =
-    rest_client_gen/lazy.py
+    json_to_models/lazy.py
 
 [report]
 exclude_lines =

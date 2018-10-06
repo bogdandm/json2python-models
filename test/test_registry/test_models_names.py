@@ -2,8 +2,8 @@ from typing import Set, Tuple
 
 import pytest
 
-from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.registry import ModelRegistry
+from json_to_models.generator import MetadataGenerator
+from json_to_models.registry import ModelRegistry
 
 # Tuple[Root model name, JSON data] | Set[Tuple[model_name, is_generated]]
 test_data = [

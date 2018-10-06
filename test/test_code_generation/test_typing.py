@@ -3,7 +3,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 import pytest
 
-from rest_client_gen.dynamic_typing import *
+from json_to_models.dynamic_typing import *
 
 
 @pytest.mark.xfail(strict=True, raises=ValueError)
@@ -104,12 +104,12 @@ test_data = [
     ),
     pytest.param(
         FloatString,
-        ('from rest_client_gen.dynamic_typing import FloatString', FloatString),
+        ('from json_to_models.dynamic_typing import FloatString', FloatString),
         id="string_serializable"
     ),
     pytest.param(
         DOptional(IntString),
-        ('from rest_client_gen.dynamic_typing import IntString\n'
+        ('from json_to_models.dynamic_typing import IntString\n'
          'from typing import Optional', Optional[IntString]),
         id="complex_string_serializable"
     ),

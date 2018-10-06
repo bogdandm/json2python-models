@@ -2,10 +2,10 @@ from typing import Dict, List, Set, Tuple
 
 import pytest
 
-from rest_client_gen.dynamic_typing import ModelMeta
-from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.models import ListEx, compose_models, extract_root
-from rest_client_gen.registry import ModelRegistry
+from json_to_models.dynamic_typing import ModelMeta
+from json_to_models.generator import MetadataGenerator
+from json_to_models.models import ListEx, compose_models, extract_root
+from json_to_models.registry import ModelRegistry
 
 
 def test_list_ex():

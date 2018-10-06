@@ -1,9 +1,9 @@
 import pytest
 
-from rest_client_gen.dynamic_typing import IsoTimeString
-from rest_client_gen.dynamic_typing.string_serializable import (FloatString, IntString, StringSerializable,
-                                                                StringSerializableRegistry)
-from rest_client_gen.generator import MetadataGenerator
+from json_to_models.dynamic_typing import IsoTimeString
+from json_to_models.dynamic_typing.string_serializable import (FloatString, IntString, StringSerializable,
+                                                               StringSerializableRegistry)
+from json_to_models.generator import MetadataGenerator
 
 r = StringSerializableRegistry()
 

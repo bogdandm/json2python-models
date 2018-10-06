@@ -2,7 +2,7 @@ from builtins import complex
 
 import pytest
 
-from rest_client_gen.dynamic_typing import DUnion, get_hash_string
+from json_to_models.dynamic_typing import DUnion, get_hash_string
 
 # *args | MetaData
 test_dunion = [

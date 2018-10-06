@@ -2,10 +2,10 @@ import datetime
 
 import pytest
 
-from rest_client_gen.dynamic_typing import (
+from json_to_models.dynamic_typing import (
     FloatString, IntString, IsoDateString, IsoDatetimeString, IsoTimeString, register_datetime_classes
 )
-from rest_client_gen.generator import MetadataGenerator
+from json_to_models.generator import MetadataGenerator
 
 register_datetime_classes()
 

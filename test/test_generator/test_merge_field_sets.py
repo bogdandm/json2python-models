@@ -3,8 +3,8 @@ from random import shuffle
 
 import pytest
 
-from rest_client_gen.dynamic_typing import DOptional, DUnion, FloatString, IntString
-from rest_client_gen.generator import MetadataGenerator
+from json_to_models.dynamic_typing import DOptional, DUnion, FloatString, IntString
+from json_to_models.generator import MetadataGenerator
 
 # List of fields sets | result field set
 test_data = [

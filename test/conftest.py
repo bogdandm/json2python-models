@@ -1,7 +1,7 @@
 import pytest
 
-from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.registry import ModelRegistry
+from json_to_models.generator import MetadataGenerator
+from json_to_models.registry import ModelRegistry
 
 
 @pytest.fixture

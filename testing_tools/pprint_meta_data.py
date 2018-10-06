@@ -1,8 +1,8 @@
 from inspect import isclass
 
-from rest_client_gen.dynamic_typing import ComplexType, ModelMeta, ModelPtr, SingleType, StringSerializable
-from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.registry import ModelRegistry
+from json_to_models.dynamic_typing import ComplexType, ModelMeta, ModelPtr, SingleType, StringSerializable
+from json_to_models.generator import MetadataGenerator
+from json_to_models.registry import ModelRegistry
 from testing_tools.data import test_data
 
 

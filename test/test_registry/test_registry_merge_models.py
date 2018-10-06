@@ -2,9 +2,9 @@ from typing import Iterable
 
 import pytest
 
-from rest_client_gen.dynamic_typing import DList, DOptional, ModelMeta, Unknown
-from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.registry import ModelRegistry
+from json_to_models.dynamic_typing import DList, DOptional, ModelMeta, Unknown
+from json_to_models.generator import MetadataGenerator
+from json_to_models.registry import ModelRegistry
 from test.test_registry.test_registry_process_meta_data import check_type, cycle_ref, test_data as base_test_data
 
 # Include test cases from `test_registry_process_meta_data.py`. They should be correct.

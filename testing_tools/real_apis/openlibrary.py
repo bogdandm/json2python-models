@@ -3,8 +3,8 @@ Example uses Open Library Books API (https://openlibrary.org/dev/docs/api/books)
 """
 import requests
 
-from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.registry import ModelRegistry
+from json_to_models.generator import MetadataGenerator
+from json_to_models.registry import ModelRegistry
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 

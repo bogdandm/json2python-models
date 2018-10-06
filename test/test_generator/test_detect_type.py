@@ -1,7 +1,7 @@
 import pytest
 
-from rest_client_gen.dynamic_typing import BooleanString, DList, DUnion, FloatString, IntString, NoneType, Unknown
-from rest_client_gen.generator import MetadataGenerator
+from json_to_models.dynamic_typing import BooleanString, DList, DUnion, FloatString, IntString, NoneType, Unknown
+from json_to_models.generator import MetadataGenerator
 
 # JSON data | MetaData
 test_data = [

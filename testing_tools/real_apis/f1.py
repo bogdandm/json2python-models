@@ -5,13 +5,13 @@ Example uses Ergast Developer API (http://ergast.com/mrd/)
 import inflection
 import requests
 
-from rest_client_gen.dynamic_typing import register_datetime_classes
-from rest_client_gen.generator import MetadataGenerator
-from rest_client_gen.models import compose_models
-from rest_client_gen.models.attr import AttrsModelCodeGenerator
-from rest_client_gen.models.base import generate_code
-from rest_client_gen.registry import ModelRegistry
-from rest_client_gen.utils import json_format
+from json_to_models.dynamic_typing import register_datetime_classes
+from json_to_models.generator import MetadataGenerator
+from json_to_models.models import compose_models
+from json_to_models.models.attr import AttrsModelCodeGenerator
+from json_to_models.models.base import generate_code
+from json_to_models.registry import ModelRegistry
+from json_to_models.utils import json_format
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 

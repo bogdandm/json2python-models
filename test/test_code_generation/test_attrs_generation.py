@@ -2,10 +2,10 @@ from typing import Dict, List
 
 import pytest
 
-from rest_client_gen.dynamic_typing import (DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
-from rest_client_gen.models import sort_fields
-from rest_client_gen.models.attr import AttrsModelCodeGenerator, METADATA_FIELD_NAME, sort_kwargs
-from rest_client_gen.models.base import generate_code
+from json_to_models.dynamic_typing import (DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
+from json_to_models.models import sort_fields
+from json_to_models.models.attr import AttrsModelCodeGenerator, METADATA_FIELD_NAME, sort_kwargs
+from json_to_models.models.base import generate_code
 from test.test_code_generation.test_models_code_generator import model_factory, trim
 
 
@@ -119,7 +119,7 @@ test_data = {
         "generated": trim(f"""
         import attr
         from attr.converter import optional
-        from rest_client_gen.dynamic_typing import FloatString, IntString
+        from json_to_models.dynamic_typing import FloatString, IntString
         from typing import List, Optional
 
 

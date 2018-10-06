@@ -34,7 +34,7 @@ class StringSerializable(BaseType):
         as a metadata instance but contains actual data
         """
         cls_name = cls.__name__
-        return [('rest_client_gen.dynamic_typing', cls_name)], cls_name
+        return [('json_to_models.dynamic_typing', cls_name)], cls_name
 
 
 T_StringSerializable = Type[StringSerializable]

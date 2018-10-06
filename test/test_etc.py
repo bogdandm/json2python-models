@@ -3,7 +3,7 @@ from random import shuffle
 import pytest
 from inflection import singularize
 
-from rest_client_gen.utils import distinct_words, json_format
+from json_to_models.utils import distinct_words, json_format
 
 test_distinct_words_data = [
     pytest.param(['test', 'foo', 'bar'], {'test', 'foo', 'bar'}),
