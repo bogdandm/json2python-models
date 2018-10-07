@@ -21,7 +21,9 @@ class ModelFieldsEquals(ModelCmp):
 
 
 class ModelFieldsPercentMatch(ModelCmp):
-    def __init__(self, percent_fields: float = .7):
+    DEFAULT = .7
+
+    def __init__(self, percent_fields: float = DEFAULT):
         self.percent_fields = percent_fields
 
     def cmp(self, fields_a: set, fields_b: set) -> bool:
@@ -29,7 +31,9 @@ class ModelFieldsPercentMatch(ModelCmp):
 
 
 class ModelFieldsNumberMatch(ModelCmp):
-    def __init__(self, number_fields: int = 10):
+    DEFAULT = 10
+
+    def __init__(self, number_fields: int = DEFAULT):
         self.number_fields = number_fields
 
     def cmp(self, fields_a: set, fields_b: set) -> bool:

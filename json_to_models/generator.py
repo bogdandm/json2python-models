@@ -1,30 +1,10 @@
 from collections import OrderedDict
-from enum import Enum
 from typing import Any, Callable, List, Optional, Union
 
 from unidecode import unidecode
 
 from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
                              StringSerializable, StringSerializableRegistry, Unknown, registry)
-
-
-class Hierarchy(Enum):
-    Nested = "n"
-    Plain = "p"
-
-
-class OptionalFieldsPolicy(Enum):
-    Optional = "o"
-    FieldSets = "fs"
-
-
-class SepStyle(Enum):
-    Underscore = "_"
-    Dash = "-"
-    CamelCase = "CC"
-
-    def __str__(self):
-        return self.value
 
 
 class MetadataGenerator:

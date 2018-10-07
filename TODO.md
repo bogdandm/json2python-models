@@ -1,5 +1,5 @@
 - (!) README.md
-- Remove OrderedDict (dictionaries in Python 3.7 are now ordered)
+- Do not use OrderedDict (dictionaries in Python 3.7 are now ordered)
 - Features
     - Models layer
         - [X] Data variant converting
@@ -32,16 +32,11 @@
             - [ ] Complex python types annotations
                 - [ ] Decorator to specify field metatype
                 - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
-            - [ ] String based types (Warning: 6 times slow down)
+            - [X] String based types (Warning: 6 times slow down)
                 - [X] ISO date
                 - [X] ISO time
                 - [X] ISO datetime
-    - API Layer
-        - [ ] Route object
-        - [ ] Register model as route in/out data spec
-    - Generate OpenAPI spec
-        - [ ] Meta-model -> OpenAPI model converter
-        - [ ] Route -> OpenAPI converter
+    - [ ] Cli tool
         
 - Testing
     - Models layer
@@ -62,20 +57,22 @@
         - [ ] Implement existing models registration
             - [ ] attrs
             - [ ] dataclasses
+    - [X] String based types
+        - [X] ISO date
+        - [X] ISO time
+        - [X] ISO datetime
+
+- Build, Deploy, CI
+    - [ ] setup.py
+    - [ ] setup.py + pytest integration
+    - [X] TravisCI integration
+    - [ ] pip package
+
+- Long term plans                
     - API Layer
         - [ ] Route object
         - [ ] Register model as route in/out data spec
     - Generate OpenAPI spec
         - [ ] Meta-model -> OpenAPI model converter
-        - [ ] Route -> OpenAPI converter
-    - [ ] String based types
-        - [ ] ISO date
-        - [ ] ISO time
-        - [ ] ISO datetime
-            
-- Build, Deploy, CI
-    - [ ] setup.py
-    - [ ] setup.py + pytest integration
+        - [ ] Route -> OpenAPI converter    
     - [ ] Tox integration
-    - [X] TravisCI integration
-    - [ ] pip package
