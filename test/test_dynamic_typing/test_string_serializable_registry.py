@@ -64,23 +64,16 @@ def test_string_serializable_registry(value, expected):
     assert result == expected
 
 
-r2 = StringSerializableRegistry()
-gen = MetadataGenerator(r2)
+def test_string_serializable_registry_order():
+    r2 = StringSerializableRegistry()
+    gen = MetadataGenerator(r2)
 
-r2.add(cls=IsoTimeString)
-r2.add(cls=IntString)
-r2.add(replace_types=(IntString,), cls=FloatString)
+    r2.add(cls=IsoTimeString)
+    r2.add(cls=IntString)
+    r2.add(replace_types=(IntString,), cls=FloatString)
+    assert gen._detect_type("12") != IntString
 
-
-@pytest.mark.xfail()
-def test_without_remove():
-    assert gen._detect_type("12") == IntString
-
-
-r2.remove(IsoTimeString)
-r2.add(cls=IsoTimeString)
-
-
-def test_remove():
+    r2.remove(IsoTimeString)
+    r2.add(cls=IsoTimeString)
     assert gen._detect_type("12") == IntString
     assert gen._detect_type("12:14") == IsoTimeString
