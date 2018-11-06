@@ -38,9 +38,13 @@ class GenericModelCodeGenerator:
     {{ code }}
     {% endfor -%}
     
+    {%- if fields -%}
     {%- for field in fields %}
         {{ field }}
     {%- endfor %}
+    {%- else %}
+        pass
+    {%- endif -%}
     """)
 
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")

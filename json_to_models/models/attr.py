@@ -42,7 +42,7 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
                      "{% endif %}")
     ATTRIB = template(f"attr.ib({KWAGRS_TEMPLATE})")
 
-    def __init__(self, model: ModelMeta, no_meta=False, attrs_kwargs: dict = None, **kwargs):
+    def __init__(self, model: ModelMeta, meta=False, attrs_kwargs: dict = None, **kwargs):
         """
         :param model: ModelMeta instance
         :param no_meta: Disable generation of metadata as attrib argument
@@ -50,7 +50,7 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
         :param kwargs:
         """
         super().__init__(model, **kwargs)
-        self.no_meta = no_meta
+        self.no_meta = not meta
         self.attrs_kwargs = attrs_kwargs or {}
 
     def generate(self, nested_classes: List[str] = None) -> Tuple[ImportPathList, str]:

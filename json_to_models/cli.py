@@ -8,11 +8,13 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, Union
 
-from json_to_models.dynamic_typing import ModelMeta
+from json_to_models.dynamic_typing import ModelMeta, register_datetime_classes
+from json_to_models.generator import MetadataGenerator
 from json_to_models.models import ModelsStructureType, compose_models
 from json_to_models.models.attr import AttrsModelCodeGenerator
-from json_to_models.models.base import GenericModelCodeGenerator
-from json_to_models.registry import ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch
+from json_to_models.models.base import GenericModelCodeGenerator, generate_code
+from json_to_models.registry import (ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch,
+                                     ModelRegistry)
 
 
 def convert_args(callable: Callable, *args_converters: type) -> Callable:
@@ -57,6 +59,7 @@ class Cli:
         self.merge_policy: List[ModelCmp] = []  # --merge
         self.structure_fn: STRUCTURE_FN_TYPE = None  # -s
         self.model_generator: Type[GenericModelCodeGenerator] = None  # -f & --code-generator
+        self.model_generator_kwargs: Dict[str, Any] = None
 
         self.argparser = self._create_argparser()
 
@@ -84,10 +87,24 @@ class Cli:
         structure = namespace.structure
         framework = namespace.framework
         code_generator = namespace.code_generator
+        code_generator_kwargs = namespace.code_generator_kwargs
 
         self.validate(models, models_lists, merge_policy, framework, code_generator)
         self.setup_models_data(models, models_lists)
-        self.set_args(merge_policy, structure, framework, code_generator)
+        self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs)
+
+    def run(self):
+        if self.enable_datetime:
+            register_datetime_classes()
+        generator = MetadataGenerator()
+        registry = ModelRegistry(*self.merge_policy)
+        for name, data in self.models_data.items():
+            meta = generator.generate(*data)
+            registry.process_meta_data(meta, name)
+        registry.merge_models(generator)
+        registry.generate_names()
+        structure = self.structure_fn(registry.models_map)
+        return generate_code(structure, self.model_generator, class_generator_kwargs=self.model_generator_kwargs)
 
     def validate(self, models, models_list, merge_policy, framework, code_generator):
         """
@@ -133,7 +150,7 @@ class Cli:
         }
 
     def set_args(self, merge_policy: List[Union[List[str], str]],
-                 structure: str, framework: str, code_generator: str):
+                 structure: str, framework: str, code_generator: str, code_generator_kwargs: str):
         """
         Convert CLI args to python representation and set them to appropriate object attributes
         """
@@ -155,6 +172,10 @@ class Cli:
             module, cls = code_generator.rsplit('.', 1)
             m = importlib.import_module(module)
             self.model_generator = getattr(m, cls)
+
+        if code_generator_kwargs:
+            self.model_generator_kwargs = json.loads(code_generator_kwargs)
+            assert isinstance(self.model_generator_kwargs, dict), "--code-generator-kwargs should be valid JSON dict"
 
         self.initialize = True
 
@@ -226,6 +247,11 @@ class Cli:
             "--code-generator",
             help="Absolute import path to GenericModelCodeGenerator subclass.\n"
                  "Works in pair with '-f custom'\n\n"
+        )
+        parser.add_argument(
+            "--code-generator-kwargs",
+            help="Dict with code generator arguments (for __init__ method).\n"
+                 "Should be wrapped in \"\"\n\n"
         )
 
         return parser
@@ -324,3 +350,8 @@ def _process_path(path: str) -> Iterable[Path]:
         return path.glob(pattern_path)
     else:
         return path,
+
+
+if __name__ == '__main__':
+    cli = Cli()
+    cli.parse_args()
