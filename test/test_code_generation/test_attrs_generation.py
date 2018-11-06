@@ -150,7 +150,7 @@ test_data_unzip = {
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["fields_data"])
 def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
-    gen = AttrsModelCodeGenerator(value)
+    gen = AttrsModelCodeGenerator(value, meta=True)
     required, optional = sort_fields(value)
     for is_optional, fields in enumerate((required, optional)):
         for field in fields:
@@ -162,7 +162,7 @@ def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
 def test_fields_attr(value: ModelMeta, expected: dict):
     expected_imports: str = expected["imports"]
     expected_fields: List[str] = expected["fields"]
-    gen = AttrsModelCodeGenerator(value)
+    gen = AttrsModelCodeGenerator(value, meta=True)
     imports, fields = gen.fields
     imports = compile_imports(imports)
     assert imports == expected_imports
@@ -171,5 +171,6 @@ def test_fields_attr(value: ModelMeta, expected: dict):
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated_attr(value: ModelMeta, expected: str):
-    generated = generate_code(([{"model": value, "nested": []}], {}), AttrsModelCodeGenerator)
+    generated = generate_code(([{"model": value, "nested": []}], {}), AttrsModelCodeGenerator,
+                              class_generator_kwargs={'meta': True})
     assert generated.rstrip() == expected, generated
