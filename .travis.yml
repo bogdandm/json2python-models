@@ -6,7 +6,7 @@ install:
   - python setup.py install
   - pip install pytest pytest-cov requests coveralls
 script:
-  - python setup.py test -a "--cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/"
+  - python setup.py test -a '--cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/'
 after_success:
   - coveralls
 matrix:
