@@ -26,6 +26,7 @@ def convert_args(callable: Callable, *args_converters: type) -> Callable:
     :param args_converters: Arguments converters
     :return: Callable wrapper
     """
+
     @wraps(callable)
     def wrapper(*args):
         converted = (
@@ -267,6 +268,12 @@ class Cli:
         )
 
         return parser
+
+
+def main():
+    cli = Cli()
+    cli.parse_args()
+    print(cli.run())
 
 
 def path_split(path: str) -> List[str]:

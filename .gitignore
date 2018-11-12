@@ -12,3 +12,9 @@ htmlcov/
 tmp.*
 
 testing_tools/real_apis/*/
+
+.eggs/
+build/
+dist/
+lib/
+*.egg-info/
