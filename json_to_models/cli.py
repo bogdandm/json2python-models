@@ -13,18 +13,30 @@ from json_to_models.generator import MetadataGenerator
 from json_to_models.models import ModelsStructureType, compose_models
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
-from json_to_models.registry import (ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch,
-                                     ModelRegistry)
+from json_to_models.registry import (
+    ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
+)
 
 
 def convert_args(callable: Callable, *args_converters: type) -> Callable:
+    """
+    Decorator. Apply ``args_converters`` to callable arguments. Ignore keyword arguments
+
+    :param callable: Function or class
+    :param args_converters: Arguments converters
+    :return: Callable wrapper
+    """
     @wraps(callable)
     def wrapper(*args):
         converted = (
             t(value) if t else value
             for value, t in zip(args, args_converters)
         )
-        return callable(*converted)
+        if len(args_converters) < len(args):
+            remain = args[len(args_converters):]
+        else:
+            remain = ()
+        return callable(*converted, *remain)
 
     return wrapper
 
@@ -298,7 +310,7 @@ def dict_lookup(d: dict, lookup: str) -> Union[dict, list]:
 
 def iter_json_file(path: Path, lookup: str) -> Generator[Union[dict, list], Any, None]:
     """
-    Loads given 'path' file perform lookup and return generator over json list.
+    Loads given 'path' file, perform lookup and return generator over json list.
     Does not open file until iteration is started.
 
     :param path: File Path instance
@@ -308,7 +320,7 @@ def iter_json_file(path: Path, lookup: str) -> Generator[Union[dict, list], Any,
     with path.open() as f:
         l = json.load(f)
     l = dict_lookup(l, lookup)
-    assert isinstance(l, list), "Dict lookup return not list, check your lookup path"
+    assert isinstance(l, list), f"Dict lookup return {type(l)} but list is expected, check your lookup path"
     yield from l
 
 
@@ -350,8 +362,3 @@ def _process_path(path: str) -> Iterable[Path]:
         return path.glob(pattern_path)
     else:
         return path,
-
-
-if __name__ == '__main__':
-    cli = Cli()
-    cli.parse_args()
