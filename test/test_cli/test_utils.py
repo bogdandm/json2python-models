@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pytest
@@ -57,11 +58,15 @@ def test_convert_args(fn, value, expected):
 
 test_path_split_data = [
     pytest.param("./test/file.txt", ['.', 'test', 'file.txt'], id='base'),
-    pytest.param("X:/test/file.txt", ['X:/', 'test', 'file.txt'], id='windows path'),
     pytest.param("/tmp/test/file.txt", ['/', 'tmp', 'test', 'file.txt'], id='unix path'),
     pytest.param("test/*.txt", ['test', '*.txt'], id='pattern'),
     pytest.param("test/**/*.txt", ['test', '**', '*.txt'], id='recursive pattern'),
 ]
+
+if sys.platform.startswith("win"):
+    test_path_split_data.append(pytest.param("X:/test/file.txt", ['X:/', 'test', 'file.txt'], id='windows path'))
+else:
+    test_path_split_data.append(pytest.param("X:/test/file.txt", ['X:', 'test', 'file.txt'], id='windows path'))
 
 
 @pytest.mark.parametrize("value,expected", test_path_split_data)
