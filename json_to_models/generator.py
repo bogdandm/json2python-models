@@ -1,10 +1,12 @@
+import keyword
+import re
 from collections import OrderedDict
 from enum import Enum
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Pattern, Union
 
 from unidecode import unidecode
 
-from .dynamic_typing import (ComplexType, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
+from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
                              StringSerializable, StringSerializableRegistry, Unknown, registry)
 
 
@@ -27,11 +29,29 @@ class SepStyle(Enum):
         return self.value
 
 
+keywords_set = set(keyword.kwlist)
+
+
 class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 
-    def __init__(self, str_types_registry: StringSerializableRegistry = None):
+    def __init__(
+            self,
+            str_types_registry: StringSerializableRegistry = None,
+            dict_keys_regex: List[Union[Pattern, str]] = None,
+            dict_keys_fields: List[str] = None
+    ):
+        """
+
+        :param str_types_registry: StringSerializableRegistry instance. Default registry will be used if None passed .
+        :param dict_keys_regex: List of RegExpressions (compiled or not).
+            If all keys of some dict are match one of them then this dict will be marked as dict field
+            but not nested model.
+        :param dict_keys_fields: List of model fields names that will be marked as dict field
+        """
         self.str_types_registry = str_types_registry if str_types_registry is not None else registry
+        self.dict_keys_regex = [re.compile(r) for r in dict_keys_regex] if dict_keys_regex else []
+        self.dict_keys_fields = set(dict_keys_fields or ())
 
     def generate(self, *data_variants: dict) -> dict:
         """
@@ -51,7 +71,10 @@ class MetadataGenerator:
             # ! _detect_type function can crash at some complex data sets if value is unicode with some characters (maybe German)
             #   Crash does not produce any useful logs and can occur any time after bad string was processed
             #   It can be reproduced on real_apis tests (openlibrary API)
-            fields[key] = self._detect_type(value if not isinstance(value, str) else unidecode(value))
+            convert_dict = key not in self.dict_keys_fields
+            if key in keywords_set:
+                key += "_"
+            fields[key] = self._detect_type(value if not isinstance(value, str) else unidecode(value), convert_dict)
         return fields
 
     def _detect_type(self, value, convert_dict=True) -> MetaData:
@@ -69,10 +92,7 @@ class MetadataGenerator:
         # List trying to yield nested type
         elif isinstance(value, list):
             if value:
-                types = []
-                for item in value:
-                    t = self._detect_type(item, convert_dict)
-                    types.append(t)
+                types = [self._detect_type(item) for item in value]
                 if len(types) > 1:
                     union = DUnion(*types)
                     if len(union.types) == 1:
@@ -85,10 +105,24 @@ class MetadataGenerator:
 
         # Dict should be processed as another model if convert_dict is enabled
         elif isinstance(value, dict):
+            for reg in self.dict_keys_regex:
+                if all(map(reg.match, value.keys())):
+                    convert_dict = False
+                    break
+
             if convert_dict:
                 return self._convert(value)
             else:
-                return dict
+                types = [self._detect_type(item) for item in value.values()]
+                if len(types) > 1:
+                    union = DUnion(*types)
+                    if len(union.types) == 1:
+                        return DDict(*union.types)
+                    return DDict(union)
+                elif types:
+                    return DDict(*types)
+                else:
+                    return DDict(Unknown)
 
         # null interpreted as is and will be processed later on Union merge stage
         elif value is None:
