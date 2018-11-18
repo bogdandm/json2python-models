@@ -1,6 +1,6 @@
 import pytest
 
-from json_to_models.dynamic_typing import BooleanString, DList, DUnion, FloatString, IntString, NoneType, Unknown
+from json_to_models.dynamic_typing import BooleanString, DDict, DList, DUnion, FloatString, IntString, NoneType, Unknown
 from json_to_models.generator import MetadataGenerator
 
 # JSON data | MetaData
@@ -17,6 +17,7 @@ test_data = [
     pytest.param("1", IntString, id="int_str"),
     pytest.param("1.0", FloatString, id="float_str"),
     pytest.param("true", BooleanString, id="bool_str"),
+    pytest.param({"test_dict_field_a": 1, "test_dict_field_b": "a"}, DDict(DUnion(int, str)), id="dict")
 ]
 
 test_dict = {param.id: param.values[0] for param in test_data}
@@ -34,3 +35,23 @@ test_data += [
 @pytest.mark.parametrize("value,expected", test_data)
 def test_detect_type(models_generator: MetadataGenerator, value, expected):
     assert models_generator._detect_type(value) == expected
+
+
+def test_convert(models_generator: MetadataGenerator):
+    data = {
+        "dict_field": {},
+        "another_dict_field": {"test_dict_field_a": 1, "test_dict_field_b": "a"},
+        "another_dict_field_2": {"test_dict_field_a": 1},
+        "another_dict_field_3": {"test_dict_field_a": 1, "test_dict_field_b": 2},
+        "int_field": 1,
+        "not": False
+    }
+    meta = models_generator._convert(data)
+    assert meta == {
+        "dict_field": DDict(Unknown),
+        "another_dict_field": DDict(DUnion(int, str)),
+        "another_dict_field_2": DDict(int),
+        "another_dict_field_3": DDict(int),
+        "int_field": int,
+        "not_": bool
+    }
