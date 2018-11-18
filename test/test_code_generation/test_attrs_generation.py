@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import pytest
 
-from json_to_models.dynamic_typing import (DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
+from json_to_models.dynamic_typing import (DDict, DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
 from json_to_models.models import sort_fields
 from json_to_models.models.attr import AttrsModelCodeGenerator, METADATA_FIELD_NAME, sort_kwargs
 from json_to_models.models.base import generate_code
@@ -87,7 +87,8 @@ test_data = {
             "baz": DOptional(DList(DList(str))),
             "bar": DOptional(IntString),
             "qwerty": FloatString,
-            "asdfg": DOptional(int)
+            "asdfg": DOptional(int),
+            "dict": DDict(int)
         }),
         "fields_data": {
             "foo": {
@@ -114,19 +115,25 @@ test_data = {
                 "name": "asdfg",
                 "type": "Optional[int]",
                 "body": f"attr.ib(default=None, {field_meta('asdfg')})"
+            },
+            "dict": {
+                "name": "dict",
+                "type": "Dict[str, int]",
+                "body": f"attr.ib({field_meta('dict')})"
             }
         },
         "generated": trim(f"""
         import attr
         from attr.converter import optional
         from json_to_models.dynamic_typing import FloatString, IntString
-        from typing import List, Optional
+        from typing import Dict, List, Optional
 
 
         @attr.s
         class Test:
             foo: int = attr.ib({field_meta('foo')})
             qwerty: FloatString = attr.ib(converter=FloatString, {field_meta('qwerty')})
+            dict: Dict[str, int] = attr.ib({field_meta('dict')})
             baz: Optional[List[List[str]]] = attr.ib(factory=list, {field_meta('baz')})
             bar: Optional[IntString] = attr.ib(default=None, converter=optional(IntString), {field_meta('bar')})
             asdfg: Optional[int] = attr.ib(default=None, {field_meta('asdfg')})
