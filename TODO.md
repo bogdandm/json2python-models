@@ -28,7 +28,7 @@
             - [ ] OptionalFieldsPolicy
                 - [X] Merge (default)
                 - [ ] Field sets
-                - [ ] Key as data (does not process json dict as a model but process it as a python dict)
+                - [X] Key as data (does not process json dict as a model but process it as a python dict)
             - [ ] Complex python types annotations
                 - [ ] Decorator to specify field metatype
                 - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
