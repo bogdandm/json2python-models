@@ -150,8 +150,8 @@ class DUnion(ComplexType):
             else:
                 h = get_hash_string(t)
                 if h not in hashes:
-                    hashes.add(h)
                     unique_types.append(t)
+                    hashes.add(h)
         super().__init__(*unique_types)
 
     def _extract_nested_types(self):
@@ -187,4 +187,14 @@ class DList(SingleType):
         return (
             [*imports, ('typing', 'List')],
             f"List[{nested}]"
+        )
+
+
+class DDict(SingleType):
+    # Dict is single type because keys of JSON dict are always strings.
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+        imports, nested = metadata_to_typing(self.type)
+        return (
+            [*imports, ('typing', 'Dict')],
+            f"Dict[str, {nested}]"
         )
