@@ -5,6 +5,7 @@ venv/
 
 htmlcov/
 .coverage
+coverage.xml
 
 *.pyc
 *.log

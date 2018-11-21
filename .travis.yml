@@ -4,11 +4,13 @@ language: python
 cache: pip
 install:
   - pip install -r requirements.txt
-  - pip install pytest pytest-cov requests coveralls
+  - pip install pytest pytest-cov requests coveralls codacy-coverage
 script:
   - pytest --cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/
 after_success:
+  - coverage xml
   - coveralls
+  - python-codacy-coverage -r coverage.xml
 matrix:
   include:
     - python: 3.7
