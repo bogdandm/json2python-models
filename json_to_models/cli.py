@@ -4,7 +4,6 @@ import itertools
 import json
 import os.path
 from collections import defaultdict
-from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, Union
 
@@ -16,33 +15,10 @@ from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 from json_to_models.registry import (
     ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
 )
-
-
-def convert_args(callable: Callable, *args_converters: type) -> Callable:
-    """
-    Decorator. Apply ``args_converters`` to callable arguments. Ignore keyword arguments
-
-    :param callable: Function or class
-    :param args_converters: Arguments converters
-    :return: Callable wrapper
-    """
-    @wraps(callable)
-    def wrapper(*args):
-        converted = (
-            t(value) if t else value
-            for value, t in zip(args, args_converters)
-        )
-        if len(args_converters) < len(args):
-            remain = args[len(args_converters):]
-        else:
-            remain = ()
-        return callable(*converted, *remain)
-
-    return wrapper
-
+from json_to_models.utils import convert_args
 
 STRUCTURE_FN_TYPE = Callable[[Dict[str, ModelMeta]], ModelsStructureType]
-
+bool_js_style = lambda s: {"true": True, "false": False}.get(s, None)
 
 class Cli:
     MODEL_CMP_MAPPING = {
@@ -58,8 +34,8 @@ class Cli:
     }
 
     MODEL_GENERATOR_MAPPING: Dict[str, Type[GenericModelCodeGenerator]] = {
-        "base": GenericModelCodeGenerator,
-        "attrs": AttrsModelCodeGenerator,
+        "base": convert_args(GenericModelCodeGenerator),
+        "attrs": convert_args(AttrsModelCodeGenerator, bool_js_style),
         # TODO:        vvvv
         "dataclasses": None
     }
@@ -99,7 +75,15 @@ class Cli:
         structure = namespace.structure
         framework = namespace.framework
         code_generator = namespace.code_generator
-        code_generator_kwargs = namespace.code_generator_kwargs
+        code_generator_kwargs_raw: List[str] = namespace.code_generator_kwargs
+        code_generator_kwargs = {}
+        for item in code_generator_kwargs_raw:
+            if item[0] == '"':
+                item = item[1:]
+            if item[-1] == '"':
+                item = item[:-1]
+            name, value = item.split("=", 1)
+            code_generator_kwargs[name] = value
 
         self.validate(models, models_lists, merge_policy, framework, code_generator)
         self.setup_models_data(models, models_lists)
@@ -162,7 +146,7 @@ class Cli:
         }
 
     def set_args(self, merge_policy: List[Union[List[str], str]],
-                 structure: str, framework: str, code_generator: str, code_generator_kwargs: str):
+                 structure: str, framework: str, code_generator: str, code_generator_kwargs: dict):
         """
         Convert CLI args to python representation and set them to appropriate object attributes
         """
@@ -186,8 +170,7 @@ class Cli:
             self.model_generator = getattr(m, cls)
 
         if code_generator_kwargs:
-            self.model_generator_kwargs = json.loads(code_generator_kwargs)
-            assert isinstance(self.model_generator_kwargs, dict), "--code-generator-kwargs should be valid JSON dict"
+            self.model_generator_kwargs = code_generator_kwargs
 
         self.initialize = True
 
@@ -262,8 +245,13 @@ class Cli:
         )
         parser.add_argument(
             "--code-generator-kwargs",
-            help="Dict with code generator arguments (for __init__ method).\n"
-                 "Should be wrapped in \"\"\n\n"
+            metavar="NAME=VALUE",
+            nargs="*", type=str,
+            help="List of code generator arguments (for __init__ method).\n"
+                 "Each argument should be in following format:\n"
+                 "    argument_name=value or \"argument_name=value with space\"\n"
+                 "Boolean values should be passed in JS style: true | false"
+                 "\n\n"
         )
 
         return parser

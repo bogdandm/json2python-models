@@ -3,9 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from json_to_models.cli import _process_path, convert_args, dict_lookup, iter_json_file, path_split, safe_json_load
+from json_to_models.cli import _process_path, dict_lookup, iter_json_file, path_split, safe_json_load
+from json_to_models.utils import convert_args
 
-echo = lambda *args: args
+echo = lambda *args, **kwargs: (args, kwargs)
 test_dict = {"user":
     {
         "id": 1,
@@ -33,26 +34,33 @@ test_dict = {"user":
 }
 path = (Path(__file__) / "..").resolve()
 
-# Data structure: function | arguments | expected result
+# Data structure: function | (arguments, kwargs) | expected (args, kwargs)
 test_convert_args_data = [
     pytest.param(
         convert_args(echo, int, float),
-        ("10", "15.5"),
-        (10, 15.5),
+        (("10", "15.5"), {}),
+        ((10, 15.5), {}),
         id="base"
     ),
     pytest.param(
         convert_args(echo, int, float),
-        ("10", "15.5", "abc", "qwerty"),
-        (10, 15.5, "abc", "qwerty"),
+        (("10", "15.5", "abc", "qwerty"), {}),
+        ((10, 15.5, "abc", "qwerty"), {}),
         id="extra_args"
+    ),
+    pytest.param(
+        convert_args(echo, int, float, x=int, y=float),
+        (("10", "15.5", "abc", "qwerty"), {'x': '0', 'y': '1.5', 'z': '0'}),
+        ((10, 15.5, "abc", "qwerty"), {'x': 0, 'y': 1.5, 'z': '0'}),
+        id="kwargs"
     )
 ]
 
 
 @pytest.mark.parametrize("fn,value,expected", test_convert_args_data)
 def test_convert_args(fn, value, expected):
-    result = fn(*value)
+    args, kwargs = value
+    result = fn(*args, **kwargs)
     assert result == expected, f"(in value: {value})"
 
 

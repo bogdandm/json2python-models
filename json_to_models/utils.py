@@ -1,5 +1,6 @@
 import json
-from typing import Set
+from functools import wraps
+from typing import Callable, Optional, Set
 
 
 class Index:
@@ -45,3 +46,52 @@ def distinct_words(*words: str) -> Set[str]:
         if flag:
             filtered_words.add(name)
     return filtered_words
+
+
+def convert_args(callable: Callable, *args_converters: Optional[type], **kwargs_converters: Optional[type]) -> Callable:
+    """
+    Decorator. Apply ``args_converters`` to callable arguments and kwargs_converters to kwargs.
+    If converter is None then argument will passed as is.
+
+    :param callable: Function or class
+    :param args_converters: Arguments converters
+    :param kwargs_converters: Keyword arguments converters
+    :return: Callable wrapper
+    """
+
+    @wraps(callable)
+    def wrapper(*args, **kwargs):
+        converted = (
+            t(value) if t else value
+            for value, t in zip(args, args_converters)
+        )
+        kwargs_converted = {
+            name: kwargs_converters[name](kwargs[name]) if kwargs_converters.get(name, None) else kwargs[name]
+            for name in kwargs.keys()
+        }
+        if len(args_converters) < len(args):
+            remain = args[len(args_converters):]
+        else:
+            remain = ()
+        return callable(*converted, *remain, **kwargs_converted)
+
+    return wrapper
+
+
+def convert_args_decorator(*args_converters: type, method=False, **kwargs_converters):
+    """
+    Decorator factory.
+
+    :param args_converters: Arguments converters
+    :param method: Set to True if decorated function is method or classmethod
+    :param kwargs_converters: Keyword arguments converters
+    :return:
+    """
+
+    def decorator(fn):
+        if method:
+            return convert_args(fn, None, *args_converters, **kwargs_converters)
+        else:
+            return convert_args(fn, *args_converters, **kwargs_converters)
+
+    return decorator
