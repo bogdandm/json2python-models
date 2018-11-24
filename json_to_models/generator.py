@@ -8,7 +8,6 @@ from unidecode import unidecode
 from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
                              StringSerializable, StringSerializableRegistry, Unknown, registry)
 
-
 keywords_set = set(keyword.kwlist)
 
 

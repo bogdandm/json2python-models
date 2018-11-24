@@ -5,7 +5,6 @@ import json
 import os.path
 from collections import defaultdict
 from datetime import datetime
-from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, Union
 
@@ -22,6 +21,7 @@ from json_to_models.utils import convert_args
 
 STRUCTURE_FN_TYPE = Callable[[Dict[str, ModelMeta]], ModelsStructureType]
 bool_js_style = lambda s: {"true": True, "false": False}.get(s, None)
+
 
 class Cli:
     MODEL_CMP_MAPPING = {
