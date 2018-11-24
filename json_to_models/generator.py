@@ -11,6 +11,7 @@ from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaD
 
 keywords_set = set(keyword.kwlist)
 
+
 class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 

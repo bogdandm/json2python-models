@@ -8,6 +8,7 @@ exclude_lines =
     pragma: no cover
     def __repr__
     def __str__
+    def main
     if self\.debug
     raise AssertionError
     raise NotImplementedError

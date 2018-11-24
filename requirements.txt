@@ -1,4 +1,4 @@
-python-dateutil==2.7.*
-inflection==0.3.*
-unidecode==1.0.*
-Jinja2==2.10.*
+python-dateutil>=2.7.*
+inflection>=0.3.*
+unidecode>=1.0.*
+Jinja2>=2.10.*
