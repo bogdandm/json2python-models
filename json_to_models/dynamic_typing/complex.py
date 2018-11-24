@@ -70,7 +70,8 @@ class ComplexType(BaseType):
             self._sorted = sorted_types
         return sorted_types
 
-    def _sort_key(self, item):
+    @staticmethod
+    def _sort_key(item):
         if hasattr(item, 'keys'):
             return str(sorted(item.keys()))
         else:

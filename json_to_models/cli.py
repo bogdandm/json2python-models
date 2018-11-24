@@ -177,7 +177,8 @@ class Cli:
 
         self.initialize = True
 
-    def _create_argparser(self) -> argparse.ArgumentParser:
+    @staticmethod
+    def _create_argparser() -> argparse.ArgumentParser:
         """
         ArgParser factory
         """

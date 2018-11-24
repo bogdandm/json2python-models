@@ -48,18 +48,18 @@ def distinct_words(*words: str) -> Set[str]:
     return filtered_words
 
 
-def convert_args(callable: Callable, *args_converters: Optional[type], **kwargs_converters: Optional[type]) -> Callable:
+def convert_args(fn: Callable, *args_converters: Optional[type], **kwargs_converters: Optional[type]) -> Callable:
     """
     Decorator. Apply ``args_converters`` to callable arguments and kwargs_converters to kwargs.
     If converter is None then argument will passed as is.
 
-    :param callable: Function or class
+    :param fn: Function or class
     :param args_converters: Arguments converters
     :param kwargs_converters: Keyword arguments converters
     :return: Callable wrapper
     """
 
-    @wraps(callable)
+    @wraps(fn)
     def wrapper(*args, **kwargs):
         converted = (
             t(value) if t else value
@@ -73,7 +73,7 @@ def convert_args(callable: Callable, *args_converters: Optional[type], **kwargs_
             remain = args[len(args_converters):]
         else:
             remain = ()
-        return callable(*converted, *remain, **kwargs_converted)
+        return fn(*converted, *remain, **kwargs_converted)
 
     return wrapper
 

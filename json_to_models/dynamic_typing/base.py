@@ -38,7 +38,7 @@ class BaseType:
         :return: hash string
         """
         # NOTE: Do not override __hash__ function because BaseType instances isn't immutable
-        if not self._hash:
+        if not getattr(self, '_hash', None):
             self._hash = self._to_hash_string()
         return self._hash
 
@@ -58,7 +58,7 @@ class UnknownType(BaseType):
         return "Unknown"
 
     def __iter__(self) -> Iterable['MetaData']:
-        return ()
+        return iter(tuple())
 
     def replace(self, t: 'MetaData', **kwargs) -> 'UnknownType':
         return self
