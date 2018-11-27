@@ -2,9 +2,11 @@
 .pytest_cache/
 venv/
 /test.py
+/json2python-models-*/
 
 htmlcov/
 .coverage
+.coverage.*
 coverage.xml
 
 *.pyc
@@ -13,3 +15,9 @@ coverage.xml
 tmp.*
 
 testing_tools/real_apis/*/
+
+.eggs/
+build/
+dist/
+lib/
+*.egg-info/

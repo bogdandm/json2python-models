@@ -3,10 +3,10 @@ dist: xenial
 language: python
 cache: pip
 install:
-  - pip install -r requirements.txt
+  - python setup.py install
   - pip install pytest pytest-cov requests coveralls codacy-coverage
 script:
-  - pytest --cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/
+  - python setup.py test -a '--cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/'
 after_success:
   - coverage xml
   - coveralls

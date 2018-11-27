@@ -3,7 +3,7 @@ from random import shuffle
 import pytest
 from inflection import singularize
 
-from json_to_models.utils import distinct_words, json_format
+from json_to_models.utils import Index, convert_args_decorator, distinct_words, json_format
 
 test_distinct_words_data = [
     pytest.param(['test', 'foo', 'bar'], {'test', 'foo', 'bar'}),
@@ -40,3 +40,26 @@ def test_singularize():
     }
     for plur, sing in data.items():
         assert singularize(plur) == sing
+
+
+def test_index():
+    ix = Index()
+    for _ in range(1000):
+        ix()
+
+
+@convert_args_decorator(int, b=float)
+def f(a, b):
+    return a + b
+
+
+class A:
+    @convert_args_decorator(float, float, method=True)
+    def __init__(self, x, y):
+        self.value = x + y
+
+
+def test_convert_args_decorator():
+    assert f('1', b='1.5') == 2.5
+    a = A("2.3", "7.5")
+    assert a.value == 9.8
