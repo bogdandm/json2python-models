@@ -24,6 +24,8 @@ def tmp_dir_cleanup():
 # download GitHub Gist dataset into tmp folder
 GISTS_URL = "https://api.github.com/gists"
 gists = requests.get(GISTS_URL).json()
+print(type(gists))
+print(gists)
 for item in gists:
     with (tmp_path / f"{item['id']}.gist").open("w") as f:
         json.dump(item, f)
