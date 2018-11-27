@@ -30,6 +30,7 @@ deploy:
     on:
       tags: true
       all_branches: false
+    skip_existing: true
 
   - provider: releases
     api_key:
