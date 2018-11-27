@@ -1,7 +1,7 @@
 import pytest
 
-from json_to_models.dynamic_typing import (BooleanString, DList, DOptional, DTuple, DUnion, FloatString, IntString,
-                                           NoneType, Unknown)
+from json_to_models.dynamic_typing import (BooleanString, DDict, DList, DOptional, DTuple, DUnion, FloatString,
+                                           IntString, NoneType, Unknown)
 from json_to_models.generator import MetadataGenerator
 
 # MetaData | Optimized MetaData
@@ -105,6 +105,26 @@ test_data = [
         DList(DUnion(str, int, FloatString, IntString)),
         DList(DUnion(str, int)),
         id="union_of_str_int_FloatString"
+    ),
+    pytest.param(
+        DOptional(DUnion(DOptional(str), str)),
+        DOptional(str),
+        id="optional_union_nested"
+    ),
+    pytest.param(
+        DUnion(NoneType, str, NoneType),
+        DOptional(str),
+        id="optional_str"
+    ),
+    pytest.param(
+        DUnion(DDict(str), DDict(str), DDict(str)),
+        DDict(str),
+        id="dict_union"
+    ),
+    pytest.param(
+        DUnion(DDict(str), DDict(int), DDict(str)),
+        DDict(DUnion(str, int)),
+        id="dict_union_2"
     ),
 ]
 

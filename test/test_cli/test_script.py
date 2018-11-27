@@ -62,11 +62,11 @@ test_commands = [
                                   -l User - "{test_data_path / 'users.json'}" """,
                  id="list1_list2"),
 
-    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" """, id="gists"),
-    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --datetime""", id="gists_datetime"),
-    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --merge percent number_10""",
+    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files""", id="gists"),
+    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --datetime""", id="gists_datetime"),
+    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --merge percent number_10""",
                  id="gists_merge_policy"),
-    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --merge exact""",
+    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --merge exact""",
                  id="gists_no_merge"),
 ]
 

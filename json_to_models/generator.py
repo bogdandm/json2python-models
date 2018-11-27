@@ -182,6 +182,12 @@ class MetadataGenerator:
         elif isinstance(meta, DUnion):
             return self._optimize_union(meta)
 
+        elif isinstance(meta, DOptional):
+            t = self.optimize_type(meta.type)
+            if isinstance(t, DOptional):
+                t = t.type
+            return meta.replace(t)
+
         elif isinstance(meta, SingleType) and (process_model_ptr or not isinstance(meta, ModelPtr)):
             # Optimize nested type
             return meta.replace(self.optimize_type(meta.type))
@@ -193,21 +199,27 @@ class MetadataGenerator:
 
     def _optimize_union(self, t: DUnion):
         # Replace DUnion of 1 element with this element
-        if len(t) == 1:
-            return t.types[0]
+        # if len(t) == 1:
+        #     return t.types[0]
 
         # Split nested types into categories
         str_types: List[Union[type, StringSerializable]] = []
         types_to_merge: List[dict] = []
         list_types: List[DList] = []
+        dict_types: List[DList] = []
         other_types: List[MetaData] = []
         for item in t.types:
+            if isinstance(item, DOptional):
+                item = item.type
+                other_types.append(NoneType)
             if isinstance(item, dict):
                 types_to_merge.append(item)
             elif item in self.str_types_registry or item is str:
                 str_types.append(item)
             elif isinstance(item, DList):
                 list_types.append(item)
+            elif isinstance(item, DDict):
+                dict_types.append(item)
             else:
                 other_types.append(item)
 
@@ -217,10 +229,11 @@ class MetadataGenerator:
         if types_to_merge:
             other_types.append(self.merge_field_sets(types_to_merge))
 
-        if list_types:
-            other_types.append(DList(DUnion(*(
-                t.type for t in list_types
-            ))))
+        for cls, iterable_types in ((DList, list_types), (DDict, dict_types)):
+            if iterable_types:
+                other_types.append(cls(DUnion(*(
+                    t.type for t in iterable_types
+                ))))
 
         if str in str_types:
             other_types.append(str)
@@ -234,14 +247,20 @@ class MetadataGenerator:
         if Unknown in types:
             types.remove(Unknown)
 
-        if len(types) > 1:
-            if NoneType in types:
+        optional = False
+        if NoneType in types:
+            optional = True
+            while NoneType in types:
                 types.remove(NoneType)
-                if len(types) > 1:
-                    return DOptional(DUnion(*types))
-                else:
-                    return DOptional(types[0])
-            return DUnion(*types)
 
+        if len(types) > 1:
+            meta_type = DUnion(*types)
+            if len(meta_type.types) == 1:
+                meta_type = meta_type.types[0]
         else:
-            return types[0]
+            meta_type = types[0]
+
+        if optional:
+            return DOptional(meta_type)
+        else:
+            return meta_type

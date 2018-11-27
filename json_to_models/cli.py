@@ -3,6 +3,7 @@ import importlib
 import itertools
 import json
 import os.path
+import re
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -79,26 +80,21 @@ class Cli:
         framework = namespace.framework
         code_generator = namespace.code_generator
         code_generator_kwargs_raw: List[str] = namespace.code_generator_kwargs
-        code_generator_kwargs = {}
-        if code_generator_kwargs_raw:
-            for item in code_generator_kwargs_raw:
-                if item[0] == '"':
-                    item = item[1:]
-                if item[-1] == '"':
-                    item = item[:-1]
-                name, value = item.split("=", 1)
-                code_generator_kwargs[name] = value
+        dict_keys_regex: List[str] = namespace.dict_keys_regex
+        dict_keys_fields: List[str] = namespace.dict_keys_fields
 
         self.validate(models, models_lists, merge_policy, framework, code_generator)
         self.setup_models_data(models, models_lists)
-        self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs)
+        self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs_raw,
+                      dict_keys_regex, dict_keys_fields)
 
     def run(self):
         if self.enable_datetime:
             register_datetime_classes()
-
-        # TODO: Inject dict_keys_regex and dict_keys_fields
-        generator = MetadataGenerator()
+        generator = MetadataGenerator(
+            dict_keys_regex=self.dict_keys_regex,
+            dict_keys_fields=self.dict_keys_fields
+        )
         registry = ModelRegistry(*self.merge_policy)
         for name, data in self.models_data.items():
             meta = generator.generate(*data)
@@ -152,7 +148,8 @@ class Cli:
         }
 
     def set_args(self, merge_policy: List[Union[List[str], str]],
-                 structure: str, framework: str, code_generator: str, code_generator_kwargs: dict):
+                 structure: str, framework: str, code_generator: str, code_generator_kwargs_raw: List[str],
+                 dict_keys_regex: List[str], dict_keys_fields: List[str]):
         """
         Convert CLI args to python representation and set them to appropriate object attributes
         """
@@ -175,8 +172,18 @@ class Cli:
             m = importlib.import_module(module)
             self.model_generator = getattr(m, cls)
 
-        if code_generator_kwargs:
-            self.model_generator_kwargs = code_generator_kwargs
+        self.model_generator_kwargs = {}
+        if code_generator_kwargs_raw:
+            for item in code_generator_kwargs_raw:
+                if item[0] == '"':
+                    item = item[1:]
+                if item[-1] == '"':
+                    item = item[:-1]
+                name, value = item.split("=", 1)
+                self.model_generator_kwargs[name] = value
+
+        self.dict_keys_regex = [re.compile(rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
+        self.dict_keys_fields = dict_keys_fields or ()
 
         self.initialize = True
 
@@ -185,7 +192,6 @@ class Cli:
         """
         ArgParser factory
         """
-        # TODO: dict_keys_regex and dict_keys_fields arguments
         parser = argparse.ArgumentParser(
             formatter_class=argparse.RawTextHelpFormatter,
             description="Convert given json files into Python models."
@@ -215,6 +221,21 @@ class Cli:
                  "Warn.: This can lead to 6-7 times slowdown on large datasets.\n"
                  "       Be sure that you really need this option.\n\n"
         )
+        parser.add_argument(
+            "--dict-keys-regex", "--dkr",
+            nargs="+", metavar="RegEx",
+            help="List of regular expressions (Python syntax).\n"
+                 "If all keys of some dict are match one of them\n"
+                 "then this dict will be marked as dict field but not nested model.\n"
+                 "Note: ^ and $ tokens will be added automatically but you have to\n"
+                 "escape other special characters manually.\n"
+        )
+        parser.add_argument(
+            "--dict-keys-fields", "--dkf",
+            nargs="+", metavar="FIELD NAME",
+            help="List of model fields names that will be marked as dict fields\n\n"
+        )
+
         default_percent = f"{ModelFieldsPercentMatch.DEFAULT * 100:.0f}"
         default_number = f"{ModelFieldsNumberMatch.DEFAULT:.0f}"
         parser.add_argument(
