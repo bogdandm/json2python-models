@@ -138,9 +138,11 @@ test_process_path_data = [
         id="pattern_3"
     ),
     pytest.param(
-        Path("*"),
-        {str(p) for p in Path('.').iterdir()},
-        id="pattern_3"
+        Path("*.py"),
+        {p.replace("\\", "/")
+         for p in map(str, Path('.').iterdir())
+         if p.endswith(".py")},
+        id="pattern_4"
     )
 ]
 

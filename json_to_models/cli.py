@@ -38,7 +38,7 @@ class Cli:
 
     MODEL_GENERATOR_MAPPING: Dict[str, Type[GenericModelCodeGenerator]] = {
         "base": convert_args(GenericModelCodeGenerator),
-        "attrs": convert_args(AttrsModelCodeGenerator, bool_js_style),
+        "attrs": convert_args(AttrsModelCodeGenerator, meta=bool_js_style),
         # TODO:        vvvv
         "dataclasses": None
     }
@@ -80,13 +80,14 @@ class Cli:
         code_generator = namespace.code_generator
         code_generator_kwargs_raw: List[str] = namespace.code_generator_kwargs
         code_generator_kwargs = {}
-        for item in code_generator_kwargs_raw:
-            if item[0] == '"':
-                item = item[1:]
-            if item[-1] == '"':
-                item = item[:-1]
-            name, value = item.split("=", 1)
-            code_generator_kwargs[name] = value
+        if code_generator_kwargs_raw:
+            for item in code_generator_kwargs_raw:
+                if item[0] == '"':
+                    item = item[1:]
+                if item[-1] == '"':
+                    item = item[:-1]
+                name, value = item.split("=", 1)
+                code_generator_kwargs[name] = value
 
         self.validate(models, models_lists, merge_policy, framework, code_generator)
         self.setup_models_data(models, models_lists)
@@ -95,6 +96,8 @@ class Cli:
     def run(self):
         if self.enable_datetime:
             register_datetime_classes()
+
+        # TODO: Inject dict_keys_regex and dict_keys_fields
         generator = MetadataGenerator()
         registry = ModelRegistry(*self.merge_policy)
         for name, data in self.models_data.items():
@@ -182,6 +185,7 @@ class Cli:
         """
         ArgParser factory
         """
+        # TODO: dict_keys_regex and dict_keys_fields arguments
         parser = argparse.ArgumentParser(
             formatter_class=argparse.RawTextHelpFormatter,
             description="Convert given json files into Python models."
@@ -263,6 +267,14 @@ class Cli:
 
 def main(version_string=None):
     import sys
+    import os
+
+    if os.getenv("TRAVIS", None) or os.getenv("FORCE_COVERAGE", None):
+        # Enable coverage if it is Travis-CI or env variable FORCE_COVERAGE set to true
+        import coverage
+
+        coverage.process_startup()
+
     cli = Cli()
     cli.parse_args()
     if not version_string:
