@@ -81,8 +81,7 @@ test_commands = [
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script(command):
-    command = command.replace("\n", " ")
-    proc = subprocess.Popen(shlex.split(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     assert not stderr, stderr
     assert stdout, stdout
