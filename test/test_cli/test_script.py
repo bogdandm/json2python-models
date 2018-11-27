@@ -12,6 +12,10 @@ import requests
 tmp_dir = tempfile.TemporaryDirectory(f"-pytest-{time()}")
 tmp_path = Path(tmp_dir.name)
 test_data_path = (Path(__file__) / ".." / "data").resolve().absolute()
+if not test_data_path.exists():
+    test_data_path = Path("./test/test_cli/data").resolve().absolute()
+    if not test_data_path.exists():
+        test_data_path = None
 
 
 # Create fixture to auto cleanup tmp directory after tests
@@ -24,8 +28,6 @@ def tmp_dir_cleanup():
 # download GitHub Gist dataset into tmp folder
 GISTS_URL = "https://api.github.com/gists"
 gists = requests.get(GISTS_URL).json()
-print(type(gists))
-print(gists)
 for item in gists:
     with (tmp_path / f"{item['id']}.gist").open("w") as f:
         json.dump(item, f)
@@ -50,16 +52,23 @@ def test_help():
     print(stdout.decode())
 
 
+if test_data_path:
+    mark_test_data = {}
+else:
+    mark_test_data = {"mark": pytest.mark.xfail}
+
 test_commands = [
-    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" """, id="list1"),
-    pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2"),
-    pytest.param(f"""{executable} -m Photos "{test_data_path / 'photos.json'}" """, id="model1"),
+    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" """, id="list1", **mark_test_data),
+    pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2", **mark_test_data),
+    pytest.param(f"""{executable} -m Photos "{test_data_path / 'photos.json'}" """, id="model1", **mark_test_data),
 
     pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" 
-                                  -m Photos "{test_data_path / 'photos.json'}" """, id="list1_model1"),
+                                  -m Photos "{test_data_path / 'photos.json'}" """,
+                 id="list1_model1", **mark_test_data),
 
     pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" 
-                                  -l User - "{test_data_path / 'users.json'}" """, id="list1_list2"),
+                                  -l User - "{test_data_path / 'users.json'}" """,
+                 id="list1_list2", **mark_test_data),
 
     pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" """, id="gists"),
     pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --datetime""", id="gists_datetime"),

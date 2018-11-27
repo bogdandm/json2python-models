@@ -34,9 +34,9 @@ setup(
     description="Python models (attrs, dataclasses or custom) generator from JSON data with typing module support",
     license="MIT",
     packages=find_packages(exclude=['test', 'testing_tools']),
-    entry_points={'console_scripts': [
-        'json2models = json_to_models.cli:main'
-    ]},
+    entry_points={
+        'console_scripts': ['json2models = json_to_models.cli:main']
+    },
     install_requires=required,
     cmdclass={"test": PyTest},
     tests_require=["pytest"],
