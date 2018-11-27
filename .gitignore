@@ -2,6 +2,7 @@
 .pytest_cache/
 venv/
 /test.py
+/json2python-models-*/
 
 htmlcov/
 .coverage

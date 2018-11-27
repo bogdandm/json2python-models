@@ -42,5 +42,6 @@ setup(
     tests_require=["pytest"],
     project_urls={
         'Source': URL
-    }
+    },
+    data_files=[('', ['pytest.ini', '.coveragerc', 'LICENSE'])]
 )

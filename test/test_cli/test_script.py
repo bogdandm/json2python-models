@@ -17,8 +17,6 @@ if not test_data_path.exists():
     if not test_data_path.exists():
         test_data_path = None
 
-print("test_data_path:", test_data_path)
-
 # Create fixture to auto cleanup tmp directory after tests
 @pytest.fixture(scope="session", autouse=True)
 def tmp_dir_cleanup():
@@ -82,7 +80,6 @@ test_commands = [
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script(command):
-    print("Command:", command)
     proc = subprocess.Popen(shlex.split(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     assert not stderr, stderr
