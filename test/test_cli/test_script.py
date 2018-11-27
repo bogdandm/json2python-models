@@ -1,5 +1,4 @@
 import json
-import shlex
 import subprocess
 import sys
 import tempfile
@@ -44,7 +43,7 @@ else:
 
 def test_help():
     c = f"{executable} -h"
-    proc = subprocess.Popen(shlex.split(c), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(c, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     assert not stderr, stderr
     assert stdout, stdout
@@ -92,8 +91,7 @@ def test_script(command):
 @pytest.mark.parametrize("command", test_commands)
 def test_script_attrs(command):
     command += " -f attrs"
-    print("Command:", command)
-    proc = subprocess.Popen(shlex.split(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = map(bytes.decode, proc.communicate())
     assert not stderr, stderr
     assert stdout, stdout
@@ -106,8 +104,7 @@ def test_script_attrs(command):
 def test_script_custom(command):
     command += " -f custom --code-generator json_to_models.models.attr.AttrsModelCodeGenerator"
     command += ' --code-generator-kwargs "meta=true"'
-    print("Command:", command)
-    proc = subprocess.Popen(shlex.split(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = map(bytes.decode, proc.communicate())
     assert not stderr, stderr
     assert stdout, stdout
@@ -134,6 +131,6 @@ wrong_arguments_commands = [
 @pytest.mark.parametrize("command", wrong_arguments_commands)
 def test_wrong_arguments(command):
     print("Command:", command)
-    proc = subprocess.Popen(shlex.split(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = map(bytes.decode, proc.communicate())
     assert not stderr and proc.returncode == 0, stderr
