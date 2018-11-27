@@ -2,17 +2,31 @@ sudo: required
 dist: xenial
 language: python
 cache: pip
+
 install:
   - python setup.py install
   - pip install pytest pytest-cov requests coveralls codacy-coverage
+
 script:
   - python setup.py test -a '--cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/'
+
 after_success:
   - coverage xml
   - coveralls
   - python-codacy-coverage -r coverage.xml
+
 matrix:
   include:
     - python: 3.7
     - python: 3.7-dev
     - python: 3.8-dev
+
+deploy:
+  provider: pypi
+  user: "bogdandm"
+  password:
+    secure: "bfIiVsBVMRAjsZYT/UtvNFiY5RU9+2b8QyveKXB3JhZCC/+S8nU/ZJkM9/3Q4V9sUVTVd+NR4Iq1OWkgFwYhJXK+eYlqWJDwfzcxTY5sXAcIxtmXGpNKJaqOF8hyCRdeusGFXR9O1RqzZVQ1ioLCj43eOkjvgFbOw2pIRtmG8Sip6oSJUmY9MSYHFzz4EoY6s+Jv9g30P7bSGY9bekOySFi7LmnX2IM+2T7AMuRvRyd4gHlLVy7pxZxj3S/jz9IiwkVq55HUl5ITWCZVrk6RnYiQhWn5D1AllrOilJGCNQ6HmKQWhDu/fNXEg24BFUTs87OymPKAFNRFniaH9PGu5v2yoN0BWN6+23c2Zc/G9QpQzqm+eVIpW5pkp25EiQw8Cz1pjDmLAVzSZuPXxJnpmkihLUAmSoktI4Zo6+QeLaBoqxds//aLqupMPhO3kzUZe1O5CrogPXTCwpHUGKzMxtjaaXdLo3z7EVT8kRDRtggpdE9KD1shDRUMBrakmuOFA+Tms+iKZSBrW5xhC2g/lFnZluZidj2ir8hyJ9lPMUmGxn/OkIQIBcMkEKCsDFC3wPD39MY/eDbkBvmK++Uhah9T0ljLOR+j1n2ZoJ+N3zD/UpucW5681dGA/sDpgjyDc9ESj14IHjTPLI7sw3IXaial4X2h0ZdfXf6NesLDraI="
+  on:
+    tags: true
+    all_branches: false
+  skip_existing: true
