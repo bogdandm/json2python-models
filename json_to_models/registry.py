@@ -162,10 +162,16 @@ class ModelRegistry:
                 groups = new_groups
 
         replaces = []
+        replaces_ids = set()
         for group in groups:
             model_meta = self._merge(generator, *group)
             generator.optimize_type(model_meta)
+            replaces_ids.add(model_meta.index)
             replaces.append((model_meta, group))
+
+        for model_meta in self.models:
+            if model_meta.index not in replaces_ids:
+                generator.optimize_type(model_meta)
         return replaces
 
     def _merge(self, generator, *models: ModelMeta):
