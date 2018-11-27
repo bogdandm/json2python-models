@@ -39,7 +39,7 @@ setup(
     },
     install_requires=required,
     cmdclass={"test": PyTest},
-    tests_require=["pytest"],
+    tests_require=["pytest", "requests"],
     project_urls={
         'Source': URL
     },

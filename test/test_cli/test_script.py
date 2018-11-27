@@ -28,6 +28,8 @@ def tmp_dir_cleanup():
 GISTS_URL = "https://api.github.com/gists"
 gists = requests.get(GISTS_URL).text
 gists = json.loads(gists)
+assert type(gists) is list and gists and type(gists[0]) is dict
+
 for item in gists:
     with (tmp_path / f"{item['id']}.gist").open("w") as f:
         json.dump(item, f)
