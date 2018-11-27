@@ -17,6 +17,7 @@ if not test_data_path.exists():
     if not test_data_path.exists():
         test_data_path = None
 
+
 # Create fixture to auto cleanup tmp directory after tests
 @pytest.fixture(scope="session", autouse=True)
 def tmp_dir_cleanup():
@@ -61,11 +62,11 @@ test_commands = [
     pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2", **mark_test_data),
     pytest.param(f"""{executable} -m Photos "{test_data_path / 'photos.json'}" """, id="model1", **mark_test_data),
 
-    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" 
+    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" \
                                   -m Photos "{test_data_path / 'photos.json'}" """,
                  id="list1_model1", **mark_test_data),
 
-    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" 
+    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" \
                                   -l User - "{test_data_path / 'users.json'}" """,
                  id="list1_list2", **mark_test_data),
 
@@ -80,6 +81,7 @@ test_commands = [
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script(command):
+    command = command.replace("\n", " ")
     proc = subprocess.Popen(shlex.split(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     assert not stderr, stderr
@@ -116,7 +118,7 @@ def test_script_custom(command):
 
 
 wrong_arguments_commands = [
-    pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}"
+    pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}" \
                                   -l Model - "{test_data_path / 'users.json'}" """, id="duplicate_name"),
     pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}" --merge unknown""",
                  id="wrong_merge_policy"),
