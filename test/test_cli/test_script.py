@@ -17,6 +17,7 @@ if not test_data_path.exists():
     if not test_data_path.exists():
         test_data_path = None
 
+print("test_data_path:", test_data_path)
 
 # Create fixture to auto cleanup tmp directory after tests
 @pytest.fixture(scope="session", autouse=True)
