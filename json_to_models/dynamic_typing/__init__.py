@@ -1,5 +1,5 @@
 from .base import (
-    BaseType, ImportPathList, MetaData, NoneType, Unknown, UnknownType, get_hash_string
+    BaseType, ImportPathList, MetaData, Null, Unknown, get_hash_string
 )
 from .complex import ComplexType, DDict, DList, DOptional, DTuple, DUnion, SingleType
 from .models_meta import AbsoluteModelRef, ModelMeta, ModelPtr
