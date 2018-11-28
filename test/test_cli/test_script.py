@@ -1,9 +1,11 @@
+import imp
 import json
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from time import time
+from typing import Tuple
 
 import pytest
 
@@ -71,24 +73,29 @@ test_commands = [
 ]
 
 
-@pytest.mark.parametrize("command", test_commands)
-def test_script(command):
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = proc.communicate()
+def _validate_result(proc: subprocess.Popen) -> Tuple[str, str]:
+    stdout, stderr = map(bytes.decode, proc.communicate())
     assert not stderr, stderr
     assert stdout, stdout
     assert proc.returncode == 0
-    print(stdout.decode())
+    # Note: imp package is deprecated but I can't find a way to create dummy module using importlib
+    module = imp.new_module("model")
+    exec(compile(stdout, "model.py", "exec"), module.__dict__)
+    return stdout, stderr
+
+
+@pytest.mark.parametrize("command", test_commands)
+def test_script(command):
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = _validate_result(proc)
+    print(stdout)
 
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script_attrs(command):
     command += " -f attrs"
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = map(bytes.decode, proc.communicate())
-    assert not stderr, stderr
-    assert stdout, stdout
-    assert proc.returncode == 0
+    stdout, stderr = _validate_result(proc)
     assert "@attr.s" in stdout
     print(stdout)
 
@@ -98,10 +105,7 @@ def test_script_custom(command):
     command += " -f custom --code-generator json_to_models.models.attr.AttrsModelCodeGenerator"
     command += ' --code-generator-kwargs "meta=true"'
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = map(bytes.decode, proc.communicate())
-    assert not stderr, stderr
-    assert stdout, stdout
-    assert proc.returncode == 0
+    stdout, stderr = _validate_result(proc)
     assert "@attr.s" in stdout
     print(stdout)
 
@@ -125,5 +129,4 @@ wrong_arguments_commands = [
 def test_wrong_arguments(command):
     print("Command:", command)
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = map(bytes.decode, proc.communicate())
-    assert not stderr and proc.returncode == 0, stderr
+    _validate_result(proc)
