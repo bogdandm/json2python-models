@@ -1,10 +1,16 @@
-from typing import List, Tuple, Type
+from typing import Iterable, List, Tuple, Type
 
 import inflection
 from jinja2 import Template
 
 from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER, indent, sort_fields
 from ..dynamic_typing import AbsoluteModelRef, ImportPathList, MetaData, ModelMeta, compile_imports, metadata_to_typing
+
+METADATA_FIELD_NAME = "RCG_ORIGINAL_FIELD"
+KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
+                  "{{ key }}={{ value }}" \
+                  "{% if not loop.last %}, {% endif %}" \
+                  "{% endfor %}"
 
 
 def template(pattern: str, indent: str = INDENT) -> Template:
@@ -159,3 +165,21 @@ def generate_code(structure: ModelsStructureType, class_generator: Type[GenericM
     else:
         imports_str = ""
     return imports_str + objects_delimiter.join(classes) + "\n"
+
+
+def sort_kwargs(kwargs: dict, ordering: Iterable[Iterable[str]]) -> dict:
+    sorted_dict_1 = {}
+    sorted_dict_2 = {}
+    current = sorted_dict_1
+    for group in ordering:
+        if isinstance(group, str):
+            if group != "*":
+                raise ValueError(f"Unknown kwarg group: {group}")
+            current = sorted_dict_2
+        else:
+            for item in group:
+                if item in kwargs:
+                    value = kwargs.pop(item)
+                    current[item] = value
+    sorted_dict = {**sorted_dict_1, **kwargs, **sorted_dict_2}
+    return sorted_dict

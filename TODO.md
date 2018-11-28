@@ -11,7 +11,8 @@
             - [X] typing code generation
                 - [ ] (Maybe in future) Extract to another module (by serializers for each dynamic typing class)
             - [X] attrs
-            - [ ] dataclasses
+            - [X] dataclasses
+                - [ ] post_init converters for StringSerializable types
             - [ ] generate from_json/to_json converters
         - [ ] Model class -> Meta format converter
             - [ ] attrs
@@ -36,24 +37,10 @@
                 - [X] ISO date
                 - [X] ISO time
                 - [X] ISO datetime
+            - [ ] Don't create metadata (RCG_ORIGINAL_FIELD) if original_field == generated_field
     - [X] Cli tool
         
 - Testing
-    - Models layer
-        - [X] Create and register models
-            - [X] Test pointers in the models registry
-            - [ ] Test whats going on with strict/non-strict merging
-        - [ ] Save meta-models as python code
-            - [X] typing code generation
-            - [X] attrs
-            - [ ] dataclasses
-            - [ ] generate from_json/to_json converters
-        - [ ] Model class -> Meta format converter
-            - [ ] attrs
-            - [ ] dataclasses
-        - [ ] Implement existing models registration
-            - [ ] attrs
-            - [ ] dataclasses
 
 - Build, Deploy, CI
     - [X] setup.py
