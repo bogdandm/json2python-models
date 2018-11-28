@@ -79,8 +79,9 @@ def _validate_result(proc: subprocess.Popen) -> Tuple[str, str]:
     assert stdout, stdout
     assert proc.returncode == 0
     # Note: imp package is deprecated but I can't find a way to create dummy module using importlib
-    module = imp.new_module("model")
-    exec(compile(stdout, "model.py", "exec"), module.__dict__)
+    module = imp.new_module("test_model")
+    sys.modules["test_model"] = module
+    exec(compile(stdout, "test_model.py", "exec"), module.__dict__)
     return stdout, stderr
 
 
@@ -97,6 +98,15 @@ def test_script_attrs(command):
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = _validate_result(proc)
     assert "@attr.s" in stdout
+    print(stdout)
+
+
+@pytest.mark.parametrize("command", test_commands)
+def test_script_dataclasses(command):
+    command += " -f dataclasses"
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = _validate_result(proc)
+    assert "@dataclass" in stdout
     print(stdout)
 
 

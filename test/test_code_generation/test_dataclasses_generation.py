@@ -4,29 +4,9 @@ import pytest
 
 from json_to_models.dynamic_typing import (DDict, DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
 from json_to_models.models import sort_fields
-from json_to_models.models.attr import AttrsModelCodeGenerator, DEFAULT_ORDER
-from json_to_models.models.base import METADATA_FIELD_NAME, generate_code, sort_kwargs
+from json_to_models.models.base import METADATA_FIELD_NAME, generate_code
+from json_to_models.models.dataclasses import DataclassModelCodeGenerator
 from test.test_code_generation.test_models_code_generator import model_factory, trim
-
-
-def test_attrib_kwargs_sort():
-    sorted_kwargs = sort_kwargs(dict(
-        y=2,
-        metadata='b',
-        converter='a',
-        default=None,
-        x=1,
-    ), DEFAULT_ORDER)
-    expected = ['default', 'converter', 'y', 'x', 'metadata']
-    for k1, k2 in zip(sorted_kwargs.keys(), expected):
-        assert k1 == k2
-    try:
-        sort_kwargs({}, ['wrong_char'])
-    except ValueError as e:
-        assert e.args[0].endswith('wrong_char')
-    else:
-        assert 0, "XPass"
-
 
 
 def field_meta(original_name):
@@ -49,36 +29,36 @@ test_data = {
             "foo": {
                 "name": "foo",
                 "type": "int",
-                "body": f"attr.ib({field_meta('foo')})"
+                "body": f"field({field_meta('foo')})"
             },
             "bar": {
                 "name": "bar",
                 "type": "int",
-                "body": f"attr.ib({field_meta('bar')})"
+                "body": f"field({field_meta('bar')})"
             },
             "baz": {
                 "name": "baz",
                 "type": "float",
-                "body": f"attr.ib({field_meta('baz')})"
+                "body": f"field({field_meta('baz')})"
             }
         },
         "fields": {
             "imports": "",
             "fields": [
-                f"foo: int = attr.ib({field_meta('foo')})",
-                f"bar: int = attr.ib({field_meta('bar')})",
-                f"baz: float = attr.ib({field_meta('baz')})",
+                f"foo: int = field({field_meta('foo')})",
+                f"bar: int = field({field_meta('bar')})",
+                f"baz: float = field({field_meta('baz')})",
             ]
         },
         "generated": trim(f"""
-        import attr
-        
-        
-        @attr.s
+        from dataclasses import dataclass, field
+
+
+        @dataclass
         class Test:
-            foo: int = attr.ib({field_meta('foo')})
-            bar: int = attr.ib({field_meta('bar')})
-            baz: float = attr.ib({field_meta('baz')})
+            foo: int = field({field_meta('foo')})
+            bar: int = field({field_meta('bar')})
+            baz: float = field({field_meta('baz')})
         """)
     },
     "complex": {
@@ -94,49 +74,48 @@ test_data = {
             "foo": {
                 "name": "foo",
                 "type": "int",
-                "body": f"attr.ib({field_meta('foo')})"
+                "body": f"field({field_meta('foo')})"
             },
             "baz": {
                 "name": "baz",
                 "type": "Optional[List[List[str]]]",
-                "body": f"attr.ib(factory=list, {field_meta('baz')})"
+                "body": f"field(default_factory=list, {field_meta('baz')})"
             },
             "bar": {
                 "name": "bar",
                 "type": "Optional[IntString]",
-                "body": f"attr.ib(default=None, converter=optional(IntString), {field_meta('bar')})"
+                "body": f"field(default=None, {field_meta('bar')})"
             },
             "qwerty": {
                 "name": "qwerty",
                 "type": "FloatString",
-                "body": f"attr.ib(converter=FloatString, {field_meta('qwerty')})"
+                "body": f"field({field_meta('qwerty')})"
             },
             "asdfg": {
                 "name": "asdfg",
                 "type": "Optional[int]",
-                "body": f"attr.ib(default=None, {field_meta('asdfg')})"
+                "body": f"field(default=None, {field_meta('asdfg')})"
             },
             "dict": {
                 "name": "dict",
                 "type": "Dict[str, int]",
-                "body": f"attr.ib({field_meta('dict')})"
+                "body": f"field({field_meta('dict')})"
             }
         },
         "generated": trim(f"""
-        import attr
-        from attr.converter import optional
+        from dataclasses import dataclass, field
         from json_to_models.dynamic_typing import FloatString, IntString
         from typing import Dict, List, Optional
 
 
-        @attr.s
+        @dataclass
         class Test:
-            foo: int = attr.ib({field_meta('foo')})
-            qwerty: FloatString = attr.ib(converter=FloatString, {field_meta('qwerty')})
-            dict: Dict[str, int] = attr.ib({field_meta('dict')})
-            baz: Optional[List[List[str]]] = attr.ib(factory=list, {field_meta('baz')})
-            bar: Optional[IntString] = attr.ib(default=None, converter=optional(IntString), {field_meta('bar')})
-            asdfg: Optional[int] = attr.ib(default=None, {field_meta('asdfg')})
+            foo: int = field({field_meta('foo')})
+            qwerty: FloatString = field({field_meta('qwerty')})
+            dict: Dict[str, int] = field({field_meta('dict')})
+            baz: Optional[List[List[str]]] = field(default_factory=list, {field_meta('baz')})
+            bar: Optional[IntString] = field(default=None, {field_meta('bar')})
+            asdfg: Optional[int] = field(default=None, {field_meta('asdfg')})
         """)
     }
 }
@@ -157,7 +136,7 @@ test_data_unzip = {
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["fields_data"])
 def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
-    gen = AttrsModelCodeGenerator(value, meta=True)
+    gen = DataclassModelCodeGenerator(value, meta=True)
     required, optional = sort_fields(value)
     for is_optional, fields in enumerate((required, optional)):
         for field in fields:
@@ -169,7 +148,7 @@ def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
 def test_fields_attr(value: ModelMeta, expected: dict):
     expected_imports: str = expected["imports"]
     expected_fields: List[str] = expected["fields"]
-    gen = AttrsModelCodeGenerator(value, meta=True)
+    gen = DataclassModelCodeGenerator(value, meta=True)
     imports, fields = gen.fields
     imports = compile_imports(imports)
     assert imports == expected_imports
@@ -178,6 +157,6 @@ def test_fields_attr(value: ModelMeta, expected: dict):
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated_attr(value: ModelMeta, expected: str):
-    generated = generate_code(([{"model": value, "nested": []}], {}), AttrsModelCodeGenerator,
+    generated = generate_code(([{"model": value, "nested": []}], {}), DataclassModelCodeGenerator,
                               class_generator_kwargs={'meta': True})
     assert generated.rstrip() == expected, generated

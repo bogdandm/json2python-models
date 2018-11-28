@@ -15,6 +15,7 @@ from json_to_models.generator import MetadataGenerator
 from json_to_models.models import ModelsStructureType, compose_models
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
+from json_to_models.models.dataclasses import DataclassModelCodeGenerator
 from json_to_models.registry import (
     ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
 )
@@ -40,8 +41,7 @@ class Cli:
     MODEL_GENERATOR_MAPPING: Dict[str, Type[GenericModelCodeGenerator]] = {
         "base": convert_args(GenericModelCodeGenerator),
         "attrs": convert_args(AttrsModelCodeGenerator, meta=bool_js_style),
-        # TODO:        vvvv
-        "dataclasses": None
+        "dataclasses": convert_args(DataclassModelCodeGenerator, meta=bool_js_style, post_init_converters=bool_js_style)
     }
 
     def __init__(self):
