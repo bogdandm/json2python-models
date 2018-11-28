@@ -1,6 +1,6 @@
 import pytest
 
-from json_to_models.dynamic_typing import BooleanString, DDict, DList, DUnion, FloatString, IntString, NoneType, Unknown
+from json_to_models.dynamic_typing import BooleanString, DDict, DList, DUnion, FloatString, IntString, Null, Unknown
 from json_to_models.generator import MetadataGenerator
 
 # JSON data | MetaData
@@ -9,7 +9,7 @@ test_data = [
     pytest.param(1, int, id="int"),
     pytest.param(True, bool, id="bool"),
     pytest.param("abc", str, id="str"),
-    pytest.param(None, NoneType, id="null"),
+    pytest.param(None, Null, id="null"),
     pytest.param([], DList(Unknown), id="list_empty"),
     pytest.param([1], DList(int), id="list_single"),
     pytest.param([*range(100)], DList(int), id="list_single_type"),

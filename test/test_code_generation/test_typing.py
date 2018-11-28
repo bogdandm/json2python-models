@@ -63,7 +63,7 @@ class TestModel:
 # MetaData | Tuple[import_stmnt, type]
 test_data = [
     pytest.param(
-        UnknownType(),
+        Unknown,
         ('from typing import Any', Any),
         id="UnknownType"
     ),
@@ -78,7 +78,7 @@ test_data = [
         id="DOptional"
     ),
     pytest.param(
-        DOptional(UnknownType()),
+        DOptional(Unknown),
         ('from typing import Any, Optional', Optional[Any]),
         id="DOptional_UnknownType"
     ),

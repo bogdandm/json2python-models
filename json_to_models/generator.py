@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional, Pattern, Union
 
 from unidecode import unidecode
 
-from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaData, ModelPtr, NoneType, SingleType,
+from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaData, ModelPtr, Null, SingleType,
                              StringSerializable, StringSerializableRegistry, Unknown, registry)
 
 keywords_set = set(keyword.kwlist)
@@ -105,7 +105,7 @@ class MetadataGenerator:
 
         # null interpreted as is and will be processed later on Union merge stage
         elif value is None:
-            return NoneType
+            return Null
 
         # string types trying to convert to other string-serializable types
         else:
@@ -211,7 +211,7 @@ class MetadataGenerator:
         for item in t.types:
             if isinstance(item, DOptional):
                 item = item.type
-                other_types.append(NoneType)
+                other_types.append(Null)
             if isinstance(item, dict):
                 types_to_merge.append(item)
             elif item in self.str_types_registry or item is str:
@@ -248,10 +248,10 @@ class MetadataGenerator:
             types.remove(Unknown)
 
         optional = False
-        if NoneType in types:
+        if Null in types:
             optional = True
-            while NoneType in types:
-                types.remove(NoneType)
+            while Null in types:
+                types.remove(Null)
 
         if len(types) > 1:
             meta_type = DUnion(*types)
