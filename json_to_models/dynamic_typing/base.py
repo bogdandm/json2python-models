@@ -70,8 +70,27 @@ class UnknownType(BaseType):
         return "Unknown"
 
 
+class NoneType(BaseType):
+    __slots__ = []
+
+    def __str__(self):
+        return "NoneType"
+
+    def __iter__(self) -> Iterable['MetaData']:
+        return iter(tuple())
+
+    def replace(self, t: 'MetaData', **kwargs) -> 'NoneType':
+        return self
+
+    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+        return ([], 'None')
+
+    def to_hash_string(self) -> str:
+        return "NoneType"
+
+
 Unknown = UnknownType()
-NoneType = type(None)
+Null = NoneType()
 MetaData = Union[type, dict, BaseType]
 
 

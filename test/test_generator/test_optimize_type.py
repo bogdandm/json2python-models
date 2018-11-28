@@ -1,7 +1,7 @@
 import pytest
 
 from json_to_models.dynamic_typing import (BooleanString, DDict, DList, DOptional, DTuple, DUnion, FloatString,
-                                           IntString, NoneType, Unknown)
+                                           IntString, Null, Unknown)
 from json_to_models.generator import MetadataGenerator
 
 # MetaData | Optimized MetaData
@@ -16,7 +16,7 @@ test_data = [
         {'1': DUnion(
             {'a': DUnion({'b': int}, {'b': float})},
             {'a': DUnion({'b': float}, {'b': int})},
-            {'a': NoneType},
+            {'a': Null},
         )},
         {'1': {'a': DOptional({'b': float})}},
         id="merge_nested_dicts"
@@ -72,32 +72,32 @@ test_data = [
         id="list_unknown_vs_multi"
     ),
     pytest.param(
-        DUnion(NoneType, str),
+        DUnion(Null, str),
         DOptional(str),
         id="optional_str"
     ),
     pytest.param(
-        DUnion(NoneType, DList(str)),
+        DUnion(Null, DList(str)),
         DOptional(DList(str)),
         id="optional_list"
     ),
     pytest.param(
-        DList(DUnion(NoneType, str)),
+        DList(DUnion(Null, str)),
         DList(DOptional(str)),
         id="list_of_optional_strings"
     ),
     pytest.param(
-        DUnion(NoneType, DList(str), int),
+        DUnion(Null, DList(str), int),
         DOptional(DUnion(DList(str), int)),
         id="optional_list_or_int"
     ),
     pytest.param(
-        DUnion(NoneType, DList(DUnion(str, int))),
+        DUnion(Null, DList(DUnion(str, int))),
         DOptional(DList(DUnion(str, int))),
         id="optional_list_of_str_or_int"
     ),
     pytest.param(
-        DList(DUnion(NoneType, str, int)),
+        DList(DUnion(Null, str, int)),
         DList(DOptional(DUnion(str, int))),
         id="list_of_optional_strings_ot_int"
     ),
@@ -112,7 +112,7 @@ test_data = [
         id="optional_union_nested"
     ),
     pytest.param(
-        DUnion(NoneType, str, NoneType),
+        DUnion(Null, str, Null),
         DOptional(str),
         id="optional_str"
     ),
