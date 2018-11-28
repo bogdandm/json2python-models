@@ -36,16 +36,13 @@
                 - [X] ISO date
                 - [X] ISO time
                 - [X] ISO datetime
-    - [ ] Cli tool
+    - [X] Cli tool
         
 - Testing
     - Models layer
-        - [X] Data variant converting
-        - [X] Data variant merging
         - [X] Create and register models
             - [X] Test pointers in the models registry
             - [ ] Test whats going on with strict/non-strict merging
-        - [X] Merge meta-models and extract common ones
         - [ ] Save meta-models as python code
             - [X] typing code generation
             - [X] attrs
@@ -57,16 +54,14 @@
         - [ ] Implement existing models registration
             - [ ] attrs
             - [ ] dataclasses
-    - [X] String based types
-        - [X] ISO date
-        - [X] ISO time
-        - [X] ISO datetime
 
 - Build, Deploy, CI
-    - [ ] setup.py
-    - [ ] setup.py + pytest integration
+    - [X] setup.py
+    - [X] setup.py + pytest integration
     - [X] TravisCI integration
-    - [ ] pip package
+    - [X] pip package
+    - [x] Codacy integration
+    - [x] CoverAll integration
 
 - Long term plans                
     - API Layer

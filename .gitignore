@@ -13,6 +13,7 @@ coverage.xml
 *.log
 *.tmp
 tmp.*
+.token
 
 testing_tools/real_apis/*/
 
