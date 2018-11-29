@@ -206,7 +206,7 @@ class ModelRegistry:
         """
         counter = defaultdict(int)
         for model in self.models:
-            counter[model.name] += 1
+            counter[model.name or model.index] += 1
             if counter[model.name] > 1:
                 model.set_raw_name(model.name_joiner(model.name, model.index), generated=True)
 
@@ -214,4 +214,6 @@ class ModelRegistry:
         for model in self.models:
             if model.is_name_generated is None:
                 model.generate_name()
+            if model.name is None:
+                model.set_raw_name("Unknown_" + model.index, True)
         self.fix_name_duplicates()
