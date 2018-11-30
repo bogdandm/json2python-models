@@ -492,6 +492,114 @@ test_compose_models_flat_data = [
         {},
         id="sort_1"
     ),
+    pytest.param(
+        [
+            ("RootA", {
+                "field_a1": {"field_a1_n": {"field": int}},
+                "field_a2": {"field_a2_n": {"field": int}},
+                "field_a3": {"field_a3_n": {"field": int}},
+                "field_a4": {"field_a4_n": {"field": int}},
+            }),
+            ("RootB", {
+                "field_b1": {"field_b1_n": {"field": int}},
+                "field_b2": {"field_b2_n": {"field": int}},
+                "field_b3": {"field_b3_n": {"field": int}},
+                "field_b4": {"field_b4_n": {"field": int}},
+            }),
+            ("RootC", {
+                "field_c1": {"field_c1_n": {"field": int}},
+                "field_c2": {"field_c2_n": {"field": int}},
+                "field_c3": {"field_c3_n": {"field": int}},
+                "field_c4": {"field_c4_n": {"field": int}},
+            }),
+        ],
+        [
+            ("RootA", []),
+            ("RootB", []),
+            ("RootC", []),
+            ("FieldA1", []),
+            ("FieldA2", []),
+            ("FieldA3", []),
+            ("FieldA4", []),
+            ("FieldB1", []),
+            ("FieldB2", []),
+            ("FieldB3", []),
+            ("FieldB4", []),
+            ("FieldC1", []),
+            ("FieldC2", []),
+            ("FieldC3", []),
+            ("FieldC4", []),
+            ("FieldA1N_FieldA2N_FieldA3N_FieldA4N_"
+             "FieldB1N_FieldB2N_FieldB3N_FieldB4N_"
+             "FieldC1N_FieldC2N_FieldC3N_FieldC4N", []),
+        ],
+        {},
+        id="sort_2"
+    ),
+    pytest.param(
+        [
+            ("RootA", {
+                "field_a1": {
+                    "field_a1_n": {"field_1": int},
+                    "field_a1_n2": {"field_11": int},
+                },
+                "field_a2": {"field_a2_n": {"field_2": int}},
+                "field_a3": {"field_a3_n": {"field_3": int}},
+                "field_a4": {"field_a4_n": {"field_4": int}},
+            }),
+            ("RootB", {
+                "field_b1": {
+                    "field_b1_n": {"field_01": int},
+                    "field_b1_n2": {"field_b11": int},
+                    "field_b1_n3": {"field_b21": int},
+                },
+                "field_b2": {"field_b2_n": {"field_02": int}},
+                "field_b3": {
+                    "field_b3_n": {"field_03": int},
+                    "field_b3_n2": {"field_b13": int},
+                    "field_b3_n3": {"field_b23": int},
+                    "field_b3_n4": {"field_b33": int},
+                },
+                "field_b4": {"field_b4_n": {"field_04": int}},
+            }),
+        ],
+        [
+            ("RootA", []),
+            ("RootB", []),
+
+            ("FieldA1", []),
+            ("FieldA1N", []),
+            ("FieldA1N2", []),
+
+            ("FieldA2", []),
+            ("FieldA2N", []),
+
+            ("FieldA3", []),
+            ("FieldA3N", []),
+
+            ("FieldA4", []),
+            ("FieldA4N", []),
+
+            ("FieldB1", []),
+            ("FieldB1N", []),
+            ("FieldB1N2", []),
+            ("FieldB1N3", []),
+
+            ("FieldB2", []),
+            ("FieldB2N", []),
+
+            ("FieldB3", []),
+            ("FieldB3N", []),
+            ("FieldB3N2", []),
+            ("FieldB3N3", []),
+            ("FieldB3N4", []),
+
+            ("FieldB4", []),
+            ("FieldB4N", []),
+        ],
+        {},
+        id="sort_3"
+    ),
 ]
 
 

@@ -41,12 +41,20 @@ class ListEx(list, Generic[T]):
 
 
 class PositionsDict(defaultdict):
+    # Dict contains mapping Index -> position, where position is list index to insert nested element of Index
     INC = object()
 
     def __init__(self, default_factory=int, **kwargs):
         super().__init__(default_factory, **kwargs)
 
     def update_position(self, key: str, value: Union[object, int]):
+        """
+        Shift all elements which are placed after updated one
+
+        :param key: Index or "root"
+        :param value: Could be position or PositionsDict.INC to perform quick increment (x+=1)
+        :return:
+        """
         if value is self.INC:
             value = self[key] + 1
         if key in self:
@@ -162,6 +170,7 @@ def compose_models_flat(models_map: Dict[Index, ModelMeta]) -> ModelsStructureTy
                 # Model is using by only one model
                 parent = next(iter(parents))
                 pos = positions.get(parent, len(root_models))
+                positions.update_position(parent, pos + 1)
             positions.update_position(key, pos + 1)
             root_models.insert(pos, struct)
 
