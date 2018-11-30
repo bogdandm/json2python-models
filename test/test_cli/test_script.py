@@ -93,6 +93,14 @@ def test_script(command):
 
 
 @pytest.mark.parametrize("command", test_commands)
+def test_script_flat(command):
+    command += " -s flat"
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = _validate_result(proc)
+    print(stdout)
+
+
+@pytest.mark.parametrize("command", test_commands)
 def test_script_attrs(command):
     command += " -f attrs"
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

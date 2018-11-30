@@ -12,7 +12,7 @@ from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, 
 import json_to_models
 from json_to_models.dynamic_typing import ModelMeta, register_datetime_classes
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import ModelsStructureType, compose_models
+from json_to_models.models import ModelsStructureType, compose_models, compose_models_flat
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 from json_to_models.models.dataclasses import DataclassModelCodeGenerator
@@ -34,8 +34,7 @@ class Cli:
 
     STRUCTURE_FN_MAPPING: Dict[str, STRUCTURE_FN_TYPE] = {
         "nested": compose_models,
-        # TODO: vvvvvvvvvvvv
-        "flat": lambda *args, **kwargs: None
+        "flat": compose_models_flat
     }
 
     MODEL_GENERATOR_MAPPING: Dict[str, Type[GenericModelCodeGenerator]] = {
@@ -187,8 +186,8 @@ class Cli:
 
         self.initialize = True
 
-    @staticmethod
-    def _create_argparser() -> argparse.ArgumentParser:
+    @classmethod
+    def _create_argparser(cls) -> argparse.ArgumentParser:
         """
         ArgParser factory
         """
@@ -255,13 +254,13 @@ class Cli:
         parser.add_argument(
             "-s", "--structure",
             default="nested",
-            choices=["nested", "flat"],
+            choices=list(cls.STRUCTURE_FN_MAPPING.keys()),
             help="Models composition style. By default nested models become nested Python classes.\n\n"
         )
         parser.add_argument(
             "-f", "--framework",
             default="base",
-            choices=["base", "attrs", "dataclasses", "custom"],
+            choices=list(cls.MODEL_GENERATOR_MAPPING.keys()) + ["custom"],
             help="Model framework for which python code is generated.\n"
                  "'base' (default) mean no framework so code will be generated without any decorators\n"
                  "and additional meta-data.\n"
