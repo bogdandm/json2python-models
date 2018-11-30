@@ -23,6 +23,9 @@ class ModelMeta(SingleType):
     def __str__(self):
         return f"Model#{self.index}" + ("-" + self._name if self._name else "")
 
+    def __repr__(self):
+        return f"<{self}>"
+
     def __eq__(self, other):
         if isinstance(other, dict):
             return self.type == other

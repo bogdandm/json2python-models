@@ -2,6 +2,8 @@ from collections import OrderedDict, defaultdict
 from itertools import chain, combinations
 from typing import Dict, List, Set, Tuple
 
+from ordered_set import OrderedSet
+
 from .dynamic_typing import BaseType, MetaData, ModelMeta, ModelPtr
 from .utils import Index, distinct_words
 
@@ -151,7 +153,7 @@ class ModelRegistry:
         flag = True
         while flag:
             flag = False
-            new_groups: Set[Set[ModelMeta]] = set()
+            new_groups: OrderedSet[Set[ModelMeta]] = OrderedSet()
             for gr1, gr2 in combinations(groups, 2):
                 if gr1 & gr2:
                     old_len = len(new_groups)

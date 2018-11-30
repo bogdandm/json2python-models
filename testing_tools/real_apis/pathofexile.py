@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import compose_models
+from json_to_models.models import compose_models_flat
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
 from json_to_models.registry import ModelRegistry
@@ -37,7 +37,7 @@ def main():
     print(pretty_format_meta(next(iter(reg.models))))
     print("\n" + "=" * 20, end='')
 
-    structure = compose_models(reg.models_map)
+    structure = compose_models_flat(reg.models_map)
     print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
     print("=" * 20)
 

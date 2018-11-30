@@ -3,9 +3,10 @@ from datetime import datetime
 from pathlib import Path
 
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import compose_models
+from json_to_models.models import compose_models, compose_models_flat
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
+from json_to_models.models.dataclasses import DataclassModelCodeGenerator
 from json_to_models.registry import ModelRegistry
 
 
@@ -30,11 +31,15 @@ def main():
     reg.generate_names()
 
     structure = compose_models(reg.models_map)
-    code = generate_code(structure, AttrsModelCodeGenerator, class_generator_kwargs={"no_meta": True})
+    code = generate_code(structure, AttrsModelCodeGenerator)
     print(code)
-    # with open("tmp.py", "w") as f:
-    #     f.write(code)
-    print(f"{(datetime.now() - start_t).total_seconds():.4f} seconds")
+
+    print("=" * 10, f"{(datetime.now() - start_t).total_seconds():.4f} seconds", "=" * 10,
+          "\nPress enter to continue...\n")
+    input()
+    structure_flat = compose_models_flat(reg.models_map)
+    code = generate_code(structure_flat, DataclassModelCodeGenerator)
+    print(code)
 
 
 if __name__ == '__main__':
