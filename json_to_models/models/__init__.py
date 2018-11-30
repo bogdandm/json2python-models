@@ -3,6 +3,8 @@ from typing import Dict, Generic, Iterable, List, Set, Tuple, TypeVar
 from ..dynamic_typing import DOptional, ModelMeta, ModelPtr
 
 Index = str
+ModelsStructureType = Tuple[List[dict], Dict[ModelMeta, ModelMeta]]
+
 T = TypeVar('T')
 
 
@@ -33,33 +35,6 @@ class ListEx(list, Generic[T]):
             raise ValueError
         pos = max(ix)
         self.insert(pos + 1, value)
-
-
-def filter_pointers(model: ModelMeta) -> Iterable[ModelPtr]:
-    """
-    Return iterator over pointers with not None parent
-    """
-    return (ptr for ptr in model.pointers if ptr.parent)
-
-
-def extract_root(model: ModelMeta) -> Set[Index]:
-    """
-    Return set of indexes of root models that are use given ``model`` directly or through another nested model.
-    """
-    seen: Set[Index] = set()
-    nodes: List[ModelPtr] = list(filter_pointers(model))
-    roots: Set[Index] = set()
-    while nodes:
-        node = nodes.pop()
-        seen.add(node.type.index)
-        filtered = list(filter_pointers(node.parent))
-        nodes.extend(ptr for ptr in filtered if ptr.type.index not in seen)
-        if not filtered:
-            roots.add(node.parent.index)
-    return roots
-
-
-ModelsStructureType = Tuple[List[dict], Dict[ModelMeta, ModelMeta]]
 
 
 def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
@@ -114,6 +89,30 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
                 parent["nested"].append(struct)
 
     return root_models, path_injections
+
+
+def filter_pointers(model: ModelMeta) -> Iterable[ModelPtr]:
+    """
+    Return iterator over pointers with not None parent
+    """
+    return (ptr for ptr in model.pointers if ptr.parent)
+
+
+def extract_root(model: ModelMeta) -> Set[Index]:
+    """
+    Return set of indexes of root models that are use given ``model`` directly or through another nested model.
+    """
+    seen: Set[Index] = set()
+    nodes: List[ModelPtr] = list(filter_pointers(model))
+    roots: Set[Index] = set()
+    while nodes:
+        node = nodes.pop()
+        seen.add(node.type.index)
+        filtered = list(filter_pointers(node.parent))
+        nodes.extend(ptr for ptr in filtered if ptr.type.index not in seen)
+        if not filtered:
+            roots.add(node.parent.index)
+    return roots
 
 
 def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:
