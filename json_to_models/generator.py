@@ -9,7 +9,7 @@ from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaD
                              StringSerializable, StringSerializableRegistry, Unknown, registry)
 
 keywords_set = set(keyword.kwlist)
-
+_static_types = {float, bool, int}
 
 class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
@@ -61,15 +61,12 @@ class MetadataGenerator:
         Converts json value to metadata
         """
         # Simple types
-        if isinstance(value, float):
-            return float
-        elif isinstance(value, bool):
-            return bool
-        elif isinstance(value, int):
-            return int
+        t = type(value)
+        if t in _static_types:
+            return t
 
         # List trying to yield nested type
-        elif isinstance(value, list):
+        elif t is list:
             if value:
                 types = [self._detect_type(item) for item in value]
                 if len(types) > 1:
