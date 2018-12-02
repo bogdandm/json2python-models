@@ -53,5 +53,5 @@ def test_convert(models_generator: MetadataGenerator):
         "another_dict_field_2": DDict(int),
         "another_dict_field_3": DDict(int),
         "int_field": int,
-        "not_": bool
+        "not": bool
     }

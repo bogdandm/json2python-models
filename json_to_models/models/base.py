@@ -1,7 +1,10 @@
+import keyword
+import re
 from typing import Iterable, List, Tuple, Type
 
 import inflection
 from jinja2 import Template
+from unidecode import unidecode
 
 from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER, indent, sort_fields
 from ..dynamic_typing import AbsoluteModelRef, ImportPathList, MetaData, ModelMeta, compile_imports, metadata_to_typing
@@ -12,6 +15,8 @@ KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
                   "{% if not loop.last %}, {% endif %}" \
                   "{% endfor %}"
 
+keywords_set = set(keyword.kwlist)
+ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
 
 def template(pattern: str, indent: str = INDENT) -> Template:
     """
@@ -80,6 +85,17 @@ class GenericModelCodeGenerator:
         """
         return []
 
+    @classmethod
+    def convert_field_name(cls, name):
+        if name in keywords_set:
+            name += "_"
+        name = unidecode(name)
+        name = re.sub(r"\W", "", name)
+        if not ('a' <= name[0].lower() <= 'z'):
+            if '0' <= name[0] <= '9':
+                name = ones[int(name[0])] + "_" + name[1:]
+        return inflection.underscore(name)
+
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
         """
         Form field data for template
@@ -90,8 +106,9 @@ class GenericModelCodeGenerator:
         :return: imports, field data
         """
         imports, typing = metadata_to_typing(meta)
+
         data = {
-            "name": inflection.underscore(name),
+            "name": self.convert_field_name(name),
             "type": typing
         }
         return imports, data
