@@ -42,32 +42,32 @@ test_data = {
     "base": {
         "model": ("Test", {
             "foo": int,
-            "bar": int,
+            "Bar": int,
             "baz": float
         }),
         "fields_data": {
             "foo": {
                 "name": "foo",
                 "type": "int",
-                "body": f"attr.ib({field_meta('foo')})"
+                "body": f"attr.ib()"
             },
-            "bar": {
+            "Bar": {
                 "name": "bar",
                 "type": "int",
-                "body": f"attr.ib({field_meta('bar')})"
+                "body": f"attr.ib({field_meta('Bar')})"
             },
             "baz": {
                 "name": "baz",
                 "type": "float",
-                "body": f"attr.ib({field_meta('baz')})"
+                "body": f"attr.ib()"
             }
         },
         "fields": {
             "imports": "",
             "fields": [
-                f"foo: int = attr.ib({field_meta('foo')})",
-                f"bar: int = attr.ib({field_meta('bar')})",
-                f"baz: float = attr.ib({field_meta('baz')})",
+                f"foo: int = attr.ib()",
+                f"bar: int = attr.ib({field_meta('Bar')})",
+                f"baz: float = attr.ib()",
             ]
         },
         "generated": trim(f"""
@@ -76,9 +76,9 @@ test_data = {
         
         @attr.s
         class Test:
-            foo: int = attr.ib({field_meta('foo')})
-            bar: int = attr.ib({field_meta('bar')})
-            baz: float = attr.ib({field_meta('baz')})
+            foo: int = attr.ib()
+            bar: int = attr.ib({field_meta('Bar')})
+            baz: float = attr.ib()
         """)
     },
     "complex": {
@@ -94,32 +94,32 @@ test_data = {
             "foo": {
                 "name": "foo",
                 "type": "int",
-                "body": f"attr.ib({field_meta('foo')})"
+                "body": f"attr.ib()"
             },
             "baz": {
                 "name": "baz",
                 "type": "Optional[List[List[str]]]",
-                "body": f"attr.ib(factory=list, {field_meta('baz')})"
+                "body": f"attr.ib(factory=list)"
             },
             "bar": {
                 "name": "bar",
                 "type": "Optional[IntString]",
-                "body": f"attr.ib(default=None, converter=optional(IntString), {field_meta('bar')})"
+                "body": f"attr.ib(default=None, converter=optional(IntString))"
             },
             "qwerty": {
                 "name": "qwerty",
                 "type": "FloatString",
-                "body": f"attr.ib(converter=FloatString, {field_meta('qwerty')})"
+                "body": f"attr.ib(converter=FloatString)"
             },
             "asdfg": {
                 "name": "asdfg",
                 "type": "Optional[int]",
-                "body": f"attr.ib(default=None, {field_meta('asdfg')})"
+                "body": f"attr.ib(default=None)"
             },
             "dict": {
                 "name": "dict",
                 "type": "Dict[str, int]",
-                "body": f"attr.ib({field_meta('dict')})"
+                "body": f"attr.ib()"
             }
         },
         "generated": trim(f"""
@@ -131,12 +131,12 @@ test_data = {
 
         @attr.s
         class Test:
-            foo: int = attr.ib({field_meta('foo')})
-            qwerty: FloatString = attr.ib(converter=FloatString, {field_meta('qwerty')})
-            dict: Dict[str, int] = attr.ib({field_meta('dict')})
-            baz: Optional[List[List[str]]] = attr.ib(factory=list, {field_meta('baz')})
-            bar: Optional[IntString] = attr.ib(default=None, converter=optional(IntString), {field_meta('bar')})
-            asdfg: Optional[int] = attr.ib(default=None, {field_meta('asdfg')})
+            foo: int = attr.ib()
+            qwerty: FloatString = attr.ib(converter=FloatString)
+            dict: Dict[str, int] = attr.ib()
+            baz: Optional[List[List[str]]] = attr.ib(factory=list)
+            bar: Optional[IntString] = attr.ib(default=None, converter=optional(IntString))
+            asdfg: Optional[int] = attr.ib(default=None)
         """)
     }
 }

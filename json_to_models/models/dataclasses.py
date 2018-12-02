@@ -52,7 +52,7 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
         """
         Form field data for template
 
-        :param name: Field name
+        :param name: Original field name
         :param meta: Field metadata
         :param optional: Is field optional
         :return: imports, field data
@@ -72,7 +72,7 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
         elif isclass(meta) and issubclass(meta, StringSerializable):
             pass
 
-        if not self.no_meta:
+        if not self.no_meta and name != data["name"]:
             body_kwargs["metadata"] = {METADATA_FIELD_NAME: name}
         if len(body_kwargs) == 1 and next(iter(body_kwargs.keys())) == "default":
             data["body"] = body_kwargs["default"]

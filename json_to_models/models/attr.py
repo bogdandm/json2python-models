@@ -49,7 +49,7 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
         """
         Form field data for template
 
-        :param name: Field name
+        :param name: Original field name
         :param meta: Field metadata
         :param optional: Is field optional
         :return: imports, field data
@@ -70,7 +70,7 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
         elif isclass(meta) and issubclass(meta, StringSerializable):
             body_kwargs["converter"] = meta.__name__
 
-        if not self.no_meta:
+        if not self.no_meta and name != data["name"]:
             body_kwargs["metadata"] = {METADATA_FIELD_NAME: name}
         data["body"] = self.ATTRIB.render(kwargs=sort_kwargs(body_kwargs, DEFAULT_ORDER))
         return imports, data
