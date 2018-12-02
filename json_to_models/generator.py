@@ -1,4 +1,3 @@
-import keyword
 import re
 from collections import OrderedDict
 from typing import Any, Callable, List, Optional, Pattern, Union
@@ -8,7 +7,6 @@ from unidecode import unidecode
 from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaData, ModelPtr, Null, SingleType,
                              StringSerializable, StringSerializableRegistry, Unknown, registry)
 
-keywords_set = set(keyword.kwlist)
 _static_types = {float, bool, int}
 
 class MetadataGenerator:
@@ -51,8 +49,6 @@ class MetadataGenerator:
             #   Crash does not produce any useful logs and can occur any time after bad string was processed
             #   It can be reproduced on real_apis tests (openlibrary API)
             convert_dict = key not in self.dict_keys_fields
-            if key in keywords_set:
-                key += "_"
             fields[key] = self._detect_type(value if not isinstance(value, str) else unidecode(value), convert_dict)
         return fields
 

@@ -22,7 +22,6 @@
             - [ ] dataclasses
             - [ ] Decorator to mark class as exclude from models merge
         - Other features
-            - [ ] Decode unicode in keys
             - [ ] Nesting models generation
                 - [X] Cascade (default)
                 - [X] Flat
@@ -38,6 +37,7 @@
                 - [X] ISO time
                 - [X] ISO datetime
             - [X] Don't create metadata (J2M_ORIGINAL_FIELD) if original_field == generated_field
+            - [X] Decode unicode in keys
     - [X] Cli tool
         
 - Testing

@@ -88,38 +88,56 @@ test_data = {
             "bar": DOptional(IntString),
             "qwerty": FloatString,
             "asdfg": DOptional(int),
-            "dict": DDict(int)
+            "dict": DDict(int),
+            "not": bool,
+            "1day": int,
+            "день_недели": str,
         }),
         "fields_data": {
             "foo": {
                 "name": "foo",
                 "type": "int",
-                "body": f"attr.ib()"
+                "body": "attr.ib()"
             },
             "baz": {
                 "name": "baz",
                 "type": "Optional[List[List[str]]]",
-                "body": f"attr.ib(factory=list)"
+                "body": "attr.ib(factory=list)"
             },
             "bar": {
                 "name": "bar",
                 "type": "Optional[IntString]",
-                "body": f"attr.ib(default=None, converter=optional(IntString))"
+                "body": "attr.ib(default=None, converter=optional(IntString))"
             },
             "qwerty": {
                 "name": "qwerty",
                 "type": "FloatString",
-                "body": f"attr.ib(converter=FloatString)"
+                "body": "attr.ib(converter=FloatString)"
             },
             "asdfg": {
                 "name": "asdfg",
                 "type": "Optional[int]",
-                "body": f"attr.ib(default=None)"
+                "body": "attr.ib(default=None)"
             },
             "dict": {
                 "name": "dict",
                 "type": "Dict[str, int]",
-                "body": f"attr.ib()"
+                "body": "attr.ib()"
+            },
+            "not": {
+                "name": "not_",
+                "type": "bool",
+                "body": f"attr.ib({field_meta('not')})"
+            },
+            "1day": {
+                "name": "one_day",
+                "type": "int",
+                "body": f"attr.ib({field_meta('1day')})"
+            },
+            "день_недели": {
+                "name": "den_nedeli",
+                "type": "str",
+                "body": f"attr.ib({field_meta('день_недели')})"
             }
         },
         "generated": trim(f"""
@@ -134,6 +152,9 @@ test_data = {
             foo: int = attr.ib()
             qwerty: FloatString = attr.ib(converter=FloatString)
             dict: Dict[str, int] = attr.ib()
+            not_: bool = attr.ib({field_meta('not')})
+            one_day: int = attr.ib({field_meta('1day')})
+            den_nedeli: str = attr.ib({field_meta('день_недели')})
             baz: Optional[List[List[str]]] = attr.ib(factory=list)
             bar: Optional[IntString] = attr.ib(default=None, converter=optional(IntString))
             asdfg: Optional[int] = attr.ib(default=None)
