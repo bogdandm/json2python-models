@@ -22,32 +22,30 @@ test_data = {
     "base": {
         "model": ("Test", {
             "foo": int,
-            "bar": int,
+            "Bar": int,
             "baz": float
         }),
         "fields_data": {
             "foo": {
                 "name": "foo",
-                "type": "int",
-                "body": f"field({field_meta('foo')})"
+                "type": "int"
             },
-            "bar": {
+            "Bar": {
                 "name": "bar",
                 "type": "int",
-                "body": f"field({field_meta('bar')})"
+                "body": f"field({field_meta('Bar')})"
             },
             "baz": {
                 "name": "baz",
-                "type": "float",
-                "body": f"field({field_meta('baz')})"
+                "type": "float"
             }
         },
         "fields": {
             "imports": "",
             "fields": [
-                f"foo: int = field({field_meta('foo')})",
-                f"bar: int = field({field_meta('bar')})",
-                f"baz: float = field({field_meta('baz')})",
+                f"foo: int",
+                f"bar: int = field({field_meta('Bar')})",
+                f"baz: float",
             ]
         },
         "generated": trim(f"""
@@ -56,9 +54,9 @@ test_data = {
 
         @dataclass
         class Test:
-            foo: int = field({field_meta('foo')})
-            bar: int = field({field_meta('bar')})
-            baz: float = field({field_meta('baz')})
+            foo: int
+            bar: int = field({field_meta('Bar')})
+            baz: float
         """)
     },
     "complex": {
@@ -73,33 +71,30 @@ test_data = {
         "fields_data": {
             "foo": {
                 "name": "foo",
-                "type": "int",
-                "body": f"field({field_meta('foo')})"
+                "type": "int"
             },
             "baz": {
                 "name": "baz",
                 "type": "Optional[List[List[str]]]",
-                "body": f"field(default_factory=list, {field_meta('baz')})"
+                "body": f"field(default_factory=list)"
             },
             "bar": {
                 "name": "bar",
                 "type": "Optional[IntString]",
-                "body": f"field(default=None, {field_meta('bar')})"
+                "body": "None"
             },
             "qwerty": {
                 "name": "qwerty",
-                "type": "FloatString",
-                "body": f"field({field_meta('qwerty')})"
+                "type": "FloatString"
             },
             "asdfg": {
                 "name": "asdfg",
                 "type": "Optional[int]",
-                "body": f"field(default=None, {field_meta('asdfg')})"
+                "body": "None"
             },
             "dict": {
                 "name": "dict",
-                "type": "Dict[str, int]",
-                "body": f"field({field_meta('dict')})"
+                "type": "Dict[str, int]"
             }
         },
         "generated": trim(f"""
@@ -110,12 +105,12 @@ test_data = {
 
         @dataclass
         class Test:
-            foo: int = field({field_meta('foo')})
-            qwerty: FloatString = field({field_meta('qwerty')})
-            dict: Dict[str, int] = field({field_meta('dict')})
-            baz: Optional[List[List[str]]] = field(default_factory=list, {field_meta('baz')})
-            bar: Optional[IntString] = field(default=None, {field_meta('bar')})
-            asdfg: Optional[int] = field(default=None, {field_meta('asdfg')})
+            foo: int
+            qwerty: FloatString
+            dict: Dict[str, int]
+            baz: Optional[List[List[str]]] = field(default_factory=list)
+            bar: Optional[IntString] = None
+            asdfg: Optional[int] = None
         """)
     }
 }
@@ -135,7 +130,7 @@ test_data_unzip = {
 
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["fields_data"])
-def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
+def test_fields_data_dc(value: ModelMeta, expected: Dict[str, dict]):
     gen = DataclassModelCodeGenerator(value, meta=True)
     required, optional = sort_fields(value)
     for is_optional, fields in enumerate((required, optional)):
@@ -145,7 +140,7 @@ def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
 
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["fields"])
-def test_fields_attr(value: ModelMeta, expected: dict):
+def test_fields_dc(value: ModelMeta, expected: dict):
     expected_imports: str = expected["imports"]
     expected_fields: List[str] = expected["fields"]
     gen = DataclassModelCodeGenerator(value, meta=True)
@@ -156,7 +151,7 @@ def test_fields_attr(value: ModelMeta, expected: dict):
 
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
-def test_generated_attr(value: ModelMeta, expected: str):
+def test_generated_dc(value: ModelMeta, expected: str):
     generated = generate_code(([{"model": value, "nested": []}], {}), DataclassModelCodeGenerator,
                               class_generator_kwargs={'meta': True})
     assert generated.rstrip() == expected, generated

@@ -6,7 +6,7 @@ from jinja2 import Template
 from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER, indent, sort_fields
 from ..dynamic_typing import AbsoluteModelRef, ImportPathList, MetaData, ModelMeta, compile_imports, metadata_to_typing
 
-METADATA_FIELD_NAME = "RCG_ORIGINAL_FIELD"
+METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
 KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
                   "{{ key }}={{ value }}" \
                   "{% if not loop.last %}, {% endif %}" \
@@ -84,7 +84,7 @@ class GenericModelCodeGenerator:
         """
         Form field data for template
 
-        :param name: Field name
+        :param name: Original field name
         :param meta: Field metadata
         :param optional: Is field optional
         :return: imports, field data

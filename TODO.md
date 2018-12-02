@@ -7,7 +7,7 @@
         - [X] Data variant merging
         - [X] Create and register models
         - [X] Merge meta-models and extract common ones
-        - [ ] Save meta-models as python code
+        - [X] Save meta-models as python code
             - [X] typing code generation
                 - [ ] (Maybe in future) Extract to another module (by serializers for each dynamic typing class)
             - [X] attrs
@@ -25,11 +25,11 @@
             - [ ] Decode unicode in keys
             - [ ] Nesting models generation
                 - [X] Cascade (default)
-                - [ ] Flat
+                - [X] Flat
             - [ ] OptionalFieldsPolicy
                 - [X] Merge (default)
-                - [ ] Field sets
                 - [X] Key as data (does not process json dict as a model but process it as a python dict)
+                - [ ] Field sets
             - [ ] Complex python types annotations
                 - [ ] Decorator to specify field metatype
                 - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
@@ -37,7 +37,7 @@
                 - [X] ISO date
                 - [X] ISO time
                 - [X] ISO datetime
-            - [ ] Don't create metadata (RCG_ORIGINAL_FIELD) if original_field == generated_field
+            - [X] Don't create metadata (J2M_ORIGINAL_FIELD) if original_field == generated_field
     - [X] Cli tool
         
 - Testing

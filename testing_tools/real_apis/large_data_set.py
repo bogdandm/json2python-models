@@ -38,7 +38,7 @@ def main():
           "\nPress enter to continue...\n")
     input()
     structure_flat = compose_models_flat(reg.models_map)
-    code = generate_code(structure_flat, DataclassModelCodeGenerator)
+    code = generate_code(structure_flat, DataclassModelCodeGenerator, class_generator_kwargs={"meta": True})
     print(code)
 
 
