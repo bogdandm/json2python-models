@@ -45,6 +45,6 @@ setup(
     },
     install_requires=required,
     cmdclass={"test": PyTest},
-    tests_require=["pytest", "pytest-xdist", "requests", "attrs"],
+    tests_require=["pytest>=4.4.0", "pytest-xdist", "requests", "attrs"],
     data_files=[('', ['pytest.ini', '.coveragerc', 'LICENSE'])]
 )
