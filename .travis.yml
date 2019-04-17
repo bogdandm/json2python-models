@@ -6,8 +6,7 @@ cache: pip
 install:
   - python setup.py sdist
   - python setup.py install
-  - pip install pytest-cov requests coveralls codacy-coverage
-  - pip install pytest>=4.4.0
+  - pip install pytest=4.4.* pytest-cov pytest-xdist requests coveralls codacy-coverage
   - pytest --version
 
 script:
