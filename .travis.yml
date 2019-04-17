@@ -6,7 +6,9 @@ cache: pip
 install:
   - python setup.py sdist
   - python setup.py install
-  - pip install pytest>=4.4.0 pytest-cov requests coveralls codacy-coverage
+  - pip install pytest-cov requests coveralls codacy-coverage
+  - pip install pytest>=4.4.0
+  - pytest --version
 
 script:
   - python setup.py test -a '--cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/'
