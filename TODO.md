@@ -1,5 +1,4 @@
 - (!) README.md
-- Do not use OrderedDict (dictionaries in Python 3.7 are now ordered)
 - Docstrings
 - Features
     - Models layer

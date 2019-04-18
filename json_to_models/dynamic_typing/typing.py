@@ -1,5 +1,4 @@
 import operator
-from collections import OrderedDict
 from inspect import isclass
 from typing import Dict, Set, Tuple
 
@@ -28,7 +27,7 @@ def compile_imports(imports: ImportPathList) -> str:
     """
     Merge list of imports path and convert them into list code (string)
     """
-    class_imports_map: Dict[str, Set[str]] = OrderedDict()
+    class_imports_map: Dict[str, Set[str]] = {}
     package_imports_set: Set[str] = set()
     for module, classes in filter(None, imports):
         if classes is None:
@@ -42,7 +41,7 @@ def compile_imports(imports: ImportPathList) -> str:
             class_imports_map[module] = classes_set
 
     # Sort imports by package name and sort class names of each import
-    class_imports_map = OrderedDict(sorted(
+    class_imports_map = dict(sorted(
         ((module, sorted(classes)) for module, classes in class_imports_map.items()),
         key=operator.itemgetter(0)
     ))
