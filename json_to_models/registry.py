@@ -1,6 +1,6 @@
 from collections import OrderedDict, defaultdict
 from itertools import chain, combinations
-from typing import Dict, List, Set, Tuple
+from typing import Dict, Iterable, List, Set, Tuple
 
 from ordered_set import OrderedSet
 
@@ -147,7 +147,7 @@ class ModelRegistry:
                 models2merge[model_b].add(model_a)
 
         # Groups of models to merge
-        groups: List[Set[ModelMeta]] = [{model, *models} for model, models in models2merge.items()]
+        groups: Iterable[Set[ModelMeta]] = [{model, *models} for model, models in models2merge.items()]
         # Make groups non-overlapping.
         # This is not optimal algorithm but it works and we probably will not have thousands of models here.
         flag = True

@@ -2,8 +2,8 @@ from typing import Dict, List
 
 import pytest
 
-from json_to_models.dynamic_typing import (AbsoluteModelRef, DList, DOptional, IntString, ModelMeta, ModelPtr,
-                                           compile_imports)
+from json_to_models.dynamic_typing import (AbsoluteModelRef, DDict, DList, DOptional, IntString, ModelMeta, ModelPtr,
+                                           Unknown, compile_imports)
 from json_to_models.models import indent, sort_fields
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 
@@ -101,7 +101,8 @@ test_data = {
         "model": ("Test", {
             "foo": int,
             "baz": DOptional(DList(DList(str))),
-            "bar": IntString
+            "bar": IntString,
+            "d": DDict(Unknown)
         }),
         "fields_data": {
             "foo": {
@@ -115,25 +116,31 @@ test_data = {
             "bar": {
                 "name": "bar",
                 "type": "IntString"
+            },
+            "d": {
+                "name": "d",
+                "type": "Dict[str, Any]"
             }
         },
         "fields": {
             "imports": "from json_to_models.dynamic_typing import IntString\n"
-                       "from typing import List, Optional",
+                       "from typing import Any, Dict, List, Optional",
             "fields": [
                 "foo: int",
                 "bar: IntString",
+                "d: Dict[str, Any]",
                 "baz: Optional[List[List[str]]]",
             ]
         },
         "generated": trim("""
         from json_to_models.dynamic_typing import IntString
-        from typing import List, Optional
+        from typing import Any, Dict, List, Optional
         
         
         class Test:
             foo: int
             bar: IntString
+            d: Dict[str, Any]
             baz: Optional[List[List[str]]]
         """)
     }
