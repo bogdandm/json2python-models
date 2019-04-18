@@ -1,4 +1,4 @@
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from itertools import chain, combinations
 from typing import Dict, Iterable, List, Set, Tuple
 
@@ -50,7 +50,7 @@ class ModelRegistry:
         :param models_cmp: list of model comparators. If you want merge only equals models pass ModelFieldsEquals()
         """
         self._models_cmp = models_cmp or self.DEFAULT_MODELS_CMP
-        self._registry: Dict[str, ModelMeta] = OrderedDict()
+        self._registry: Dict[str, ModelMeta] = {}
         self._index = Index()
 
     @property

@@ -1,5 +1,5 @@
 - (!) README.md
-- Do not use OrderedDict (dictionaries in Python 3.7 are now ordered)
+- Docstrings
 - Features
     - Models layer
         - [X] Data variant converting
@@ -7,6 +7,7 @@
         - [X] Data variant merging
         - [X] Create and register models
         - [X] Merge meta-models and extract common ones
+            - [ ] Strict mode
         - [X] Save meta-models as python code
             - [X] typing code generation
                 - [ ] (Maybe in future) Extract to another module (by serializers for each dynamic typing class)

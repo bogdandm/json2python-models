@@ -1,5 +1,4 @@
 import re
-from collections import OrderedDict
 from typing import Any, Callable, List, Optional, Pattern, Union
 
 from unidecode import unidecode
@@ -114,7 +113,7 @@ class MetadataGenerator:
         """
         Merge fields sets into one set of pairs (key, metadata)
         """
-        fields: dict = OrderedDict()
+        fields: dict = {}
 
         first = True
         for model in field_sets:
@@ -166,7 +165,7 @@ class MetadataGenerator:
             Default is False to prevent recursion cycles.
         """
         if isinstance(meta, dict):
-            fields = OrderedDict()
+            fields = {}
 
             for k, v in meta.items():
                 fields[k] = self.optimize_type(v)
