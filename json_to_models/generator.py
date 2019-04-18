@@ -77,6 +77,8 @@ class MetadataGenerator:
 
         # Dict should be processed as another model if convert_dict is enabled
         elif isinstance(value, dict):
+            if not value:
+                return DDict(Unknown)
             for reg in self.dict_keys_regex:
                 if all(map(reg.match, value.keys())):
                     convert_dict = False
@@ -91,10 +93,8 @@ class MetadataGenerator:
                     if len(union.types) == 1:
                         return DDict(*union.types)
                     return DDict(union)
-                elif types:
-                    return DDict(*types)
                 else:
-                    return DDict(Unknown)
+                    return DDict(*types)
 
         # null interpreted as is and will be processed later on Union merge stage
         elif value is None:

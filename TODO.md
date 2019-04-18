@@ -3,7 +3,7 @@
 - Features
     - Models layer
         - [X] Data variant converting
-            - [ ] Change empty dict to actual dict type, not empty models
+            - [X] Change empty dict to actual dict type, not empty models
         - [X] Data variant merging
         - [X] Create and register models
         - [X] Merge meta-models and extract common ones
