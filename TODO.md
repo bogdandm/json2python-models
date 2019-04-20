@@ -14,6 +14,8 @@
             - [X] attrs
             - [X] dataclasses
                 - [ ] post_init converters for StringSerializable types
+                    - [ ] Nested converters
+                    - [ ] Cli argument
             - [ ] generate from_json/to_json converters
         - [ ] Model class -> Meta format converter
             - [ ] attrs

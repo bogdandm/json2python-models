@@ -1,5 +1,5 @@
 from inspect import isclass
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 
 from .base import GenericModelCodeGenerator, KWAGRS_TEMPLATE, METADATA_FIELD_NAME, sort_kwargs, template
 from ..dynamic_typing import DDict, DList, DOptional, ImportPathList, MetaData, ModelMeta, StringSerializable
@@ -9,12 +9,6 @@ DEFAULT_ORDER = (
     "*",
     ("metadata",)
 )
-
-
-def f(self):
-    for name in ('',):
-        t = self.__annotations__[name]
-        setattr(self, name, t.to_internal_value(getattr(self, name)))
 
 
 def dataclass_post_init_converters(str_fields: List[str]):
@@ -37,7 +31,7 @@ def dataclass_post_init_converters(str_fields: List[str]):
     return __post_init__
 
 
-def convert_strings(str_fields: List[str]):
+def convert_strings(str_fields: List[str]) -> Callable[[type], type]:
     """
     Decorator factory. Set up `__post_init__` method to convert strings fields values into StringSerializable types
 
@@ -45,15 +39,15 @@ def convert_strings(str_fields: List[str]):
     :return: Class decorator
     """
 
-    def decorator(cls):
-        if hasattr(cls, '__post__init__'):
-            old_fn = cls.__post__init__
+    def decorator(cls: type) -> type:
+        if hasattr(cls, '__post_init__'):
+            old_fn = cls.__post_init__
 
-            def __post__init__(self, *args, **kwargs):
+            def __post_init__(self, *args, **kwargs):
                 dataclass_post_init_converters(str_fields)(self)
                 old_fn(self, *args, **kwargs)
 
-            setattr(cls, '__post_init__', __post__init__)
+            setattr(cls, '__post_init__', __post_init__)
         else:
             setattr(cls, '__post_init__', dataclass_post_init_converters(str_fields))
 
@@ -85,12 +79,14 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
     def decorators(self) -> Tuple[ImportPathList, List[str]]:
         imports = [('dataclasses', ['dataclass', 'field'])]
         decorators = [self.DC_DECORATOR.render(kwargs=self.dataclass_kwargs)]
+
         if self.post_init_converters:
             str_fields = [self.convert_field_name(name) for name, t in self.model.type.items()
                           if isclass(t) and issubclass(t, StringSerializable)]
             if str_fields:
-                imports.append(('json_to_models.models.dataclasses', ['dataclass_post_init_converters']))
+                imports.append(('json_to_models.models.dataclasses', ['convert_strings']))
                 decorators.append(self.DC_CONVERT_DECORATOR.render(str_fields=str_fields))
+
         return imports, decorators
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
