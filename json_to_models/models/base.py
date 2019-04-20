@@ -8,6 +8,7 @@ from unidecode import unidecode
 
 from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER, indent, sort_fields
 from ..dynamic_typing import AbsoluteModelRef, ImportPathList, MetaData, ModelMeta, compile_imports, metadata_to_typing
+from ..utils import cached_classmethod
 
 METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
 KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
@@ -17,6 +18,7 @@ KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
 
 keywords_set = set(keyword.kwlist)
 ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+
 
 def template(pattern: str, indent: str = INDENT) -> Template:
     """
@@ -56,6 +58,9 @@ class GenericModelCodeGenerator:
     {%- else %}
         pass
     {%- endif -%}
+    {%- if extra %}    
+    {{ extra }}
+    {%- endif -%}
     """)
 
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
@@ -63,29 +68,31 @@ class GenericModelCodeGenerator:
     def __init__(self, model: ModelMeta, **kwargs):
         self.model = model
 
-    def generate(self, nested_classes: List[str] = None) -> Tuple[ImportPathList, str]:
+    def generate(self, nested_classes: List[str] = None, extra: str = "") -> Tuple[ImportPathList, str]:
         """
         :param nested_classes: list of strings that contains classes code
         :return: list of import data, class code
         """
         imports, fields = self.fields
+        decorator_imports, decorators = self.decorators
         data = {
-            "decorators": self.decorators,
+            "decorators": decorators,
             "name": self.model.name,
-            "fields": fields
+            "fields": fields,
+            "extra": extra
         }
         if nested_classes:
             data["nested"] = [indent(s) for s in nested_classes]
         return imports, self.BODY.render(**data)
 
     @property
-    def decorators(self) -> List[str]:
+    def decorators(self) -> Tuple[ImportPathList, List[str]]:
         """
-        :return: List of decorators code (without @)
+        :return: List of imports and List of decorators code (without @)
         """
-        return []
+        return [], []
 
-    @classmethod
+    @cached_classmethod
     def convert_field_name(cls, name):
         if name in keywords_set:
             name += "_"

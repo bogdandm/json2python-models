@@ -11,11 +11,60 @@ DEFAULT_ORDER = (
 )
 
 
+def f(self):
+    for name in ('',):
+        t = self.__annotations__[name]
+        setattr(self, name, t.to_internal_value(getattr(self, name)))
+
+
+def dataclass_post_init_converters(str_fields: List[str]):
+    """
+    Method factory. Return post_init method to convert string into StringSerializable types
+    To override generated __post_init__ you can call it directly:
+
+    >>> def __post_init__(self):
+    ...     dataclass_post_init_converters(['a', 'b'])(self)
+
+    :param str_fields: names of StringSerializable fields
+    :return: __post_init__ method
+    """
+
+    def __post_init__(self):
+        for name in (str_fields):
+            t = self.__annotations__[name]
+            setattr(self, name, t.to_internal_value(getattr(self, name)))
+
+    return __post_init__
+
+
+def convert_strings(str_fields: List[str]):
+    """
+    Decorator factory. Set up `__post_init__` method to convert strings fields values into StringSerializable types
+
+    :param str_fields: names of StringSerializable fields
+    :return: Class decorator
+    """
+
+    def decorator(cls):
+        if hasattr(cls, '__post__init__'):
+            old_fn = cls.__post__init__
+
+            def __post__init__(self, *args, **kwargs):
+                dataclass_post_init_converters(str_fields)(self)
+                old_fn(self, *args, **kwargs)
+
+            setattr(cls, '__post_init__', __post__init__)
+        else:
+            setattr(cls, '__post_init__', dataclass_post_init_converters(str_fields))
+
+        return cls
+
+    return decorator
+
+
 class DataclassModelCodeGenerator(GenericModelCodeGenerator):
-    DC_DECORATOR = template("dataclass"
-                            "{% if kwargs %}"
-                            f"({KWAGRS_TEMPLATE})"
-                            "{% endif %}")
+    DC_DECORATOR = template(f"dataclass{{% if kwargs %}}({KWAGRS_TEMPLATE}){{% endif %}}")
+    DC_CONVERT_DECORATOR = template("convert_strings({{ str_fields }})")
     DC_FIELD = template(f"field({KWAGRS_TEMPLATE})")
 
     def __init__(self, model: ModelMeta, meta=False, post_init_converters=False, dataclass_kwargs: dict = None,
@@ -32,21 +81,17 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
         self.no_meta = not meta
         self.dataclass_kwargs = dataclass_kwargs or {}
 
-    def generate(self, nested_classes: List[str] = None) -> Tuple[ImportPathList, str]:
-        """
-        :param nested_classes: list of strings that contains classes code
-        :return: list of import data, class code
-        """
-        imports, code = super().generate(nested_classes)
-        imports.append(('dataclasses', ['dataclass, field']))
-        return imports, code
-
     @property
-    def decorators(self) -> List[str]:
-        """
-        :return: List of decorators code (without @)
-        """
-        return [self.DC_DECORATOR.render(kwargs=self.dataclass_kwargs)]
+    def decorators(self) -> Tuple[ImportPathList, List[str]]:
+        imports = [('dataclasses', ['dataclass', 'field'])]
+        decorators = [self.DC_DECORATOR.render(kwargs=self.dataclass_kwargs)]
+        if self.post_init_converters:
+            str_fields = [self.convert_field_name(name) for name, t in self.model.type.items()
+                          if isclass(t) and issubclass(t, StringSerializable)]
+            if str_fields:
+                imports.append(('json_to_models.models.dataclasses', ['dataclass_post_init_converters']))
+                decorators.append(self.DC_CONVERT_DECORATOR.render(str_fields=str_fields))
+        return imports, decorators
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
         """

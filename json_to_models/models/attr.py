@@ -29,21 +29,9 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
         self.no_meta = not meta
         self.attrs_kwargs = attrs_kwargs or {}
 
-    def generate(self, nested_classes: List[str] = None) -> Tuple[ImportPathList, str]:
-        """
-        :param nested_classes: list of strings that contains classes code
-        :return: list of import data, class code
-        """
-        imports, code = super().generate(nested_classes)
-        imports.append(('attr', None))
-        return imports, code
-
     @property
-    def decorators(self) -> List[str]:
-        """
-        :return: List of decorators code (without @)
-        """
-        return [self.ATTRS.render(kwargs=self.attrs_kwargs)]
+    def decorators(self) -> Tuple[ImportPathList, List[str]]:
+        return [('attr', None)], [self.ATTRS.render(kwargs=self.attrs_kwargs)]
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
         """
