@@ -20,8 +20,7 @@ def _process_string_field_value(path: List[str], value: Any, current_type: Any, 
         except ValueError as e:
             if not optional:
                 raise e
-        finally:
-            return value
+        return value
     elif token == 'O':
         return _process_string_field_value(
             path=path,
