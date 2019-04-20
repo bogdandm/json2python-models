@@ -37,7 +37,7 @@ class StringSerializable(BaseType):
         return [('json_to_models.dynamic_typing', cls_name)], cls_name
 
     def __iter__(self):
-        return ()
+        return iter(())
 
 
 T_StringSerializable = Type[StringSerializable]

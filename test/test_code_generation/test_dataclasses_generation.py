@@ -2,10 +2,12 @@ from typing import Dict, List
 
 import pytest
 
-from json_to_models.dynamic_typing import (DDict, DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
+from json_to_models.dynamic_typing import (DDict, DList, DOptional, DUnion, FloatString, IntString, ModelMeta,
+                                           compile_imports)
 from json_to_models.models import sort_fields
 from json_to_models.models.base import METADATA_FIELD_NAME, generate_code
-from json_to_models.models.dataclasses import DataclassModelCodeGenerator
+from json_to_models.models.dataclasses import (DataclassModelCodeGenerator, convert_strings,
+                                               dataclass_post_init_converters)
 from test.test_code_generation.test_models_code_generator import model_factory, trim
 
 
@@ -97,13 +99,15 @@ test_data = {
                 "type": "Dict[str, int]"
             }
         },
-        "generated": trim(f"""
+        "generated": trim("""
         from dataclasses import dataclass, field
         from json_to_models.dynamic_typing import FloatString, IntString
+        from json_to_models.models.dataclasses import convert_strings
         from typing import Dict, List, Optional
 
 
         @dataclass
+        @convert_strings(['bar#U.S', 'qwerty'])
         class Test:
             foo: int
             qwerty: FloatString
@@ -111,6 +115,33 @@ test_data = {
             baz: Optional[List[List[str]]] = field(default_factory=list)
             bar: Optional[IntString] = None
             asdfg: Optional[int] = None
+        """)
+    },
+    "converters": {
+        "model": ("Test", {
+            "a": int,
+            "b": IntString,
+            "c": DOptional(FloatString),
+            "d": DList(DList(DList(IntString))),
+            "e": DDict(IntString),
+            "u": DUnion(DDict(IntString), DList(DList(IntString))),
+        }),
+        "generated": trim("""
+        from dataclasses import dataclass, field
+        from json_to_models.dynamic_typing import FloatString, IntString
+        from json_to_models.models.dataclasses import convert_strings
+        from typing import Dict, List, Optional, Union
+
+
+        @dataclass
+        @convert_strings(['b', 'c#U.S', 'd#L.L.L.S', 'e#D.S'])
+        class Test:
+            a: int
+            b: IntString
+            d: List[List[List[IntString]]]
+            e: Dict[str, IntString]
+            u: Union[Dict[str, IntString], List[List[IntString]]]
+            c: Optional[FloatString] = None
         """)
     }
 }
@@ -152,6 +183,49 @@ def test_fields_dc(value: ModelMeta, expected: dict):
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated_dc(value: ModelMeta, expected: str):
-    generated = generate_code(([{"model": value, "nested": []}], {}), DataclassModelCodeGenerator,
-                              class_generator_kwargs={'meta': True})
+    generated = generate_code(
+        ([{"model": value, "nested": []}], {}),
+        DataclassModelCodeGenerator,
+        class_generator_kwargs={'meta': True, 'post_init_converters': True}
+    )
     assert generated.rstrip() == expected, generated
+
+
+def test_dataclass_post_init_converters():
+    from dataclasses import dataclass
+
+    @dataclass
+    class A:
+        x: IntString
+        y: FloatString
+
+        __post_init__ = dataclass_post_init_converters(['x', 'y'])
+
+    a = A('1', '1.1')
+    assert type(a.x) is IntString
+    assert type(a.y) is FloatString
+
+
+def test_convert_strings_decorator():
+    from dataclasses import dataclass
+
+    @dataclass
+    @convert_strings(['x', 'y'])
+    class A:
+        x: IntString
+        y: FloatString
+
+    @dataclass
+    @convert_strings(['x', 'y'])
+    class B:
+        x: IntString
+        y: FloatString
+
+        def __post_init__(self):
+            self.x *= 2
+
+    a = A('1', '1.1')
+    b = B('1', '1.1')
+    assert type(a.x) is IntString
+    assert type(a.y) is FloatString
+    assert b.x == 2

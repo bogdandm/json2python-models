@@ -1,8 +1,10 @@
+import logging
 from inspect import isclass
 from typing import Callable, List, Tuple
 
 from .base import GenericModelCodeGenerator, KWAGRS_TEMPLATE, METADATA_FIELD_NAME, sort_kwargs, template
-from ..dynamic_typing import DDict, DList, DOptional, ImportPathList, MetaData, ModelMeta, StringSerializable
+from ..dynamic_typing import (BaseType, DDict, DList, DOptional, DUnion, ImportPathList, MetaData, ModelMeta,
+                              StringSerializable)
 
 DEFAULT_ORDER = (
     ("default", "default_factory"),
@@ -31,11 +33,23 @@ def dataclass_post_init_converters(str_fields: List[str]):
     return __post_init__
 
 
-def convert_strings(str_fields: List[str]) -> Callable[[type], type]:
+def convert_strings(str_field_paths: List[str]) -> Callable[[type], type]:
     """
     Decorator factory. Set up `__post_init__` method to convert strings fields values into StringSerializable types
 
-    :param str_fields: names of StringSerializable fields
+    If field contains complex data type path should be consist of field name and dotted list of tokens:
+
+    * `S` - string component
+    * `U` - Union or Optional
+    * `L` - List
+    * `D` - Dict
+
+    So if field `'bar'` has type `Optional[List[List[IntString]]]` field path would be `'bar#U.L.L.S'`
+
+    ! If type is too complex i.e. Union[List[IntString], List[List[IntString]]]
+    you can't specify field path and such field would be ignored
+
+    :param str_field_paths: Paths of StringSerializable fields (field name or field name + typing path)
     :return: Class decorator
     """
 
@@ -44,12 +58,12 @@ def convert_strings(str_fields: List[str]) -> Callable[[type], type]:
             old_fn = cls.__post_init__
 
             def __post_init__(self, *args, **kwargs):
-                dataclass_post_init_converters(str_fields)(self)
+                dataclass_post_init_converters(str_field_paths)(self)
                 old_fn(self, *args, **kwargs)
 
             setattr(cls, '__post_init__', __post_init__)
         else:
-            setattr(cls, '__post_init__', dataclass_post_init_converters(str_fields))
+            setattr(cls, '__post_init__', dataclass_post_init_converters(str_field_paths))
 
         return cls
 
@@ -75,14 +89,58 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
         self.no_meta = not meta
         self.dataclass_kwargs = dataclass_kwargs or {}
 
+    def get_string_field_paths(self) -> List[str]:
+        # `S` - string component
+        # `U` - Union or Optional
+        # `L` - List
+        # `D` - Dict
+        str_fields = []
+        for name, t in self.model.type.items():
+            name = self.convert_field_name(name)
+
+            # Walk through nested types
+            paths: List[List[str]] = []
+            tokens: List[Tuple[MetaData, List[str]]] = [(t, ['#'])]
+            while tokens:
+                tmp_type, path = tokens.pop()
+                if isclass(tmp_type):
+                    if issubclass(tmp_type, StringSerializable):
+                        paths.append(path + ['S'])
+                elif isinstance(tmp_type, BaseType):
+                    cls = type(tmp_type)
+                    if cls in (DUnion, DOptional):
+                        token = 'U'
+                    elif cls is DList:
+                        token = 'L'
+                    elif cls is DDict:
+                        token = 'D'
+                    else:
+                        raise TypeError(f"Unsupported meta-type for converter path {cls}")
+
+                    for nested_type in tmp_type:
+                        tokens.append((nested_type, path + [token]))
+            paths: List[str] = ["".join(p[1:]) for p in paths]
+            if not paths:
+                continue
+            if len(paths) > 1:
+                logging.warning(f"Could generate (string->StringSerializable) converter for type {t} (field {name})")
+                continue
+
+            path = paths.pop()
+            if path == 'S':
+                str_fields.append(name)
+            else:
+                str_fields.append(f'{name}#{".".join(path)}')
+
+        return str_fields
+
     @property
     def decorators(self) -> Tuple[ImportPathList, List[str]]:
         imports = [('dataclasses', ['dataclass', 'field'])]
         decorators = [self.DC_DECORATOR.render(kwargs=self.dataclass_kwargs)]
 
         if self.post_init_converters:
-            str_fields = [self.convert_field_name(name) for name, t in self.model.type.items()
-                          if isclass(t) and issubclass(t, StringSerializable)]
+            str_fields = self.get_string_field_paths()
             if str_fields:
                 imports.append(('json_to_models.models.dataclasses', ['convert_strings']))
                 decorators.append(self.DC_CONVERT_DECORATOR.render(str_fields=str_fields))
