@@ -12,9 +12,10 @@
             - [X] typing code generation
                 - [ ] (Maybe in future) Extract to another module (by serializers for each dynamic typing class)
             - [X] attrs
+                - complex StringSerializable converters (based on dataclass post_init converter)
             - [X] dataclasses
                 - [ ] post_init converters for StringSerializable types
-                    - [ ] Nested converters
+                    - [X] Nested converters
                     - [ ] Cli argument
             - [ ] generate from_json/to_json converters
         - [ ] Model class -> Meta format converter

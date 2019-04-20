@@ -1,9 +1,8 @@
-import logging
 from inspect import isclass
-from typing import Callable, List, Tuple
+from typing import Any, Callable, List, Tuple
 
 from .base import GenericModelCodeGenerator, KWAGRS_TEMPLATE, METADATA_FIELD_NAME, sort_kwargs, template
-from ..dynamic_typing import (BaseType, DDict, DList, DOptional, DUnion, ImportPathList, MetaData, ModelMeta,
+from ..dynamic_typing import (BaseType, DDict, DList, DOptional, DUnion, ImportPathList, MetaData, ModelMeta, ModelPtr,
                               StringSerializable)
 
 DEFAULT_ORDER = (
@@ -11,6 +10,39 @@ DEFAULT_ORDER = (
     "*",
     ("metadata",)
 )
+
+
+def _process_string_field_value(path: List[str], value: Any, current_type: Any, optional=False) -> Any:
+    token, *path = path
+    if token == 'S':
+        try:
+            value = current_type.to_internal_value(value)
+        except ValueError as e:
+            if not optional:
+                raise e
+        finally:
+            return value
+    elif token == 'O':
+        return _process_string_field_value(
+            path=path,
+            value=value,
+            current_type=current_type.__args__[0],
+            optional=True
+        )
+    elif token == 'L':
+        t = current_type.__args__[0]
+        return [
+            _process_string_field_value(path, item, current_type=t, optional=optional)
+            for item in value
+        ]
+    elif token == 'D':
+        t = current_type.__args__[1]
+        return {
+            key: _process_string_field_value(path, item, current_type=t, optional=optional)
+            for key, item in value.items()
+        }
+    else:
+        raise ValueError(f"Unknown token {token}")
 
 
 def dataclass_post_init_converters(str_fields: List[str]):
@@ -26,9 +58,23 @@ def dataclass_post_init_converters(str_fields: List[str]):
     """
 
     def __post_init__(self):
-        for name in (str_fields):
-            t = self.__annotations__[name]
-            setattr(self, name, t.to_internal_value(getattr(self, name)))
+        # `S` - string component
+        # `O` - Optional
+        # `L` - List
+        # `D` - Dict
+        for name in str_fields:
+            if '#' in name:
+                name, path_str = name.split('#')
+                path: List[str] = path_str.split('.')
+            else:
+                path = ['S']
+
+            new_value = _process_string_field_value(
+                path=path,
+                value=getattr(self, name),
+                current_type=self.__annotations__[name]
+            )
+            setattr(self, name, new_value)
 
     return __post_init__
 
@@ -40,11 +86,11 @@ def convert_strings(str_field_paths: List[str]) -> Callable[[type], type]:
     If field contains complex data type path should be consist of field name and dotted list of tokens:
 
     * `S` - string component
-    * `U` - Union or Optional
+    * `O` - Optional
     * `L` - List
     * `D` - Dict
 
-    So if field `'bar'` has type `Optional[List[List[IntString]]]` field path would be `'bar#U.L.L.S'`
+    So if field `'bar'` has type `Optional[List[List[IntString]]]` field path would be `'bar#O.L.L.S'`
 
     ! If type is too complex i.e. Union[List[IntString], List[List[IntString]]]
     you can't specify field path and such field would be ignored
@@ -91,7 +137,7 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
 
     def get_string_field_paths(self) -> List[str]:
         # `S` - string component
-        # `U` - Union or Optional
+        # `O` - Optional
         # `L` - List
         # `D` - Dict
         str_fields = []
@@ -108,22 +154,23 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
                         paths.append(path + ['S'])
                 elif isinstance(tmp_type, BaseType):
                     cls = type(tmp_type)
-                    if cls in (DUnion, DOptional):
-                        token = 'U'
+                    if cls is DOptional:
+                        token = 'O'
                     elif cls is DList:
                         token = 'L'
                     elif cls is DDict:
                         token = 'D'
+                    elif cls in (DUnion, ModelPtr):
+                        # We could not resolve Union
+                        paths = []
+                        break
                     else:
                         raise TypeError(f"Unsupported meta-type for converter path {cls}")
 
                     for nested_type in tmp_type:
                         tokens.append((nested_type, path + [token]))
             paths: List[str] = ["".join(p[1:]) for p in paths]
-            if not paths:
-                continue
-            if len(paths) > 1:
-                logging.warning(f"Could generate (string->StringSerializable) converter for type {t} (field {name})")
+            if len(paths) != 1:
                 continue
 
             path = paths.pop()
