@@ -83,7 +83,7 @@ class GenericModelCodeGenerator:
         }
         if nested_classes:
             data["nested"] = [indent(s) for s in nested_classes]
-        return imports, self.BODY.render(**data)
+        return [*imports, *decorator_imports], self.BODY.render(**data)
 
     @property
     def decorators(self) -> Tuple[ImportPathList, List[str]]:

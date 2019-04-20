@@ -12,10 +12,7 @@ DEFAULT_ORDER = (
 
 
 class AttrsModelCodeGenerator(GenericModelCodeGenerator):
-    ATTRS = template("attr.s"
-                     "{% if kwargs %}"
-                     f"({KWAGRS_TEMPLATE})"
-                     "{% endif %}")
+    ATTRS = template(f"attr.s{{% if kwargs %}}({KWAGRS_TEMPLATE}){{% endif %}}")
     ATTRIB = template(f"attr.ib({KWAGRS_TEMPLATE})")
 
     def __init__(self, model: ModelMeta, meta=False, attrs_kwargs: dict = None, **kwargs):
