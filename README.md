@@ -13,17 +13,17 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 ## Features
 
 * Full `typing` module support
-* Types merging - if some field could contains data of different types it will handle it
-* Fields and models names generation (unicode support included)
-* Similar models generalization
-* Handling recursive data structures (i.e family tree)
-* Detecting string literals (i.e. datetime or just stringify numbers)
-* Generation models as tree (nested models) or list
-* Specifying when dictionaries should be processed as is
-* CLI tool
+* **Types merging** - if some field contains data of different types this will be represent as `Union` type
+* Fields and models **names** generation (unicode support included)
+* Similar **models generalization**
+* Handling **recursive data** structures (i.e family tree)
+* Detecting **string literals** (i.e. datetime or just stringify numbers)
+* Generation models as **tree** (nested models) or **list**
+* Specifying when dictionaries should be processed as **`dict` type** (by default every dict is considered as some model)
+* **CLI** tool
 
 ## Examples
-[*skip*](#installation)
+[*skip to **Installation***](#installation)
 
 ```json
 [
