@@ -39,11 +39,19 @@ def main():
 
     gen = MetadataGenerator()
     reg = ModelRegistry()
-    for data in ([chroniclingamerica_data], [launchlibrary_data], university_domains_data):
-        fields = gen.generate(*data)
-        reg.process_meta_data(fields)
+
+    fields = gen.generate(chroniclingamerica_data)
+    reg.process_meta_data(fields, model_name="CHRONICLING")
+
+    fields = gen.generate(launchlibrary_data)
+    reg.process_meta_data(fields, model_name="LaunchLibrary")
+
+    fields = gen.generate(*university_domains_data)
+    reg.process_meta_data(fields, model_name="Universities")
+
     reg.merge_models(generator=gen)
     reg.generate_names()
+
     structure = compose_models(reg.models_map)
     print(generate_code(structure, AttrsModelCodeGenerator))
 

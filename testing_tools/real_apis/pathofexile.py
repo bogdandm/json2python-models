@@ -1,5 +1,5 @@
 """
-Path of Exile API http://www.pathofexile.com/developer/docs/api-resource-public-stash-tabs
+Path of Exile Stash API http://www.pathofexile.com/developer/docs/api-resource-public-stash-tabs
 """
 from datetime import datetime
 
@@ -10,7 +10,6 @@ from json_to_models.models import compose_models_flat
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
 from json_to_models.registry import ModelRegistry
-from json_to_models.utils import json_format
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
@@ -34,12 +33,13 @@ def main():
     reg.merge_models(generator=gen)
     reg.generate_names()
 
+    print("Meta tree:")
     print(pretty_format_meta(next(iter(reg.models))))
     print("\n" + "=" * 20, end='')
 
     structure = compose_models_flat(reg.models_map)
-    print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
-    print("=" * 20)
+    # print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
+    # print("=" * 20)
 
     print(generate_code(structure, AttrsModelCodeGenerator))
     print(f"{(datetime.now() - start_t).total_seconds():.4f} seconds")
