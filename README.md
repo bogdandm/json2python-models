@@ -12,7 +12,7 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 
 ## Features
 
-* Full `typing` module support
+* Full **`typing` module** support
 * **Types merging** - if some field contains data of different types this will be represent as `Union` type
 * Fields and models **names** generation (unicode support included)
 * Similar **models generalization**
