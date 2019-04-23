@@ -22,10 +22,10 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 * Specifying when dictionaries should be processed as **`dict` type** (by default every dict is considered as some model)
 * **CLI** tool
 
-## Examples
+## Example
 [*skip to **Installation***](#installation)
 
-```json
+```
 [
     {
         "season": "2019",
@@ -55,30 +55,7 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
                     }
                 ]
             },
-            {
-                "position": "2",
-                "positionText": "2",
-                "points": "62",
-                "wins": "1",
-                "Driver": {
-                    "driverId": "bottas",
-                    "permanentNumber": "77",
-                    "code": "BOT",
-                    "url": "http://en.wikipedia.org/wiki/Valtteri_Bottas",
-                    "givenName": "Valtteri",
-                    "familyName": "Bottas",
-                    "dateOfBirth": "1989-08-28",
-                    "nationality": "Finnish"
-                },
-                "Constructors": [
-                    {
-                        "constructorId": "mercedes",
-                        "url": "http://en.wikipedia.org/wiki/Mercedes-Benz_in_Formula_One",
-                        "name": "Mercedes",
-                        "nationality": "German"
-                    }
-                ]
-            }
+            ...
         ]
     }
 ]
@@ -129,9 +106,9 @@ class DriverStandings:
 | **Be ware**: this project supports only `python3.7` and higher. |
 | --- |
 
-To install Requests, use `pip`:
+To install it, use `pip`:
 
-`pip install`
+`pip install json2pytho-models`
 
 Or you can build it from source:
 
@@ -153,12 +130,11 @@ python setup.py install
 
 ## Tests
 
-To run tests you should clone project and install `pytest` and `requests` (to download online datasets):
+To run tests you should clone project and run `setup.py` script:
 
 ```
 git clone https://github.com/bogdandm/json2python-models.git
 cd json2python-models
-
 python setup.py test -a '<pytest additional arguments>'
 ```
 
@@ -169,7 +145,7 @@ Also I would recommend you to install `pytest-sugar` for pretty printing test re
 You can find out some examples of usage of this project at [testing_tools/real_apis/...](/testing_tools/real_apis)
 
 Each file contains functions to download data from some online API (references included at the top of file) and
-`main` function that generate and print code. Some examples may print debug data before actual code.
+`main` function that generates and prints code. Some examples may print debug data before actual code.
 Downloaded data will be saved at `testing_tools/real_apis/<name of example>/<dataset>.json`
 
 ## API docs
