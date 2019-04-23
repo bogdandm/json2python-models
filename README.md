@@ -1,7 +1,5 @@
 [![json2python-models](/etc/logo.png)](https://github.com/bogdandm/json2python-models)
 
-# JSON to Python models
-
 [![PyPI version](https://badge.fury.io/py/json2python-models.svg)](https://badge.fury.io/py/json2python-models)
 [![Build Status](https://travis-ci.org/bogdandm/json2python-models.svg?branch=master)](https://travis-ci.org/bogdandm/json2python-models)
 [![Coverage Status](https://coveralls.io/repos/github/bogdandm/json2python-models/badge.svg?branch=master)](https://coveralls.io/github/bogdandm/json2python-models?branch=master)
@@ -11,8 +9,6 @@
 
 json2python-models is a [Python](https://www.python.org/) tool that can generate Python models classes 
 (dataclasses, attrs) from JSON dataset. 
-
-It could handle recursive data structures, detect complex datatypes, generalize similar models, etc.
 
 ## Features
 
@@ -28,7 +24,9 @@ It could handle recursive data structures, detect complex datatypes, generalize 
 
 ## Installation
 
-> **Be ware**: it supports only `python3.7` and higher.
+<aside class="warning">
+**Be ware**: it supports only `python3.7` and higher.
+</aside>
 
 To install Requests, use `pip`:
 
@@ -51,7 +49,7 @@ To run tests you should clone project and install `pytest` and `requests` (to do
 git clone https://github.com/bogdandm/json2python-models.git
 cd json2python-models
 pip install pytest>=4.4.0
-python setup.py install
+
 python setup.py test -a '<pytest arguments>'
 or
 pytest tests
