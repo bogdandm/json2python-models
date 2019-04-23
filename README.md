@@ -24,9 +24,8 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 
 ## Installation
 
-<aside class="warning">
-**Be ware**: it supports only `python3.7` and higher.
-</aside>
+| **Be ware**: it supports only `python3.7` and higher. |
+| --- |  
 
 To install Requests, use `pip`:
 
