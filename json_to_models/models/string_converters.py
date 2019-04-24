@@ -5,6 +5,7 @@ from typing import Any, Callable, List, Optional, Tuple
 from . import ClassType
 from ..dynamic_typing import (BaseType, DDict, DList, DOptional, DUnion, MetaData, ModelMeta, ModelPtr,
                               StringSerializable)
+from ..dynamic_typing.base import NoneType
 
 
 def convert_strings(str_field_paths: List[str], class_type: Optional[ClassType] = None,
@@ -165,6 +166,8 @@ def get_string_field_paths(model: ModelMeta) -> List[Tuple[str, List[str]]]:
                     # We could not resolve Union
                     paths = []
                     break
+                elif cls is NoneType:
+                    continue
                 else:
                     raise TypeError(f"Unsupported meta-type for converter path {cls}")
 

@@ -70,6 +70,11 @@ test_commands = [
                  id="gists_merge_policy"),
     pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --merge exact""",
                  id="gists_no_merge"),
+    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --datetime --strings-converters""",
+                 id="gists_strings_converters"),
+
+    pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" --strings-converters""",
+                 id="users_strings_converters"),
 ]
 
 

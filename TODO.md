@@ -13,10 +13,9 @@
                 - [ ] (Maybe in future) Extract to another module (by serializers for each dynamic typing class)
             - [X] attrs
                 - complex StringSerializable converters (based on dataclass post_init converter)
+                - [x] post_init converters for StringSerializable types
             - [X] dataclasses
-                - [ ] post_init converters for StringSerializable types
-                    - [X] Nested converters
-                    - [ ] Cli argument
+                - [x] post_init converters for StringSerializable types
             - [ ] generate from_json/to_json converters
         - [ ] Model class -> Meta format converter
             - [ ] attrs
@@ -26,7 +25,7 @@
             - [ ] dataclasses
             - [ ] Decorator to mark class as exclude from models merge
         - Other features
-            - [ ] Nesting models generation
+            - [X] Nesting models generation
                 - [X] Cascade (default)
                 - [X] Flat
             - [ ] OptionalFieldsPolicy

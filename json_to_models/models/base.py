@@ -71,7 +71,7 @@ class GenericModelCodeGenerator:
                                      % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
 
-    def __init__(self, model: ModelMeta, post_init_converters=False, **kwargs):
+    def __init__(self, model: ModelMeta, post_init_converters=False):
         self.model = model
         self.post_init_converters = post_init_converters
 

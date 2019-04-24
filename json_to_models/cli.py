@@ -45,9 +45,10 @@ class Cli:
     }
 
     def __init__(self):
-        self.initialize = False
+        self.initialized = False
         self.models_data: Dict[str, Iterable[dict]] = {}  # -m/-l
         self.enable_datetime: bool = False  # --datetime
+        self.strings_converters: bool = False  # --strings-converters
         self.merge_policy: List[ModelCmp] = []  # --merge
         self.structure_fn: STRUCTURE_FN_TYPE = None  # -s
         self.model_generator: Type[GenericModelCodeGenerator] = None  # -f & --code-generator
@@ -75,6 +76,7 @@ class Cli:
             for model_name, lookup, path in namespace.list or ()
         ]
         self.enable_datetime = namespace.datetime
+        self.strings_converters = namespace.strings_converters
         merge_policy = [m.split("_") if "_" in m else m for m in namespace.merge]
         structure = namespace.structure
         framework = namespace.framework
@@ -172,7 +174,7 @@ class Cli:
             m = importlib.import_module(module)
             self.model_generator = getattr(m, cls)
 
-        self.model_generator_kwargs = {}
+        self.model_generator_kwargs = {} if not self.strings_converters else {'post_init_converters': True}
         if code_generator_kwargs_raw:
             for item in code_generator_kwargs_raw:
                 if item[0] == '"':
@@ -185,7 +187,7 @@ class Cli:
         self.dict_keys_regex = [re.compile(rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
         self.dict_keys_fields = dict_keys_fields or ()
 
-        self.initialize = True
+        self.initialized = True
 
     @classmethod
     def _create_argparser(cls) -> argparse.ArgumentParser:
@@ -235,6 +237,11 @@ class Cli:
             help="Enable datetime/date/time strings parsing.\n"
                  "Warn.: This can lead to 6-7 times slowdown on large datasets.\n"
                  "       Be sure that you really need this option.\n\n"
+        )
+        parser.add_argument(
+            "--strings-converters",
+            action="store_true",
+            help="Enable generation of string types converters (i.e. IsoDatetimeString or BooleanString).\n\n"
         )
 
         default_percent = f"{ModelFieldsPercentMatch.DEFAULT * 100:.0f}"
