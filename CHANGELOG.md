@@ -1,13 +1,34 @@
 # Change Log
 
-## [v0.1b1](https://github.com/bogdandm/json2python-models/tree/v0.1b1) (2018-11-27)
-[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1a1...v0.1b1)
-
-- Bug fixes
+## [v0.1.0](https://github.com/bogdandm/json2python-models/tree/v0.1.0) (2019-04-24)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1b2...v0.1.0)
 
 **Merged pull requests:**
 
-- Add --dict-keys-regex and --dict-keys-fields arguments [\#11](https://github.com/bogdandm/json2python-models/pull/11) ([bogdandm](https://github.com/bogdandm))
+- Adding readme [\#22](https://github.com/bogdandm/json2python-models/pull/22) ([bogdandm](https://github.com/bogdandm))
+- Post init converters for string types [\#21](https://github.com/bogdandm/json2python-models/pull/21) ([bogdandm](https://github.com/bogdandm))
+- No ordereddict [\#20](https://github.com/bogdandm/json2python-models/pull/20) ([bogdandm](https://github.com/bogdandm))
+- Process empty dict as Dict type [\#19](https://github.com/bogdandm/json2python-models/pull/19) ([bogdandm](https://github.com/bogdandm))
+- Fix pytest version conflict [\#18](https://github.com/bogdandm/json2python-models/pull/18) ([bogdandm](https://github.com/bogdandm))
+- Decode unicode and remove non-words characters in models fields names [\#17](https://github.com/bogdandm/json2python-models/pull/17) ([bogdandm](https://github.com/bogdandm))
+- Does not add METADATA\_FIELD\_NAME to metadata if original fields name is a same as generated one [\#16](https://github.com/bogdandm/json2python-models/pull/16) ([bogdandm](https://github.com/bogdandm))
+
+## [v0.1b2](https://github.com/bogdandm/json2python-models/tree/v0.1b2) (2018-11-30)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1b1...v0.1b2)
+
+**Merged pull requests:**
+
+- Flat models structure generation [\#15](https://github.com/bogdandm/json2python-models/pull/15) ([bogdandm](https://github.com/bogdandm))
+- Dataclasses code generation [\#14](https://github.com/bogdandm/json2python-models/pull/14) ([bogdandm](https://github.com/bogdandm))
+- Evaluate generated code in tests [\#13](https://github.com/bogdandm/json2python-models/pull/13) ([bogdandm](https://github.com/bogdandm))
+- NoneType -\> Null refactoring \(fix wrong NoneType annotation\) [\#12](https://github.com/bogdandm/json2python-models/pull/12) ([bogdandm](https://github.com/bogdandm))
+
+## [v0.1b1](https://github.com/bogdandm/json2python-models/tree/v0.1b1) (2018-11-27)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1a1...v0.1b1)
+
+**Merged pull requests:**
+
+- Add --dict-keys-regex and --dict-keys-fields arguments; [\#11](https://github.com/bogdandm/json2python-models/pull/11) ([bogdandm](https://github.com/bogdandm))
 
 ## [v0.1a1](https://github.com/bogdandm/json2python-models/tree/v0.1a1) (2018-11-27)
 **Merged pull requests:**
