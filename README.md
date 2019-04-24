@@ -122,24 +122,79 @@ python setup.py install
 
 ### CLI
 
-For regular usage CLI tool is a best option. After you install this package you could use it as `json2models` 
-or `python -m json_to_models`.
+For regular usage CLI tool is the best option. After you install this package you could use it as `json2models <arguments>` 
+or `python -m json_to_models <arguments>`. I.e.:
+```
+json2models -m Car car_*.json -f attrs > car.py
+```
 
 Arguments:
+* `-h`, `--help`
+    * Show help message and exit
+    
+* `-m`, `--model`
+    * **Format**: `-m <Model name> [<JSON files> ...]`
+    * **Description**: Model name and its JSON data as path or unix-like path pattern. `*`,  `**` or `?` patterns symbols are supported.
+    * **Example**: `-m Car audi.json reno.json` or `-m Car audi.json -m Car reno.json` (results will be the same)
+    
+* `-l`, `--list`
+    * **Format**: `-l <Model name> <JSON key> <JSON file>`
+    * **Description**: Like `-m` but given json file should contain list of model data (dataset). 
+        If this file contains dict with nested list than you can pass `<JSON key>` to lookup. 
+        Deep lookups are supported by dot-separated path. If no lookup needed pass `-` as `<JSON key>`.
+    * **Example**: `-l Car - cars.json -l Person fetch_results.items.persons result.json`
+    * **Note**: Models names under this arguments should be unique.
+    
+* `-f`, `--framework`
+    * **Format**: `-f {base,attrs,dataclasses,custom}`
+    * **Description**: Model framework for which python code is generated. 
+    `base` (default) mean no framework so code will be generated without any decorators and additional meta-data.
+    * **Example**: `-f attrs`
+    * **Default**: `-f base`
+    
+* `--datetime`
+    * **Description**: Enable datetime/date/time strings parsing.
+    * **Default**: disabled
+    * **Warning**: This can lead to 6-7 times slowdown on large datasets. Be sure that you really need this option.
 
-| Key | Format | Description | Example | Note |
-| --- | --- | --- | --- | --- |
-| `-h, -help` | - | show help message and exit | | |
-| `-m, --model` | `-m <Model name> [<JSON files> ...]` | Model name and its JSON data as path or unix-like path pattern. `*`,  `**` or `?` patterns symbols are supported. | `-m Car audi.json reno.json` or `-m Car audi.json -m Car reno.json` (results will be the same) | |
-| `-l, --list` | `-l <Model name> <JSON key> <JSON file>` | Like `-m` but given json file should contain list of model data (dataset). If this file contains dict with nested list than you can pass `<JSON key>` to lookup. Deep lookups are supported by dot-separated path. If no lookup needed pass '-' as <JSON key> | `-l Car - cars.json -l Person fetch_results.items.persons result.json` | Models names under `-l` arguments should be unique |
-| `-f, --framework` | `-f {base,attrs,dataclasses,custom}` | Model framework for which python code is generated. 'base' (default) mean no framework so code will be generated without any decorators and additional meta-data. | `-f attrs` | Default: `-f base` |
-| `-s , --structure` | `-s {nested, flat}` | Models composition style. | `-s flat` | Default: `-s nested` |
-| `--datetime` | - | Enable datetime/date/time strings parsing. Warn.: This can lead to 6-7 times slowdown on large datasets. Be sure that you really need this option. | | Default: disabled |
-| `--merge`| `--merge MERGE_POLICY [MERGE_POLICY ...]` | Merge policy settings. Possible values are: `percent[_<percent>]` - two models had a certain percentage of matched field names. Custom value could be i.e. `percent_95`. `number[_<number>]` - two models had a certain number of matched field names. `exact` - two models should have exact same field names to merge. | `--merge percent_95 number_20` - merge if 95% of fields match or 20 fields match | Default: `--merge percent_70 number_10` |
-| `--dict-keys-regex, --dkr` | `--dkr RegEx [RegEx ...]` | List of regular expressions (Python syntax). If all keys of some dict are match one of them then this dict will be marked as dict field but not nested model. | `--dkr node_\d+ \d+_\d+_\d+` | `^` and `$` (string borders) tokens will be added automatically but you have escape to other special characters manually. | Optional |
-| `--dict-keys-fields, --dkf` | `--dkf FIELD_NAME [FIELD_NAME ...]` | List of model fields names that will be marked as dict fields | `--dkf "dict_data" "mapping"` | Optional |
-| `--code-generator` | `--code-generator CODE_GENERATOR` | Absolute import path to GenericModelCodeGenerator subclass. | `-f mypackage.mymodule.DjangoModelsGenerator` | Is ignored without `-f custom` but is required with it |
-| `--code-generator-kwargs` | `--code-generator-kwargs [NAME=VALUE [NAME=VALUE ...]]` | List of GenericModelCodeGenerator subclass arguments (for `__init__` method, see docs of specific subclass). Each argument should be in following format: `argument_name=value` or `"argument_name=value with space"`. Boolean values should be passed in JS style: `true` or `false` | `--code-generator-kwargs kwarg1=true kwarg2=10 "kwarg3=It is string with spaces"` | Optional |
+* `--merge`
+    * **Format**: `--merge MERGE_POLICY [MERGE_POLICY ...]`
+    * **Description**: Merge policy settings. Possible values are: 
+        * `percent[_<percent>]` - two models had a certain percentage of matched field names. 
+            Custom value could be i.e. `percent_95`. 
+        * `number[_<number>]` - two models had a certain number of matched field names. 
+        * `exact` - two models should have exact same field names to merge.
+    * **Example**: `--merge percent_95 number_20` - merge if 95% of fields are matched or 20 of fields are matched
+    * **Default**: `--merge percent_70 number_10`
+    
+* `--dict-keys-regex`, `--dkr`
+    * **Format**: `--dkr RegEx [RegEx ...]`
+    * **Description**: List of regular expressions (Python syntax). 
+        If all keys of some dict are match one of them then this dict will be marked as dict field but not nested model.
+    * **Example**: `--dkr node_\d+ \d+_\d+_\d+`
+    * **Note**: `^` and `$` (string borders) tokens will be added automatically but you have escape to other special characters manually.
+    * **Optional**
+    
+* `--dict-keys-fields`, `--dkf`
+    * **Format**: `--dkf FIELD_NAME [FIELD_NAME ...]`
+    * **Description**: List of model fields names that will be marked as dict fields
+    * **Example**: `--dkf "dict_data" "mapping"`
+    * **Optional**
+    
+* `--code-generator`
+    * **Format**: `--code-generator CODE_GENERATOR`
+    * **Description**: Absolute import path to GenericModelCodeGenerator subclass.
+    * **Example**: `-f mypackage.mymodule.DjangoModelsGenerator`
+    * **Note**: Is ignored without `-f custom` but is required with it.
+    
+* `--code-generator-kwargs`
+    * **Format**: `--code-generator-kwargs [NAME=VALUE [NAME=VALUE ...]]`
+    * **Description**: List of GenericModelCodeGenerator subclass arguments (for `__init__` method, 
+        see docs of specific subclass). 
+        Each argument should be in following format: `argument_name=value` or `"argument_name=value with space"`. 
+        Boolean values should be passed in JS style: `true` or `false`
+    * **Example**:  `--code-generator-kwargs kwarg1=true kwarg2=10 "kwarg3=It is string with spaces"`
+    * **Optional**
 
 One of model arguments (`-m` or `-l`) is required.
 
@@ -174,6 +229,12 @@ Downloaded data will be saved at `testing_tools/real_apis/<name of example>/<dat
 * [Unidecode](https://pypi.org/project/Unidecode/) - Unicode to ASCII conversion
 * [Jinja2](https://github.com/pallets/jinja) - Code templates
 * [ordered-set](https://github.com/LuminosoInsight/ordered-set) is used in models merging algorithm
+
+Test tools:
+* [pytest](https://github.com/pytest-dev/pytest) - Test framework
+* [pytest-xdist](https://github.com/pytest-dev/pytest-xdist) - Parallel execution of test suites
+* [pytest-sugar](https://github.com/Frozenball/pytest-sugar) - Test results pretty printing
+* [requests](https://github.com/kennethreitz/requests) - Test data download
 
 ## Contributing
 
