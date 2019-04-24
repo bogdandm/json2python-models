@@ -8,8 +8,10 @@ import json_to_models
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
-URL = "https://github.com/bogdandm/json2python-models"
+with open('README.md') as f:
+    long_description = f.read()
 
+URL = "https://github.com/bogdandm/json2python-models"
 CPU_N = multiprocessing.cpu_count()
 
 
@@ -38,6 +40,8 @@ setup(
     author="bogdandm (Bogdan Kalashnikov)",
     author_email="bogdan.dm1995@yandex.ru",
     description="Python models (attrs, dataclasses or custom) generator from JSON data with typing module support",
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     license="MIT",
     packages=find_packages(exclude=['test', 'testing_tools']),
     entry_points={
@@ -46,5 +50,5 @@ setup(
     install_requires=required,
     cmdclass={"test": PyTest},
     tests_require=["pytest>=4.4.0", "pytest-xdist", "requests", "attrs"],
-    data_files=[('', ['pytest.ini', '.coveragerc', 'LICENSE'])]
+    data_files=[('', ['pytest.ini', '.coveragerc', 'LICENSE', 'README.md', 'CHANGELOG.md'])]
 )
