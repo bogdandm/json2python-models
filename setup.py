@@ -13,7 +13,7 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 with open('README.md') as f:
     long_description = f.read()
-long_description.replace("/etc", f"https://raw.githubusercontent.com/{REPO}/master/etc")
+long_description = long_description.replace("/etc", f"https://raw.githubusercontent.com/{REPO}/master/etc")
 
 
 class PyTest(TestCommand):
