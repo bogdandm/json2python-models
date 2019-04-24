@@ -6,9 +6,9 @@ from datetime import datetime
 import requests
 
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import compose_models_flat
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
+from json_to_models.models.structure import compose_models_flat
 from json_to_models.registry import ModelRegistry
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response

@@ -95,3 +95,40 @@ def convert_args_decorator(*args_converters: type, method=False, **kwargs_conver
             return convert_args(fn, *args_converters, **kwargs_converters)
 
     return decorator
+
+
+def cached_method(func: Callable):
+    """
+    Decorator to cache method return values
+    """
+    null = object()
+
+    @wraps(func)
+    def cached_fn(self, *args):
+        if getattr(self, '__cache__', None) is None:
+            setattr(self, '__cache__', {})
+        value = self.__cache__.get(args, null)
+        if value is null:
+            value = func(self, *args)
+            self.__cache__[args] = value
+        return value
+
+    return cached_fn
+
+
+def cached_classmethod(func: Callable):
+    """
+    Decorator to cache classmethod return values
+    """
+    cache = {}
+    null = object()
+
+    @wraps(func)
+    def cached_fn(cls, *args):
+        value = cache.get(args, null)
+        if value is null:
+            value = func(cls, *args)
+            cache[args] = value
+        return value
+
+    return classmethod(cached_fn)

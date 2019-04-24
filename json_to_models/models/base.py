@@ -6,8 +6,13 @@ import inflection
 from jinja2 import Template
 from unidecode import unidecode
 
-from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER, indent, sort_fields
-from ..dynamic_typing import AbsoluteModelRef, ImportPathList, MetaData, ModelMeta, compile_imports, metadata_to_typing
+from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER
+from .string_converters import get_string_field_paths
+from .structure import sort_fields
+from .utils import indent
+from ..dynamic_typing import (AbsoluteModelRef, ImportPathList, MetaData,
+                              ModelMeta, compile_imports, metadata_to_typing)
+from ..utils import cached_classmethod
 
 METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
 KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
@@ -17,6 +22,7 @@ KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
 
 keywords_set = set(keyword.kwlist)
 ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+
 
 def template(pattern: str, indent: str = INDENT) -> Template:
     """
@@ -56,36 +62,20 @@ class GenericModelCodeGenerator:
     {%- else %}
         pass
     {%- endif -%}
+    {%- if extra %}    
+    {{ extra }}
+    {%- endif -%}
     """)
 
+    STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
+                                     % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
 
-    def __init__(self, model: ModelMeta, **kwargs):
+    def __init__(self, model: ModelMeta, post_init_converters=False):
         self.model = model
+        self.post_init_converters = post_init_converters
 
-    def generate(self, nested_classes: List[str] = None) -> Tuple[ImportPathList, str]:
-        """
-        :param nested_classes: list of strings that contains classes code
-        :return: list of import data, class code
-        """
-        imports, fields = self.fields
-        data = {
-            "decorators": self.decorators,
-            "name": self.model.name,
-            "fields": fields
-        }
-        if nested_classes:
-            data["nested"] = [indent(s) for s in nested_classes]
-        return imports, self.BODY.render(**data)
-
-    @property
-    def decorators(self) -> List[str]:
-        """
-        :return: List of decorators code (without @)
-        """
-        return []
-
-    @classmethod
+    @cached_classmethod
     def convert_field_name(cls, name):
         if name in keywords_set:
             name += "_"
@@ -95,6 +85,40 @@ class GenericModelCodeGenerator:
             if '0' <= name[0] <= '9':
                 name = ones[int(name[0])] + "_" + name[1:]
         return inflection.underscore(name)
+
+    def generate(self, nested_classes: List[str] = None, extra: str = "") -> Tuple[ImportPathList, str]:
+        """
+        :param nested_classes: list of strings that contains classes code
+        :return: list of import data, class code
+        """
+        imports, fields = self.fields
+        decorator_imports, decorators = self.decorators
+        data = {
+            "decorators": decorators,
+            "name": self.model.name,
+            "fields": fields,
+            "extra": extra
+        }
+        if nested_classes:
+            data["nested"] = [indent(s) for s in nested_classes]
+        return [*imports, *decorator_imports], self.BODY.render(**data)
+
+    @property
+    def decorators(self) -> Tuple[ImportPathList, List[str]]:
+        """
+        :return: List of imports and List of decorators code (without @)
+        """
+        imports, decorators = [], []
+        if self.post_init_converters:
+            str_fields = self.string_field_paths
+            decorator_imports, decorator_kwargs = self.convert_strings_kwargs
+            if str_fields and decorator_kwargs:
+                imports.extend([
+                    *decorator_imports,
+                    ('json_to_models.models.string_converters', ['convert_strings']),
+                ])
+                decorators.append(self.STR_CONVERT_DECORATOR.render(str_fields=str_fields, kwargs=decorator_kwargs))
+        return imports, decorators
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
         """
@@ -129,6 +153,23 @@ class GenericModelCodeGenerator:
                 imports.extend(field_imports)
                 strings.append(self.FIELD.render(**data))
         return imports, strings
+
+    @property
+    def string_field_paths(self) -> List[str]:
+        """
+        Get paths for convert_strings function
+        """
+        return [self.convert_field_name(name) + ('#' + '.'.join(path) if path else '')
+                for name, path in get_string_field_paths(self.model)]
+
+    @property
+    def convert_strings_kwargs(self) -> Tuple[ImportPathList, dict]:
+        """
+        Override it to enable generation of string types converters
+
+        :return: Imports and Dict with kw-arguments for `json_to_models.models.string_converters.convert_strings` decorator.
+        """
+        return [], {}
 
 
 def _generate_code(

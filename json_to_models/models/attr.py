@@ -12,38 +12,27 @@ DEFAULT_ORDER = (
 
 
 class AttrsModelCodeGenerator(GenericModelCodeGenerator):
-    ATTRS = template("attr.s"
-                     "{% if kwargs %}"
-                     f"({KWAGRS_TEMPLATE})"
-                     "{% endif %}")
+    ATTRS = template(f"attr.s{{% if kwargs %}}({KWAGRS_TEMPLATE}){{% endif %}}")
     ATTRIB = template(f"attr.ib({KWAGRS_TEMPLATE})")
 
-    def __init__(self, model: ModelMeta, meta=False, attrs_kwargs: dict = None, **kwargs):
+    def __init__(self, model: ModelMeta, meta=False, post_init_converters=False, attrs_kwargs: dict = None):
         """
         :param model: ModelMeta instance
         :param meta: Enable generation of metadata as attrib argument
+        :param post_init_converters: Enable generation of type converters in __post_init__ methods
         :param attrs_kwargs: kwargs for @attr.s() decorators
         :param kwargs:
         """
-        super().__init__(model, **kwargs)
+        super().__init__(model, post_init_converters)
         self.no_meta = not meta
         self.attrs_kwargs = attrs_kwargs or {}
 
-    def generate(self, nested_classes: List[str] = None) -> Tuple[ImportPathList, str]:
-        """
-        :param nested_classes: list of strings that contains classes code
-        :return: list of import data, class code
-        """
-        imports, code = super().generate(nested_classes)
-        imports.append(('attr', None))
-        return imports, code
-
     @property
-    def decorators(self) -> List[str]:
-        """
-        :return: List of decorators code (without @)
-        """
-        return [self.ATTRS.render(kwargs=self.attrs_kwargs)]
+    def decorators(self) -> Tuple[ImportPathList, List[str]]:
+        imports, decorators = super().decorators
+        imports.append(('attr', None))
+        decorators.insert(0, self.ATTRS.render(kwargs=self.attrs_kwargs))
+        return imports, decorators
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
         """
@@ -64,13 +53,23 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
                 body_kwargs["factory"] = "dict"
             else:
                 body_kwargs["default"] = "None"
-                if isclass(meta.type) and issubclass(meta.type, StringSerializable):
+                if isclass(meta.type) and issubclass(meta.type, StringSerializable) and not self.post_init_converters:
                     body_kwargs["converter"] = f"optional({meta.type.__name__})"
                     imports.append(("attr.converter", "optional"))
-        elif isclass(meta) and issubclass(meta, StringSerializable):
+        elif isclass(meta) and issubclass(meta, StringSerializable) and not self.post_init_converters:
             body_kwargs["converter"] = meta.__name__
 
         if not self.no_meta and name != data["name"]:
             body_kwargs["metadata"] = {METADATA_FIELD_NAME: name}
         data["body"] = self.ATTRIB.render(kwargs=sort_kwargs(body_kwargs, DEFAULT_ORDER))
         return imports, data
+
+    @property
+    def convert_strings_kwargs(self) -> Tuple[ImportPathList, dict]:
+        """
+        :return: Imports and Dict with kw-arguments for `json_to_models.models.string_converters.convert_strings` decorator.
+        """
+        imports, kwargs = super().convert_strings_kwargs
+        imports.append(('json_to_models.models', ['ClassType']))
+        kwargs["class_type"] = 'ClassType.Attrs'
+        return imports, kwargs
