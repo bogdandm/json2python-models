@@ -8,7 +8,7 @@
 ![Example](/etc/convert.png)
 
 json2python-models is a [Python](https://www.python.org/) tool that can generate Python models classes 
-(dataclasses, attrs) from JSON dataset. 
+(dataclasses, [attrs](https://github.com/python-attrs/attrs)) from JSON dataset. 
 
 ## Features
 
@@ -23,7 +23,7 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 * **CLI** tool
 
 ## Example
-[*skip to **Installation***](#installation)
+[*skip up to **Installation***](#installation)
 
 ```
 [
@@ -122,9 +122,28 @@ python setup.py install
 
 ### CLI
 
-> Coming soon
+For regular usage CLI tool is a best option. After you install this package you could use it as `json2models` 
+or `python -m json_to_models`.
 
-### Low level
+Arguments:
+
+| Key | Format | Description | Example | Note |
+| --- | --- | --- | --- | --- |
+| `-h, -help` | - | show help message and exit | | |
+| `-m, --model` | `-m <Model name> [<JSON files> ...]` | Model name and its JSON data as path or unix-like path pattern. `*`,  `**` or `?` patterns symbols are supported. | `-m Car audi.json reno.json` or `-m Car audi.json -m Car reno.json` (results will be the same) | |
+| `-l, --list` | `-l <Model name> <JSON key> <JSON file>` | Like `-m` but given json file should contain list of model data (dataset). If this file contains dict with nested list than you can pass `<JSON key>` to lookup. Deep lookups are supported by dot-separated path. If no lookup needed pass '-' as <JSON key> | `-l Car - cars.json -l Person fetch_results.items.persons result.json` | Models names under `-l` arguments should be unique |
+| `-f, --framework` | `-f {base,attrs,dataclasses,custom}` | Model framework for which python code is generated. 'base' (default) mean no framework so code will be generated without any decorators and additional meta-data. | `-f attrs` | Default: `-f base` |
+| `-s , --structure` | `-s {nested, flat}` | Models composition style. | `-s flat` | Default: `-s nested` |
+| `--datetime` | - | Enable datetime/date/time strings parsing. Warn.: This can lead to 6-7 times slowdown on large datasets. Be sure that you really need this option. | | Default: disabled |
+| `--merge`| `--merge MERGE_POLICY [MERGE_POLICY ...]` | Merge policy settings. Possible values are: `percent[_<percent>]` - two models had a certain percentage of matched field names. Custom value could be i.e. `percent_95`. `number[_<number>]` - two models had a certain number of matched field names. `exact` - two models should have exact same field names to merge. | `--merge percent_95 number_20` - merge if 95% of fields match or 20 fields match | Default: `--merge percent_70 number_10` |
+| `--dict-keys-regex, --dkr` | `--dkr RegEx [RegEx ...]` | List of regular expressions (Python syntax). If all keys of some dict are match one of them then this dict will be marked as dict field but not nested model. | `--dkr node_\d+ \d+_\d+_\d+` | `^` and `$` (string borders) tokens will be added automatically but you have escape to other special characters manually. | Optional |
+| `--dict-keys-fields, --dkf` | `--dkf FIELD_NAME [FIELD_NAME ...]` | List of model fields names that will be marked as dict fields | `--dkf "dict_data" "mapping"` | Optional |
+| `--code-generator` | `--code-generator CODE_GENERATOR` | Absolute import path to GenericModelCodeGenerator subclass. | `-f mypackage.mymodule.DjangoModelsGenerator` | Is ignored without `-f custom` but is required with it |
+| `--code-generator-kwargs` | `--code-generator-kwargs [NAME=VALUE [NAME=VALUE ...]]` | List of GenericModelCodeGenerator subclass arguments (for `__init__` method, see docs of specific subclass). Each argument should be in following format: `argument_name=value` or `"argument_name=value with space"`. Boolean values should be passed in JS style: `true` or `false` | `--code-generator-kwargs kwarg1=true kwarg2=10 "kwarg3=It is string with spaces"` | Optional |
+
+One of model arguments (`-m` or `-l`) is required.
+
+### Low level API
 
 > Coming soon (Wiki)
 
@@ -147,10 +166,6 @@ You can find out some examples of usage of this project at [testing_tools/real_a
 Each file contains functions to download data from some online API (references included at the top of file) and
 `main` function that generates and prints code. Some examples may print debug data before actual code.
 Downloaded data will be saved at `testing_tools/real_apis/<name of example>/<dataset>.json`
-
-## API docs
-
-> Coming soon (Wiki)
 
 ## Built With
 
