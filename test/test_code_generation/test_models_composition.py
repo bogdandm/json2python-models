@@ -4,7 +4,8 @@ import pytest
 
 from json_to_models.dynamic_typing import ModelMeta
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import ListEx, compose_models, compose_models_flat, extract_root
+from json_to_models.models.structure import compose_models, compose_models_flat, extract_root
+from json_to_models.models.utils import ListEx
 from json_to_models.registry import ModelRegistry
 
 

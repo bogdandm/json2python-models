@@ -1,13 +1,12 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import pytest
 
 from json_to_models.dynamic_typing import (DDict, DList, DOptional, DUnion, FloatString, IntString, ModelMeta,
                                            compile_imports)
-from json_to_models.models import sort_fields
 from json_to_models.models.base import METADATA_FIELD_NAME, generate_code
-from json_to_models.models.dataclasses import (DataclassModelCodeGenerator, convert_strings,
-                                               dataclass_post_init_converters)
+from json_to_models.models.dataclasses import (DataclassModelCodeGenerator)
+from json_to_models.models.structure import sort_fields
 from test.test_code_generation.test_models_code_generator import model_factory, trim
 
 
@@ -189,62 +188,3 @@ def test_generated_dc(value: ModelMeta, expected: str):
         class_generator_kwargs={'meta': True, 'post_init_converters': True}
     )
     assert generated.rstrip() == expected, generated
-
-
-def test_dataclass_post_init_converters():
-    from dataclasses import dataclass
-
-    @dataclass
-    class A:
-        x: IntString
-        y: FloatString
-
-        __post_init__ = dataclass_post_init_converters(['x', 'y'])
-
-    a = A('1', '1.1')
-    assert type(a.x) is IntString
-    assert type(a.y) is FloatString
-
-
-def test_convert_strings_decorator():
-    from dataclasses import dataclass
-
-    @dataclass
-    @convert_strings(['x', 'y'])
-    class A:
-        x: IntString
-        y: FloatString
-
-    @dataclass
-    @convert_strings(['x', 'y'])
-    class B:
-        x: IntString
-        y: FloatString
-
-        def __post_init__(self):
-            self.x *= 2
-
-    a = A('1', '1.1')
-    b = B('1', '1.1')
-    assert type(a.x) is IntString
-    assert type(a.y) is FloatString
-    assert b.x == 2
-
-
-def test_convert_complex_data():
-    from dataclasses import dataclass
-
-    @dataclass
-    @convert_strings(['x', 'y#L.S', 'z#D.S', 'a#O.S', 'b#O.L.D.L.S'])
-    class A:
-        x: IntString
-        y: List[IntString]
-        z: Dict[str, IntString]
-        a: Optional[IntString]
-        b: Optional[List[Dict[str, List[IntString]]]]
-
-    a = A('1', '1234', {'s': '2', 'w': '3'}, None,
-          [{'a': ['1', '2']}, {'b': ['3', '2']}])
-
-    assert a == A(1, [1, 2, 3, 4], {'s': 2, 'w': 3}, None,
-                  [{'a': [1, 2]}, {'b': [3, 2]}])

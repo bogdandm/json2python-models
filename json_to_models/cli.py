@@ -12,10 +12,11 @@ from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, 
 import json_to_models
 from json_to_models.dynamic_typing import ModelMeta, register_datetime_classes
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import ModelsStructureType, compose_models, compose_models_flat
+from json_to_models.models import ModelsStructureType
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 from json_to_models.models.dataclasses import DataclassModelCodeGenerator
+from json_to_models.models.structure import compose_models, compose_models_flat
 from json_to_models.registry import (
     ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
 )

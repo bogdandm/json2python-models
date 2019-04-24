@@ -3,9 +3,9 @@ from typing import Dict, List
 import pytest
 
 from json_to_models.dynamic_typing import (DDict, DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
-from json_to_models.models import sort_fields
 from json_to_models.models.attr import AttrsModelCodeGenerator, DEFAULT_ORDER
 from json_to_models.models.base import METADATA_FIELD_NAME, generate_code, sort_kwargs
+from json_to_models.models.structure import sort_fields
 from test.test_code_generation.test_models_code_generator import model_factory, trim
 
 
