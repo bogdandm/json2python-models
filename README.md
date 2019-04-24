@@ -22,8 +22,22 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 * Specifying when dictionaries should be processed as **`dict` type** (by default every dict is considered as some model)
 * **CLI** tool
 
+## Table of Contents
+
+* [Features](#features)
+* [Table of Contents](#table-of-contents)
+* [Example](#example)
+* [Installation](#installation)
+* [Usage](#usage)
+    * [CLI](#cli)
+    * [Low level API]()
+* [Tests](#tests)
+    * [Test examples](#test-examples)
+* [Built With](#built-with)
+* [Contributing](#contributing)
+* [License](#license)
+
 ## Example
-[*skip up to **Installation***](#installation)
 
 ```
 driver_standings.json
