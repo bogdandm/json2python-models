@@ -17,7 +17,8 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 * Fields and models **names** generation (unicode support included)
 * Similar **models generalization**
 * Handling **recursive data** structures (i.e family tree)
-* Detecting **string literals** (i.e. datetime or just stringify numbers)
+* Detecting **string literals** (i.e. datetime or just stringify numbers) 
+    and providing decorators to easily convert into Python representation
 * Generation models as **tree** (nested models) or **list**
 * Specifying when dictionaries should be processed as **`dict` type** (by default every dict is considered as some model)
 * **CLI** tool
@@ -127,7 +128,7 @@ class DriverStandings:
 
 To install it, use `pip`:
 
-`pip install json2pytho-models`
+`pip install json2python-models`
 
 Or you can build it from source:
 
@@ -175,6 +176,9 @@ Arguments:
 * `--datetime` - Enable datetime/date/time strings parsing.
     * **Default**: disabled
     * **Warning**: This can lead to 6-7 times slowdown on large datasets. Be sure that you really need this option.
+    
+* `--strings-converters` - Enable generation of string types converters (i.e. `IsoDatetimeString` or `BooleanString`).
+    * **Default**: disabled
 
 * `--merge` - Merge policy settings. Possible values are: 
     * **Format**: `--merge MERGE_POLICY [MERGE_POLICY ...]`
