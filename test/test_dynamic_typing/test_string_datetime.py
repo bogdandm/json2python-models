@@ -2,9 +2,8 @@ import datetime
 
 import pytest
 
-from json_to_models.dynamic_typing import (
-    FloatString, IntString, IsoDateString, IsoDatetimeString, IsoTimeString, register_datetime_classes
-)
+from json_to_models.dynamic_typing import (BooleanString, FloatString, IntString, IsoDateString, IsoDatetimeString,
+                                           IsoTimeString, register_datetime_classes)
 from json_to_models.generator import MetadataGenerator
 
 register_datetime_classes()
@@ -20,6 +19,11 @@ test_detect_type_data = [
         "1.5",
         FloatString,
         id="default_check_float"
+    ),
+    pytest.param(
+        "true",
+        BooleanString,
+        id="bool"
     ),
     pytest.param(
         "2018-12-31",
@@ -46,6 +50,11 @@ def test_detect_type(models_generator: MetadataGenerator, value, expected):
 
 
 test_parse_data = [
+    pytest.param(
+        "true",
+        BooleanString(True),
+        id="bool"
+    ),
     pytest.param(
         "2018-12-31",
         IsoDateString(2018, 12, 31),

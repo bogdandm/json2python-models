@@ -4,8 +4,10 @@ Example uses Open Library Books API (https://openlibrary.org/dev/docs/api/books)
 import requests
 
 from json_to_models.generator import MetadataGenerator
+from json_to_models.models import compose_models
+from json_to_models.models.attr import AttrsModelCodeGenerator
+from json_to_models.models.base import generate_code
 from json_to_models.registry import ModelRegistry
-from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
 session = requests.Session()
@@ -44,16 +46,16 @@ def main():
 
     gen = MetadataGenerator()
     reg = ModelRegistry()
-    for data in (search_result, books):
-        reg.process_meta_data(gen.generate(*data))
+    reg.process_meta_data(gen.generate(*search_result), model_name="Search")
+    reg.process_meta_data(gen.generate(*books), model_name="Book")
     reg.merge_models(generator=gen)
 
-    print("\n" + "=" * 20, end='')
+    print("\n" + "=" * 20)
     for model in reg.models:
         model.generate_name()
-    for model in reg.models:
-        print(pretty_format_meta(model))
-        print("\n" + "=" * 20, end='')
+
+    structure = compose_models(reg.models_map)
+    print(generate_code(structure, AttrsModelCodeGenerator))
 
 
 if __name__ == '__main__':

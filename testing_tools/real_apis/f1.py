@@ -11,7 +11,6 @@ from json_to_models.models.base import generate_code
 from json_to_models.models.dataclasses import DataclassModelCodeGenerator
 from json_to_models.models.structure import compose_models
 from json_to_models.registry import ModelRegistry
-from json_to_models.utils import json_format
 from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
@@ -58,8 +57,8 @@ def main():
         print("=" * 20, end='')
 
     structure = compose_models(reg.models_map)
-    print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
-    print("=" * 20)
+    # print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
+    # print("=" * 20)
 
     print(generate_code(structure, DataclassModelCodeGenerator, class_generator_kwargs={"post_init_converters": True}))
 
