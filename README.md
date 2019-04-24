@@ -26,6 +26,7 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 [*skip up to **Installation***](#installation)
 
 ```
+driver_standings.json
 [
     {
         "season": "2019",
@@ -59,6 +60,10 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
         ]
     }
 ]
+```
+
+```
+json2models -f attrs -l DriverStandings driver_standings.json
 ```
 
 ```python
@@ -163,10 +168,12 @@ Arguments:
     * **Default**: `--merge percent_70 number_10`
     
 * `--dict-keys-regex`, `--dkr` - List of regular expressions (Python syntax).
+    If all keys of some dict are match one of the pattern then 
+    this dict will be marked as dict field but not nested model.
     * **Format**: `--dkr RegEx [RegEx ...]`
-        If all keys of some dict are match one of them then this dict will be marked as dict field but not nested model.
     * **Example**: `--dkr node_\d+ \d+_\d+_\d+`
-    * **Note**: `^` and `$` (string borders) tokens will be added automatically but you have escape to other special characters manually.
+    * **Note**: `^` and `$` (string borders) tokens will be added automatically but you 
+        have escape to other special characters manually.
     * **Optional**
     
 * `--dict-keys-fields`, `--dkf` - List of model fields names that will be marked as dict fields
