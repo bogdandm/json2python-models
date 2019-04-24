@@ -3,7 +3,8 @@ from random import shuffle
 import pytest
 from inflection import singularize
 
-from json_to_models.utils import Index, convert_args_decorator, distinct_words, json_format
+from json_to_models.utils import (Index, cached_classmethod, cached_method, convert_args_decorator, distinct_words,
+                                  json_format)
 
 test_distinct_words_data = [
     pytest.param(['test', 'foo', 'bar'], {'test', 'foo', 'bar'}),
@@ -63,3 +64,40 @@ def test_convert_args_decorator():
     assert f('1', b='1.5') == 2.5
     a = A("2.3", "7.5")
     assert a.value == 9.8
+
+
+def test_cached_methods():
+    class A:
+        x = []
+
+        def __init__(self):
+            self.y = []
+
+        @cached_method
+        def f(self, a):
+            self.y.append(a)
+            return a
+
+        @cached_classmethod
+        def g(cls, a):
+            cls.x.append(a)
+            return a
+
+    A.g('a')
+    A.g('a')
+    a = A()
+    A.g('b')
+    A.g('a')
+    a.f('b')
+    a.f('b')
+    a.f('a')
+    a.f('a')
+    b = A()
+    a.f('b')
+    b.f('a')
+    b.g('c')
+
+    assert A.x == ['a', 'b', 'c']
+    assert a.y == ['b', 'a']
+    assert b.y == ['a']
+    assert a.x == ['a', 'b', 'c']

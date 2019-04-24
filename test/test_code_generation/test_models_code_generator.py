@@ -4,8 +4,9 @@ import pytest
 
 from json_to_models.dynamic_typing import (AbsoluteModelRef, DDict, DList, DOptional, IntString, ModelMeta, ModelPtr,
                                            Unknown, compile_imports)
-from json_to_models.models import indent, sort_fields
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
+from json_to_models.models.structure import sort_fields
+from json_to_models.models.utils import indent
 
 # Data structure:
 # (string, indent lvl, indent string)

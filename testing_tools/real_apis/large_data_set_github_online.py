@@ -9,7 +9,7 @@ try:
 except ImportError:
     tqdm = lambda x, **kwargs: x
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import compose_models
+from json_to_models.models.structure import compose_models
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
 from json_to_models.registry import ModelRegistry

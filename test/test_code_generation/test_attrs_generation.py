@@ -2,10 +2,11 @@ from typing import Dict, List
 
 import pytest
 
-from json_to_models.dynamic_typing import (DDict, DList, DOptional, FloatString, IntString, ModelMeta, compile_imports)
-from json_to_models.models import sort_fields
+from json_to_models.dynamic_typing import (DDict, DList, DOptional, DUnion, FloatString, IntString, ModelMeta,
+                                           compile_imports)
 from json_to_models.models.attr import AttrsModelCodeGenerator, DEFAULT_ORDER
 from json_to_models.models.base import METADATA_FIELD_NAME, generate_code, sort_kwargs
+from json_to_models.models.structure import sort_fields
 from test.test_code_generation.test_models_code_generator import model_factory, trim
 
 
@@ -142,22 +143,52 @@ test_data = {
         },
         "generated": trim(f"""
         import attr
-        from attr.converter import optional
         from json_to_models.dynamic_typing import FloatString, IntString
+        from json_to_models.models import ClassType
+        from json_to_models.models.string_converters import convert_strings
         from typing import Dict, List, Optional
 
 
         @attr.s
+        @convert_strings(['bar#O.S', 'qwerty'], class_type=ClassType.Attrs)
         class Test:
             foo: int = attr.ib()
-            qwerty: FloatString = attr.ib(converter=FloatString)
+            qwerty: FloatString = attr.ib()
             dict: Dict[str, int] = attr.ib()
             not_: bool = attr.ib({field_meta('not')})
             one_day: int = attr.ib({field_meta('1day')})
             den_nedeli: str = attr.ib({field_meta('день_недели')})
             baz: Optional[List[List[str]]] = attr.ib(factory=list)
-            bar: Optional[IntString] = attr.ib(default=None, converter=optional(IntString))
+            bar: Optional[IntString] = attr.ib(default=None)
             asdfg: Optional[int] = attr.ib(default=None)
+        """)
+    },
+    "converters": {
+        "model": ("Test", {
+            "a": int,
+            "b": IntString,
+            "c": DOptional(FloatString),
+            "d": DList(DList(DList(IntString))),
+            "e": DDict(IntString),
+            "u": DUnion(DDict(IntString), DList(DList(IntString))),
+        }),
+        "generated": trim("""
+        import attr
+        from json_to_models.dynamic_typing import FloatString, IntString
+        from json_to_models.models import ClassType
+        from json_to_models.models.string_converters import convert_strings
+        from typing import Dict, List, Optional, Union
+
+
+        @attr.s
+        @convert_strings(['b', 'c#O.S', 'd#L.L.L.S', 'e#D.S'], class_type=ClassType.Attrs)
+        class Test:
+            a: int = attr.ib()
+            b: IntString = attr.ib()
+            d: List[List[List[IntString]]] = attr.ib()
+            e: Dict[str, IntString] = attr.ib()
+            u: Union[Dict[str, IntString], List[List[IntString]]] = attr.ib()
+            c: Optional[FloatString] = attr.ib(default=None)
         """)
     }
 }
@@ -200,5 +231,5 @@ def test_fields_attr(value: ModelMeta, expected: dict):
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated_attr(value: ModelMeta, expected: str):
     generated = generate_code(([{"model": value, "nested": []}], {}), AttrsModelCodeGenerator,
-                              class_generator_kwargs={'meta': True})
+                              class_generator_kwargs={'meta': True, 'post_init_converters': True})
     assert generated.rstrip() == expected, generated

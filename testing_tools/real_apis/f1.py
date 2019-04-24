@@ -7,9 +7,9 @@ import requests
 
 from json_to_models.dynamic_typing import register_datetime_classes
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import compose_models
-from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
+from json_to_models.models.dataclasses import DataclassModelCodeGenerator
+from json_to_models.models.structure import compose_models
 from json_to_models.registry import ModelRegistry
 from json_to_models.utils import json_format
 from testing_tools.pprint_meta_data import pretty_format_meta
@@ -61,7 +61,7 @@ def main():
     print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
     print("=" * 20)
 
-    print(generate_code(structure, AttrsModelCodeGenerator))
+    print(generate_code(structure, DataclassModelCodeGenerator, class_generator_kwargs={"post_init_converters": True}))
 
 
 if __name__ == '__main__':

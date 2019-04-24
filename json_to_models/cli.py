@@ -12,10 +12,11 @@ from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, 
 import json_to_models
 from json_to_models.dynamic_typing import ModelMeta, register_datetime_classes
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import ModelsStructureType, compose_models, compose_models_flat
+from json_to_models.models import ModelsStructureType
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 from json_to_models.models.dataclasses import DataclassModelCodeGenerator
+from json_to_models.models.structure import compose_models, compose_models_flat
 from json_to_models.registry import (
     ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
 )
@@ -44,9 +45,10 @@ class Cli:
     }
 
     def __init__(self):
-        self.initialize = False
+        self.initialized = False
         self.models_data: Dict[str, Iterable[dict]] = {}  # -m/-l
         self.enable_datetime: bool = False  # --datetime
+        self.strings_converters: bool = False  # --strings-converters
         self.merge_policy: List[ModelCmp] = []  # --merge
         self.structure_fn: STRUCTURE_FN_TYPE = None  # -s
         self.model_generator: Type[GenericModelCodeGenerator] = None  # -f & --code-generator
@@ -74,6 +76,7 @@ class Cli:
             for model_name, lookup, path in namespace.list or ()
         ]
         self.enable_datetime = namespace.datetime
+        self.strings_converters = namespace.strings_converters
         merge_policy = [m.split("_") if "_" in m else m for m in namespace.merge]
         structure = namespace.structure
         framework = namespace.framework
@@ -171,7 +174,7 @@ class Cli:
             m = importlib.import_module(module)
             self.model_generator = getattr(m, cls)
 
-        self.model_generator_kwargs = {}
+        self.model_generator_kwargs = {} if not self.strings_converters else {'post_init_converters': True}
         if code_generator_kwargs_raw:
             for item in code_generator_kwargs_raw:
                 if item[0] == '"':
@@ -184,7 +187,7 @@ class Cli:
         self.dict_keys_regex = [re.compile(rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
         self.dict_keys_fields = dict_keys_fields or ()
 
-        self.initialize = True
+        self.initialized = True
 
     @classmethod
     def _create_argparser(cls) -> argparse.ArgumentParser:
@@ -214,6 +217,21 @@ class Cli:
                  "pass 'a.b' as <JSON key>.\n\n"
         )
         parser.add_argument(
+            "-f", "--framework",
+            default="base",
+            choices=list(cls.MODEL_GENERATOR_MAPPING.keys()) + ["custom"],
+            help="Model framework for which python code is generated.\n"
+                 "'base' (default) mean no framework so code will be generated without any decorators\n"
+                 "and additional meta-data.\n"
+                 "If you pass 'custom' you should specify --code-generator argument\n\n"
+        )
+        parser.add_argument(
+            "-s", "--structure",
+            default="nested",
+            choices=list(cls.STRUCTURE_FN_MAPPING.keys()),
+            help="Models composition style. By default nested models become nested Python classes.\n\n"
+        )
+        parser.add_argument(
             "--datetime",
             action="store_true",
             help="Enable datetime/date/time strings parsing.\n"
@@ -221,18 +239,9 @@ class Cli:
                  "       Be sure that you really need this option.\n\n"
         )
         parser.add_argument(
-            "--dict-keys-regex", "--dkr",
-            nargs="+", metavar="RegEx",
-            help="List of regular expressions (Python syntax).\n"
-                 "If all keys of some dict are match one of them\n"
-                 "then this dict will be marked as dict field but not nested model.\n"
-                 "Note: ^ and $ tokens will be added automatically but you have to\n"
-                 "escape other special characters manually.\n"
-        )
-        parser.add_argument(
-            "--dict-keys-fields", "--dkf",
-            nargs="+", metavar="FIELD NAME",
-            help="List of model fields names that will be marked as dict fields\n\n"
+            "--strings-converters",
+            action="store_true",
+            help="Enable generation of string types converters (i.e. IsoDatetimeString or BooleanString).\n\n"
         )
 
         default_percent = f"{ModelFieldsPercentMatch.DEFAULT * 100:.0f}"
@@ -252,19 +261,18 @@ class Cli:
                  "'exact'               - two models should have exact same field names to merge.\n\n"
         )
         parser.add_argument(
-            "-s", "--structure",
-            default="nested",
-            choices=list(cls.STRUCTURE_FN_MAPPING.keys()),
-            help="Models composition style. By default nested models become nested Python classes.\n\n"
+            "--dict-keys-regex", "--dkr",
+            nargs="+", metavar="RegEx",
+            help="List of regular expressions (Python syntax).\n"
+                 "If all keys of some dict are match one of them\n"
+                 "then this dict will be marked as dict field but not nested model.\n"
+                 "Note: ^ and $ tokens will be added automatically but you have to\n"
+                 "escape other special characters manually.\n"
         )
         parser.add_argument(
-            "-f", "--framework",
-            default="base",
-            choices=list(cls.MODEL_GENERATOR_MAPPING.keys()) + ["custom"],
-            help="Model framework for which python code is generated.\n"
-                 "'base' (default) mean no framework so code will be generated without any decorators\n"
-                 "and additional meta-data.\n"
-                 "If you pass 'custom' you should specify --code-generator argument\n\n"
+            "--dict-keys-fields", "--dkf",
+            nargs="+", metavar="FIELD NAME",
+            help="List of model fields names that will be marked as dict fields\n\n"
         )
         parser.add_argument(
             "--code-generator",

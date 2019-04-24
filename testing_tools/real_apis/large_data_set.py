@@ -3,10 +3,10 @@ from datetime import datetime
 from pathlib import Path
 
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import compose_models, compose_models_flat
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
 from json_to_models.models.dataclasses import DataclassModelCodeGenerator
+from json_to_models.models.structure import compose_models, compose_models_flat
 from json_to_models.registry import ModelRegistry
 
 
