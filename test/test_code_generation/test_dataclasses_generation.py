@@ -101,12 +101,13 @@ test_data = {
         "generated": trim("""
         from dataclasses import dataclass, field
         from json_to_models.dynamic_typing import FloatString, IntString
-        from json_to_models.models.dataclasses import convert_strings
+        from json_to_models.models import ClassType
+        from json_to_models.models.string_converters import convert_strings
         from typing import Dict, List, Optional
 
 
         @dataclass
-        @convert_strings(['bar#O.S', 'qwerty'])
+        @convert_strings(['bar#O.S', 'qwerty'], class_type=ClassType.Dataclass)
         class Test:
             foo: int
             qwerty: FloatString
@@ -128,12 +129,13 @@ test_data = {
         "generated": trim("""
         from dataclasses import dataclass, field
         from json_to_models.dynamic_typing import FloatString, IntString
-        from json_to_models.models.dataclasses import convert_strings
+        from json_to_models.models import ClassType
+        from json_to_models.models.string_converters import convert_strings
         from typing import Dict, List, Optional, Union
 
 
         @dataclass
-        @convert_strings(['b', 'c#O.S', 'd#L.L.L.S', 'e#D.S'])
+        @convert_strings(['b', 'c#O.S', 'd#L.L.L.S', 'e#D.S'], class_type=ClassType.Dataclass)
         class Test:
             a: int
             b: IntString
