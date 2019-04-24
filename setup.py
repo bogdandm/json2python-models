@@ -6,13 +6,14 @@ from setuptools.command.test import test as TestCommand
 
 import json_to_models
 
+REPO = "bogdandm/json2python-models"
+CPU_N = multiprocessing.cpu_count()
+
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 with open('README.md') as f:
     long_description = f.read()
-
-URL = "https://github.com/bogdandm/json2python-models"
-CPU_N = multiprocessing.cpu_count()
+long_description.replace("/etc", f"https://raw.githubusercontent.com/{REPO}/master/etc")
 
 
 class PyTest(TestCommand):
@@ -36,7 +37,7 @@ setup(
     name="json2python-models",
     version=json_to_models.__version__,
     python_requires=">=3.7",
-    url=URL,
+    url=f"https://github.com/{REPO}",
     author="bogdandm (Bogdan Kalashnikov)",
     author_email="bogdan.dm1995@yandex.ru",
     description="Python models (attrs, dataclasses or custom) generator from JSON data with typing module support",
