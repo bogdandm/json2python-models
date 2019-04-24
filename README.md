@@ -129,37 +129,32 @@ json2models -m Car car_*.json -f attrs > car.py
 ```
 
 Arguments:
-* `-h`, `--help`
-    * Show help message and exit
+* `-h`, `--help` - Show help message and exit
     
-* `-m`, `--model`
+* `-m`, `--model` - Model name and its JSON data as path or unix-like path pattern. `*`,  `**` or `?` patterns symbols are supported.
     * **Format**: `-m <Model name> [<JSON files> ...]`
-    * **Description**: Model name and its JSON data as path or unix-like path pattern. `*`,  `**` or `?` patterns symbols are supported.
     * **Example**: `-m Car audi.json reno.json` or `-m Car audi.json -m Car reno.json` (results will be the same)
     
-* `-l`, `--list`
+* `-l`, `--list` - Like `-m` but given json file should contain list of model data (dataset). 
+    If this file contains dict with nested list than you can pass `<JSON key>` to lookup. 
+    Deep lookups are supported by dot-separated path. If no lookup needed pass `-` as `<JSON key>`.
     * **Format**: `-l <Model name> <JSON key> <JSON file>`
-    * **Description**: Like `-m` but given json file should contain list of model data (dataset). 
-        If this file contains dict with nested list than you can pass `<JSON key>` to lookup. 
-        Deep lookups are supported by dot-separated path. If no lookup needed pass `-` as `<JSON key>`.
     * **Example**: `-l Car - cars.json -l Person fetch_results.items.persons result.json`
     * **Note**: Models names under this arguments should be unique.
     
-* `-f`, `--framework`
-    * **Format**: `-f {base,attrs,dataclasses,custom}`
-    * **Description**: Model framework for which python code is generated. 
+* `-f`, `--framework` - Model framework for which python code is generated. 
     `base` (default) mean no framework so code will be generated without any decorators and additional meta-data.
+    * **Format**: `-f {base,attrs,dataclasses,custom}`
     * **Example**: `-f attrs`
     * **Default**: `-f base`
     
-* `--datetime`
-    * **Description**: Enable datetime/date/time strings parsing.
+* `--datetime` - Enable datetime/date/time strings parsing.
     * **Default**: disabled
     * **Warning**: This can lead to 6-7 times slowdown on large datasets. Be sure that you really need this option.
 
-* `--merge`
+* `--merge` - Merge policy settings. Possible values are: 
     * **Format**: `--merge MERGE_POLICY [MERGE_POLICY ...]`
-    * **Description**: Merge policy settings. Possible values are: 
+    * **Possible values** (MERGE_POLICY):
         * `percent[_<percent>]` - two models had a certain percentage of matched field names. 
             Custom value could be i.e. `percent_95`. 
         * `number[_<number>]` - two models had a certain number of matched field names. 
@@ -167,32 +162,28 @@ Arguments:
     * **Example**: `--merge percent_95 number_20` - merge if 95% of fields are matched or 20 of fields are matched
     * **Default**: `--merge percent_70 number_10`
     
-* `--dict-keys-regex`, `--dkr`
+* `--dict-keys-regex`, `--dkr` - List of regular expressions (Python syntax).
     * **Format**: `--dkr RegEx [RegEx ...]`
-    * **Description**: List of regular expressions (Python syntax). 
         If all keys of some dict are match one of them then this dict will be marked as dict field but not nested model.
     * **Example**: `--dkr node_\d+ \d+_\d+_\d+`
     * **Note**: `^` and `$` (string borders) tokens will be added automatically but you have escape to other special characters manually.
     * **Optional**
     
-* `--dict-keys-fields`, `--dkf`
+* `--dict-keys-fields`, `--dkf` - List of model fields names that will be marked as dict fields
     * **Format**: `--dkf FIELD_NAME [FIELD_NAME ...]`
-    * **Description**: List of model fields names that will be marked as dict fields
     * **Example**: `--dkf "dict_data" "mapping"`
     * **Optional**
     
-* `--code-generator`
+* `--code-generator` - Absolute import path to `GenericModelCodeGenerator` subclass.
     * **Format**: `--code-generator CODE_GENERATOR`
-    * **Description**: Absolute import path to GenericModelCodeGenerator subclass.
     * **Example**: `-f mypackage.mymodule.DjangoModelsGenerator`
     * **Note**: Is ignored without `-f custom` but is required with it.
     
-* `--code-generator-kwargs`
+* `--code-generator-kwargs` - List of GenericModelCodeGenerator subclass arguments (for `__init__` method, 
+    see docs of specific subclass). 
+    Each argument should be in following format: `argument_name=value` or `"argument_name=value with space"`. 
+    Boolean values should be passed in JS style: `true` or `false`
     * **Format**: `--code-generator-kwargs [NAME=VALUE [NAME=VALUE ...]]`
-    * **Description**: List of GenericModelCodeGenerator subclass arguments (for `__init__` method, 
-        see docs of specific subclass). 
-        Each argument should be in following format: `argument_name=value` or `"argument_name=value with space"`. 
-        Boolean values should be passed in JS style: `true` or `false`
     * **Example**:  `--code-generator-kwargs kwarg1=true kwarg2=10 "kwarg3=It is string with spaces"`
     * **Optional**
 
