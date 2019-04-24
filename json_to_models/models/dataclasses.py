@@ -17,7 +17,7 @@ def _process_string_field_value(path: List[str], value: Any, current_type: Any, 
     if token == 'S':
         try:
             value = current_type.to_internal_value(value)
-        except ValueError as e:
+        except (ValueError, TypeError) as e:
             if not optional:
                 raise e
         return value
