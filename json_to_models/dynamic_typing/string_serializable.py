@@ -8,6 +8,7 @@ class StringSerializable(BaseType):
     """
     Mixin for classes which are used to (de-)serialize some values in a string form
     """
+
     @classmethod
     def to_internal_value(cls, value: str) -> 'StringSerializable':
         """
@@ -62,6 +63,7 @@ class StringSerializableRegistry:
         :param cls: StringSerializable class
         :return: decorator
         """
+
         def decorator(cls):
             self.types.append(cls)
             for t in replace_types:
