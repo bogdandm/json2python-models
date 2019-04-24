@@ -75,3 +75,18 @@ def test_convert_complex_data():
 
     assert a == A(1, [1, 2, 3, 4], {'s': 2, 'w': 3}, None,
                   [{'a': [1, 2]}, {'b': [3, 2]}])
+
+    @attr.s
+    @convert_strings(['x', 'y#L.S', 'z#D.S', 'a#O.S', 'b#O.L.D.L.S'], class_type=ClassType.Attrs)
+    class A:
+        x: IntString = attr.ib()
+        y: List[IntString] = attr.ib()
+        z: Dict[str, IntString] = attr.ib()
+        a: Optional[IntString] = attr.ib(default=None)
+        b: Optional[List[Dict[str, List[IntString]]]] = attr.ib(default=None)
+
+    a = A('1', '1234', {'s': '2', 'w': '3'}, None,
+          [{'a': ['1', '2']}, {'b': ['3', '2']}])
+
+    assert a == A(1, [1, 2, 3, 4], {'s': 2, 'w': 3}, None,
+                  [{'a': [1, 2]}, {'b': [3, 2]}])
