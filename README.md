@@ -167,6 +167,11 @@ Arguments:
     * **Example**: `-f attrs`
     * **Default**: `-f base`
     
+* `-s , --structure` - Models composition style.
+    * **Format**: `-s {nested, flat}` 
+    * **Example**: `-s flat`
+    * **Default**: `-s nested`
+    
 * `--datetime` - Enable datetime/date/time strings parsing.
     * **Default**: disabled
     * **Warning**: This can lead to 6-7 times slowdown on large datasets. Be sure that you really need this option.
