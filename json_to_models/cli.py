@@ -215,25 +215,26 @@ class Cli:
                  "pass 'a.b' as <JSON key>.\n\n"
         )
         parser.add_argument(
+            "-f", "--framework",
+            default="base",
+            choices=list(cls.MODEL_GENERATOR_MAPPING.keys()) + ["custom"],
+            help="Model framework for which python code is generated.\n"
+                 "'base' (default) mean no framework so code will be generated without any decorators\n"
+                 "and additional meta-data.\n"
+                 "If you pass 'custom' you should specify --code-generator argument\n\n"
+        )
+        parser.add_argument(
+            "-s", "--structure",
+            default="nested",
+            choices=list(cls.STRUCTURE_FN_MAPPING.keys()),
+            help="Models composition style. By default nested models become nested Python classes.\n\n"
+        )
+        parser.add_argument(
             "--datetime",
             action="store_true",
             help="Enable datetime/date/time strings parsing.\n"
                  "Warn.: This can lead to 6-7 times slowdown on large datasets.\n"
                  "       Be sure that you really need this option.\n\n"
-        )
-        parser.add_argument(
-            "--dict-keys-regex", "--dkr",
-            nargs="+", metavar="RegEx",
-            help="List of regular expressions (Python syntax).\n"
-                 "If all keys of some dict are match one of them\n"
-                 "then this dict will be marked as dict field but not nested model.\n"
-                 "Note: ^ and $ tokens will be added automatically but you have to\n"
-                 "escape other special characters manually.\n"
-        )
-        parser.add_argument(
-            "--dict-keys-fields", "--dkf",
-            nargs="+", metavar="FIELD NAME",
-            help="List of model fields names that will be marked as dict fields\n\n"
         )
 
         default_percent = f"{ModelFieldsPercentMatch.DEFAULT * 100:.0f}"
@@ -253,19 +254,18 @@ class Cli:
                  "'exact'               - two models should have exact same field names to merge.\n\n"
         )
         parser.add_argument(
-            "-s", "--structure",
-            default="nested",
-            choices=list(cls.STRUCTURE_FN_MAPPING.keys()),
-            help="Models composition style. By default nested models become nested Python classes.\n\n"
+            "--dict-keys-regex", "--dkr",
+            nargs="+", metavar="RegEx",
+            help="List of regular expressions (Python syntax).\n"
+                 "If all keys of some dict are match one of them\n"
+                 "then this dict will be marked as dict field but not nested model.\n"
+                 "Note: ^ and $ tokens will be added automatically but you have to\n"
+                 "escape other special characters manually.\n"
         )
         parser.add_argument(
-            "-f", "--framework",
-            default="base",
-            choices=list(cls.MODEL_GENERATOR_MAPPING.keys()) + ["custom"],
-            help="Model framework for which python code is generated.\n"
-                 "'base' (default) mean no framework so code will be generated without any decorators\n"
-                 "and additional meta-data.\n"
-                 "If you pass 'custom' you should specify --code-generator argument\n\n"
+            "--dict-keys-fields", "--dkf",
+            nargs="+", metavar="FIELD NAME",
+            help="List of model fields names that will be marked as dict fields\n\n"
         )
         parser.add_argument(
             "--code-generator",
