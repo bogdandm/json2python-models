@@ -75,10 +75,10 @@ class GenericModelCodeGenerator:
         self.model = model
         self.post_init_converters = post_init_converters
         self.convert_unicode = convert_unicode
+        self.model.name = self.convert_class_name(self.model.name)
 
     @cached_method
     def convert_class_name(self, name):
-        # TODO: Convert names in typing links (lei_da_tu: '雷达图')
         return prepare_label(name, convert_unicode=self.convert_unicode)
 
     @cached_method
@@ -94,7 +94,7 @@ class GenericModelCodeGenerator:
         decorator_imports, decorators = self.decorators
         data = {
             "decorators": decorators,
-            "name": self.convert_class_name(self.model.name),
+            "name": self.model.name,
             "fields": fields,
             "extra": extra
         }
