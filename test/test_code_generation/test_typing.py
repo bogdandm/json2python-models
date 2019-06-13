@@ -56,10 +56,6 @@ def model(data: dict, name: str):
     return ModelPtr(meta)
 
 
-class TestModel:
-    pass
-
-
 # MetaData | Tuple[import_stmnt, type]
 test_data = [
     pytest.param(

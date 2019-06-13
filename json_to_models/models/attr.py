@@ -15,7 +15,8 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
     ATTRS = template(f"attr.s{{% if kwargs %}}({KWAGRS_TEMPLATE}){{% endif %}}")
     ATTRIB = template(f"attr.ib({KWAGRS_TEMPLATE})")
 
-    def __init__(self, model: ModelMeta, meta=False, post_init_converters=False, attrs_kwargs: dict = None):
+    def __init__(self, model: ModelMeta, meta=False, post_init_converters=False, attrs_kwargs: dict = None,
+                 convert_unicode=True):
         """
         :param model: ModelMeta instance
         :param meta: Enable generation of metadata as attrib argument
@@ -23,7 +24,7 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
         :param attrs_kwargs: kwargs for @attr.s() decorators
         :param kwargs:
         """
-        super().__init__(model, post_init_converters)
+        super().__init__(model, post_init_converters, convert_unicode)
         self.no_meta = not meta
         self.attrs_kwargs = attrs_kwargs or {}
 

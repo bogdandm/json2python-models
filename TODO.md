@@ -1,4 +1,6 @@
-- (!) README.md
+- README
+    - [ ] Restrictions
+    - [ ] Low lvl API wiki or sphinx docs
 - Docstrings
 - Features
     - Models layer
@@ -35,10 +37,11 @@
             - [ ] Complex python types annotations
                 - [ ] Decorator to specify field metatype
                 - [ ] Specify metatype in attr/dataclass argument (if dataclasses has such)
-            - [X] String based types (Warning: 6 times slow down)
+            - String based types (Warning: 6 times slow down)
                 - [X] ISO date
                 - [X] ISO time
                 - [X] ISO datetime
+                - [ ] Web addresses (www, http, https, etc.)
             - [X] Don't create metadata (J2M_ORIGINAL_FIELD) if original_field == generated_field
             - [X] Decode unicode in keys
     - [X] Cli tool

@@ -15,7 +15,8 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
     DC_DECORATOR = template(f"dataclass{{% if kwargs %}}({KWAGRS_TEMPLATE}){{% endif %}}")
     DC_FIELD = template(f"field({KWAGRS_TEMPLATE})")
 
-    def __init__(self, model: ModelMeta, meta=False, post_init_converters=False, dataclass_kwargs: dict = None):
+    def __init__(self, model: ModelMeta, meta=False, post_init_converters=False, dataclass_kwargs: dict = None,
+                 convert_unicode=True):
         """
         :param model: ModelMeta instance
         :param meta: Enable generation of metadata as attrib argument
@@ -23,7 +24,7 @@ class DataclassModelCodeGenerator(GenericModelCodeGenerator):
         :param dataclass_kwargs: kwargs for @dataclass() decorators
         :param kwargs:
         """
-        super().__init__(model, post_init_converters)
+        super().__init__(model, post_init_converters, convert_unicode)
         self.no_meta = not meta
         self.dataclass_kwargs = dataclass_kwargs or {}
 

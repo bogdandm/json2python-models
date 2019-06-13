@@ -1,5 +1,5 @@
 from inspect import isclass
-from typing import Iterable, List, Tuple, Union
+from typing import Any, Generator, Iterable, List, Tuple, Union
 
 ImportPathList = List[Tuple[str, Union[Iterable[str], str, None]]]
 
@@ -49,6 +49,14 @@ class BaseType:
         :return:
         """
         raise NotImplementedError()
+
+    def iter_child(self) -> Generator['MetaData', Any, None]:
+        yield self
+        for child in self:
+            if isinstance(child, BaseType):
+                yield from child.iter_child()
+            else:
+                yield child
 
 
 class UnknownType(BaseType):

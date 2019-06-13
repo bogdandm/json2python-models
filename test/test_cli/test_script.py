@@ -75,11 +75,23 @@ test_commands = [
 
     pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" --strings-converters""",
                  id="users_strings_converters"),
+    pytest.param(f"""{executable} -m SomeUnicode "{test_data_path / 'unicode.json'}" """,
+                 id="convert_unicode"),
+    pytest.param(f"""{executable} -m SomeUnicode "{test_data_path / 'unicode.json'}" --no-unidecode""",
+                 id="dont_convert_unicode"),
+    pytest.param(f"""{executable} -m SomeUnicode "{test_data_path / 'unicode.json'}" --disable-unicode-conversion""",
+                 id="dont_convert_unicode_2"),
 ]
 
 
-def _validate_result(proc: subprocess.Popen) -> Tuple[str, str]:
+def _validate_result(proc: subprocess.Popen, output=None, output_file: Path = None) -> Tuple[str, str]:
     stdout, stderr = map(bytes.decode, proc.communicate())
+    if output_file:
+        assert output is None
+        with output_file.open(encoding='utf-8') as f:
+            output = f.read()
+    if output:
+        stdout = output
     assert not stderr, stderr
     assert stdout, stdout
     assert proc.returncode == 0
@@ -153,3 +165,12 @@ def test_wrong_arguments(command):
     print("Command:", command)
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _validate_result(proc)
+
+
+@pytest.mark.parametrize("command", test_commands)
+def test_script_output_file(command):
+    file = tmp_path / 'out.py'
+    command += f" -o {file}"
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = _validate_result(proc, output_file=file)
+    print(stdout)
