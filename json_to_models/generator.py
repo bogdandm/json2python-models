@@ -8,6 +8,7 @@ from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaD
 
 _static_types = {float, bool, int}
 
+
 class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 
