@@ -1,5 +1,19 @@
 # Change Log
 
+## [Unreleased](https://github.com/bogdandm/json2python-models/tree/HEAD)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1.0.post2...HEAD)
+
+**Merged pull requests:**
+
+- Disable unicode conversion flag [\#24](https://github.com/bogdandm/json2python-models/pull/24) ([bogdandm](https://github.com/bogdandm))
+
+## [v0.1.0.post2](https://github.com/bogdandm/json2python-models/tree/v0.1.0.post2) (2019-05-02)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1.0.post1...v0.1.0.post2)
+
+## [v0.1.0.post1](https://github.com/bogdandm/json2python-models/tree/v0.1.0.post1) (2019-04-24)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1.0...v0.1.0.post1)
+
 ## [v0.1.0](https://github.com/bogdandm/json2python-models/tree/v0.1.0) (2019-04-24)
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1b2...v0.1.0)
 
