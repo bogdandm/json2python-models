@@ -143,7 +143,7 @@ class GenericModelCodeGenerator:
 
         :return: imports, list of fields as string
         """
-        required, optional = sort_fields(self.model)
+        required, optional = sort_fields(self.model, unicode_fix=not self.convert_unicode)
         imports: ImportPathList = []
         strings: List[str] = []
         for is_optional, fields in enumerate((required, optional)):
