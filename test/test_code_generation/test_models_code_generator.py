@@ -206,3 +206,89 @@ def test_absolute_model_ref():
     assert wrapper.to_typing_code()[1] == "List[List['TestModel']]"
     with AbsoluteModelRef.inject({test_model: test_model}):
         assert wrapper.to_typing_code()[1] == "List[List['TestModel.TestModel']]"
+
+
+test_unicode_data = [
+    pytest.param(
+        model_factory("Test", {
+            "foo": int,
+            "bar": int,
+            "baz": float
+        }),
+        {'convert_unicode': True},
+        trim("""
+        class Test:
+            foo: int
+            bar: int
+            baz: float
+        """),
+        id="test_pytest_setup"
+    ),
+    pytest.param(
+        model_factory("Test", {
+            "поле1": int,
+            "bar": int,
+            "baz": float
+        }),
+        {'convert_unicode': True},
+        trim("""
+        class Test:
+            pole1: int
+            bar: int
+            baz: float
+        """),
+        id="test_field_on"
+    ),
+    pytest.param(
+        model_factory("Test", {
+            "поле1": int,
+            "bar": int,
+            "baz": float
+        }),
+        {'convert_unicode': False},
+        trim("""
+        class Test:
+            поле1: int
+            bar: int
+            baz: float
+        """),
+        id="test_field_off"
+    ),
+    pytest.param(
+        model_factory("Тест", {
+            "поле1": int,
+            "bar": int,
+            "baz": float
+        }),
+        {'convert_unicode': True},
+        trim("""
+        class Test:
+            pole1: int
+            bar: int
+            baz: float
+        """),
+        id="test_field_on"
+    ),
+    pytest.param(
+        model_factory("Тест", {
+            "поле1": int,
+            "bar": int,
+            "baz": float
+        }),
+        {'convert_unicode': False},
+        trim("""
+        class Тест:
+            поле1: int
+            bar: int
+            baz: float
+        """),
+        id="test_classname_off"
+    ),
+]
+
+
+@pytest.mark.parametrize("value,kwargs,expected", test_unicode_data)
+def test_generated(value: ModelMeta, kwargs: dict, expected: str):
+    generated = generate_code(([{"model": value, "nested": []}], {}),
+                              GenericModelCodeGenerator, class_generator_kwargs=kwargs)
+    assert generated.rstrip() == expected, generated
