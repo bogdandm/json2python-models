@@ -1,8 +1,18 @@
 # Change Log
 
-## [Unreleased](https://github.com/bogdandm/json2python-models/tree/HEAD)
+## [v0.1.2](https://github.com/bogdandm/json2python-models/tree/v0.1.2) (2019-06-17)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1.1...v0.1.2)
 
-[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1.0.post2...HEAD)
+* Fix models merging
+* Fix Union optimization in merged models
+* Fix optimizing Union\[Unknown\] or Union\[None\]
+
+**Merged pull requests:**
+
+- Bug fixes [\#25](https://github.com/bogdandm/json2python-models/pull/25) ([bogdandm](https://github.com/bogdandm))
+
+## [v0.1.1](https://github.com/bogdandm/json2python-models/tree/v0.1.1) (2019-06-13)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1.0.post2...v0.1.1)
 
 **Merged pull requests:**
 
