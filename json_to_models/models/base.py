@@ -12,7 +12,7 @@ from .structure import sort_fields
 from .utils import indent
 from ..dynamic_typing import (AbsoluteModelRef, ImportPathList, MetaData,
                               ModelMeta, compile_imports, metadata_to_typing)
-from ..utils import cached_classmethod
+from ..utils import cached_method
 
 METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
 KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
@@ -71,20 +71,19 @@ class GenericModelCodeGenerator:
                                      % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
 
-    def __init__(self, model: ModelMeta, post_init_converters=False):
+    def __init__(self, model: ModelMeta, post_init_converters=False, convert_unicode=True):
         self.model = model
         self.post_init_converters = post_init_converters
+        self.convert_unicode = convert_unicode
+        self.model.name = self.convert_class_name(self.model.name)
 
-    @cached_classmethod
-    def convert_field_name(cls, name):
-        if name in keywords_set:
-            name += "_"
-        name = unidecode(name)
-        name = re.sub(r"\W", "", name)
-        if not ('a' <= name[0].lower() <= 'z'):
-            if '0' <= name[0] <= '9':
-                name = ones[int(name[0])] + "_" + name[1:]
-        return inflection.underscore(name)
+    @cached_method
+    def convert_class_name(self, name):
+        return prepare_label(name, convert_unicode=self.convert_unicode)
+
+    @cached_method
+    def convert_field_name(self, name):
+        return inflection.underscore(prepare_label(name, convert_unicode=self.convert_unicode))
 
     def generate(self, nested_classes: List[str] = None, extra: str = "") -> Tuple[ImportPathList, str]:
         """
@@ -144,7 +143,7 @@ class GenericModelCodeGenerator:
 
         :return: imports, list of fields as string
         """
-        required, optional = sort_fields(self.model)
+        required, optional = sort_fields(self.model, unicode_fix=not self.convert_unicode)
         imports: ImportPathList = []
         strings: List[str] = []
         for is_optional, fields in enumerate((required, optional)):
@@ -241,3 +240,15 @@ def sort_kwargs(kwargs: dict, ordering: Iterable[Iterable[str]]) -> dict:
                     current[item] = value
     sorted_dict = {**sorted_dict_1, **kwargs, **sorted_dict_2}
     return sorted_dict
+
+
+def prepare_label(s: str, convert_unicode: bool) -> str:
+    if s in keywords_set:
+        s += "_"
+    if convert_unicode:
+        s = unidecode(s)
+    s = re.sub(r"\W", "", s)
+    if not ('a' <= s[0].lower() <= 'z'):
+        if '0' <= s[0] <= '9':
+            s = ones[int(s[0])] + "_" + s[1:]
+    return s

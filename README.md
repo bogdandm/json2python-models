@@ -162,13 +162,17 @@ Arguments:
     * **Example**: `-l Car - cars.json -l Person fetch_results.items.persons result.json`
     * **Note**: Models names under this arguments should be unique.
     
+* `-o`, `--output` - Output file
+    * **Format**: `-o <FILE>`
+    * **Example**: `-o car_model.py`
+    
 * `-f`, `--framework` - Model framework for which python code is generated. 
     `base` (default) mean no framework so code will be generated without any decorators and additional meta-data.
     * **Format**: `-f {base,attrs,dataclasses,custom}`
     * **Example**: `-f attrs`
     * **Default**: `-f base`
     
-* `-s , --structure` - Models composition style.
+* `-s`, `--structure` - Models composition style.
     * **Format**: `-s {nested, flat}` 
     * **Example**: `-s flat`
     * **Default**: `-s nested`
@@ -176,6 +180,9 @@ Arguments:
 * `--datetime` - Enable datetime/date/time strings parsing.
     * **Default**: disabled
     * **Warning**: This can lead to 6-7 times slowdown on large datasets. Be sure that you really need this option.
+    
+* `--disable-unicode-conversion`, `--no-unidecode` - Disable unicode conversion in field labels and class names
+    * **Default**: enabled
     
 * `--strings-converters` - Enable generation of string types converters (i.e. `IsoDatetimeString` or `BooleanString`).
     * **Default**: disabled
@@ -196,7 +203,7 @@ Arguments:
     * **Format**: `--dkr RegEx [RegEx ...]`
     * **Example**: `--dkr node_\d+ \d+_\d+_\d+`
     * **Note**: `^` and `$` (string borders) tokens will be added automatically but you 
-        have escape to other special characters manually.
+        have to escape other special characters manually.
     * **Optional**
     
 * `--dict-keys-fields`, `--dkf` - List of model fields names that will be marked as dict fields

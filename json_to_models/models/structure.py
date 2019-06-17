@@ -2,7 +2,7 @@ from typing import Dict, Iterable, List, Set, Tuple
 
 from . import Index, ModelsStructureType
 from .utils import ListEx, PositionsDict
-from ..dynamic_typing import DOptional, ModelMeta, ModelPtr
+from ..dynamic_typing import BaseType, DOptional, ModelMeta, ModelPtr
 
 
 def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
@@ -137,7 +137,7 @@ def extract_root(model: ModelMeta) -> Set[Index]:
     return roots
 
 
-def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:
+def sort_fields(model_meta: ModelMeta, unicode_fix=False) -> Tuple[List[str], List[str]]:
     """
     Split fields into required and optional groups
 
@@ -145,10 +145,16 @@ def sort_fields(model_meta: ModelMeta) -> Tuple[List[str], List[str]]:
     """
     fields = model_meta.type
     required = []
+    required_2 = []
     optional = []
     for key, meta in fields.items():
         if isinstance(meta, DOptional):
             optional.append(key)
+        elif unicode_fix and isinstance(meta, BaseType) and any(
+                isinstance(node, ModelMeta)
+                for node in meta.iter_child()
+        ):
+            required_2.append(key)
         else:
             required.append(key)
-    return required, optional
+    return required + required_2, optional
