@@ -1,6 +1,6 @@
 from collections import defaultdict
 from itertools import chain, combinations
-from typing import Dict, Iterable, List, Set, Tuple
+from typing import Dict, FrozenSet, Iterable, List, Set, Tuple
 
 from ordered_set import OrderedSet
 
@@ -153,15 +153,22 @@ class ModelRegistry:
         flag = True
         while flag:
             flag = False
-            new_groups: OrderedSet[Set[ModelMeta]] = OrderedSet()
-            for gr1, gr2 in combinations(groups, 2):
-                if gr1 & gr2:
-                    old_len = len(new_groups)
-                    new_groups.add(frozenset(gr1 | gr2))
-                    added = old_len < len(new_groups)
-                    flag = flag or added
+            new_groups: OrderedSet[FrozenSet[ModelMeta]] = OrderedSet()
+            for gr1 in groups:
+                in_set = False
+                for gr2 in groups:
+                    if gr1 is gr2:
+                        continue
+                    if gr1 & gr2:
+                        in_set = True
+                        old_len = len(new_groups)
+                        new_groups.add(frozenset(gr1 | gr2))
+                        added = old_len < len(new_groups)
+                        flag = flag or added
+                if not in_set:
+                    new_groups.add(gr1)
             if flag:
-                groups = new_groups
+                groups: OrderedSet[FrozenSet[ModelMeta]] = new_groups
 
         replaces = []
         replaces_ids = set()
