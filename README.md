@@ -141,122 +141,122 @@ It requires a lit bit of tweaking:
 * There is a lot of optinal fields so we reduce merging threshold 
 
 ```
-json_to_models -s flat -f attrs -m Swagger testing_tools/swagger.json 
+json_to_models -s flat -f dataclasses -m Swagger testing_tools/swagger.json 
     --dict-keys-fields securityDefinitions paths responses definitions properties 
     --merge percent_50 number
 ```
 
 ```python
-import attr
+from dataclasses import dataclass, field
 from json_to_models.dynamic_typing import FloatString
 from typing import Any, Dict, List, Optional, Union
 
 
-@attr.s
+@dataclass
 class Swagger:
-    swagger: FloatString = attr.ib(converter=FloatString)
-    info: 'Info' = attr.ib()
-    host: str = attr.ib()
-    schemes: List[str] = attr.ib()
-    base_path: str = attr.ib()
-    consumes: List[str] = attr.ib()
-    produces: List[str] = attr.ib()
-    security_definitions: Dict[str, 'Parameter_SecurityDefinition'] = attr.ib()
-    security: List['Security'] = attr.ib()
-    paths: Dict[str, 'Path'] = attr.ib()
-    definitions: Dict[str, 'Definition_Schema'] = attr.ib()
+    swagger: FloatString
+    info: 'Info'
+    host: str
+    schemes: List[str]
+    base_path: str
+    consumes: List[str]
+    produces: List[str]
+    security_definitions: Dict[str, 'Parameter_SecurityDefinition']
+    security: List['Security']
+    paths: Dict[str, 'Path']
+    definitions: Dict[str, 'Definition_Schema']
 
 
-@attr.s
+@dataclass
 class Info:
-    title: str = attr.ib()
-    description: str = attr.ib()
-    version: str = attr.ib()
+    title: str
+    description: str
+    version: str
 
 
-@attr.s
+@dataclass
 class Security:
-    api_key: Optional[List[Any]] = attr.ib(factory=list)
-    basic: Optional[List[Any]] = attr.ib(factory=list)
+    api_key: Optional[List[Any]] = field(default_factory=list)
+    basic: Optional[List[Any]] = field(default_factory=list)
 
 
-@attr.s
+@dataclass
 class Path:
-    parameters: List['Parameter_SecurityDefinition'] = attr.ib()
-    post: Optional['Delete_Get_Patch_Post_Put'] = attr.ib(default=None)
-    get: Optional['Delete_Get_Patch_Post_Put'] = attr.ib(default=None)
-    put: Optional['Delete_Get_Patch_Post_Put'] = attr.ib(default=None)
-    patch: Optional['Delete_Get_Patch_Post_Put'] = attr.ib(default=None)
-    delete: Optional['Delete_Get_Patch_Post_Put'] = attr.ib(default=None)
+    parameters: List['Parameter_SecurityDefinition']
+    post: Optional['Delete_Get_Patch_Post_Put'] = None
+    get: Optional['Delete_Get_Patch_Post_Put'] = None
+    put: Optional['Delete_Get_Patch_Post_Put'] = None
+    patch: Optional['Delete_Get_Patch_Post_Put'] = None
+    delete: Optional['Delete_Get_Patch_Post_Put'] = None
 
 
-@attr.s
+@dataclass
 class Property:
-    type: str = attr.ib()
-    format: Optional[str] = attr.ib(default=None)
-    xnullable: Optional[bool] = attr.ib(default=None)
-    items: Optional['Item_Schema'] = attr.ib(default=None)
+    type: str
+    format: Optional[str] = None
+    xnullable: Optional[bool] = None
+    items: Optional['Item_Schema'] = None
 
 
-@attr.s
+@dataclass
 class Property_2E:
-    type: str = attr.ib()
-    title: Optional[str] = attr.ib(default=None)
-    read_only: Optional[bool] = attr.ib(default=None)
-    max_length: Optional[int] = attr.ib(default=None)
-    min_length: Optional[int] = attr.ib(default=None)
-    items: Optional['Item'] = attr.ib(default=None)
-    enum: Optional[List[str]] = attr.ib(factory=list)
-    maximum: Optional[int] = attr.ib(default=None)
-    minimum: Optional[int] = attr.ib(default=None)
-    format: Optional[str] = attr.ib(default=None)
+    type: str
+    title: Optional[str] = None
+    read_only: Optional[bool] = None
+    max_length: Optional[int] = None
+    min_length: Optional[int] = None
+    items: Optional['Item'] = None
+    enum: Optional[List[str]] = field(default_factory=list)
+    maximum: Optional[int] = None
+    minimum: Optional[int] = None
+    format: Optional[str] = None
 
 
-@attr.s
+@dataclass
 class Item:
-    ref: Optional[str] = attr.ib(default=None)
-    title: Optional[str] = attr.ib(default=None)
-    type: Optional[str] = attr.ib(default=None)
-    max_length: Optional[int] = attr.ib(default=None)
-    min_length: Optional[int] = attr.ib(default=None)
+    ref: Optional[str] = None
+    title: Optional[str] = None
+    type: Optional[str] = None
+    max_length: Optional[int] = None
+    min_length: Optional[int] = None
 
 
-@attr.s
+@dataclass
 class Parameter_SecurityDefinition:
-    name: str = attr.ib()
-    in_: str = attr.ib()
-    description: Optional[str] = attr.ib(default=None)
-    required: Optional[bool] = attr.ib(default=None)
-    type: Optional[str] = attr.ib(default=None)
-    schema: Optional['Item_Schema'] = attr.ib(default=None)
+    name: str
+    in_: str
+    required: Optional[bool] = None
+    schema: Optional['Item_Schema'] = None
+    type: Optional[str] = None
+    description: Optional[str] = None
 
 
-@attr.s
+@dataclass
 class Delete_Get_Patch_Post_Put:
-    operation_id: str = attr.ib()
-    description: str = attr.ib()
-    parameters: List['Parameter_SecurityDefinition'] = attr.ib()
-    responses: Dict[str, 'Response'] = attr.ib()
-    tags: List[str] = attr.ib()
+    operation_id: str
+    description: str
+    parameters: List['Parameter_SecurityDefinition']
+    responses: Dict[str, 'Response']
+    tags: List[str]
 
 
-@attr.s
+@dataclass
 class Item_Schema:
-    ref: str = attr.ib()
+    ref: str
 
 
-@attr.s
+@dataclass
 class Response:
-    description: str = attr.ib()
-    schema: Optional[Union['Definition_Schema', 'Item_Schema']] = attr.ib(default=None)
+    description: str
+    schema: Optional[Union['Item_Schema', 'Definition_Schema']] = None
 
 
-@attr.s
+@dataclass
 class Definition_Schema:
-    ref: Optional[str] = attr.ib(default=None)
-    required: Optional[List[str]] = attr.ib(factory=list)
-    type: Optional[str] = attr.ib(default=None)
-    properties: Optional[Dict[str, Union['Property_2E', 'Property']]] = attr.ib(factory=dict)
+    ref: Optional[str] = None
+    required: Optional[List[str]] = field(default_factory=list)
+    type: Optional[str] = None
+    properties: Optional[Dict[str, Union['Property_2E', 'Property']]] = field(default_factory=dict)
 ```
 
 </p>
