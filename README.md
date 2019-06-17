@@ -141,7 +141,9 @@ It requires a lit bit of tweaking:
 * There is a lot of optinal fields so we reduce merging threshold 
 
 ```
-json_to_models -s flat -f attrs -m Swagger testing_tools/swagger.json --dict-keys-fields securityDefinitions paths responses definitions properties --merge percent_50 number
+json_to_models -s flat -f attrs -m Swagger testing_tools/swagger.json 
+    --dict-keys-fields securityDefinitions paths responses definitions properties 
+    --merge percent_50 number
 ```
 
 ```python
