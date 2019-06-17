@@ -29,7 +29,6 @@ def load_data() -> dict:
 
 def main():
     data = load_data()
-    del data["paths"]
 
     gen = MetadataGenerator(
         dict_keys_regex=[],
