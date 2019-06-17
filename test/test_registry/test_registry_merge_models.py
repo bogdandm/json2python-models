@@ -214,6 +214,58 @@ test_data = base_test_data + [
         ],
         id="merge_models_with_optional_field"
     ),
+    pytest.param(
+        [
+            {
+                "a" + str(i): int for i in range(20)
+            },
+            {
+                **{
+                    "a" + str(i): int for i in range(20)
+                },
+                **{
+                    "b" + str(i): int for i in range(20)
+                }
+            },
+            {
+                "b" + str(i): int for i in range(20)
+            },
+            {
+                "c" + str(i): int for i in range(20)
+            },
+            {
+                **{
+                    "b" + str(i): int for i in range(20)
+                },
+                **{
+                    "c" + str(i): int for i in range(20)
+                }
+            },
+            {
+                "field1": int
+            },
+            {
+                "field1": int
+            }
+        ],
+        [
+            {
+                **{
+                    "a" + str(i): DOptional(int) for i in range(20)
+                },
+                **{
+                    "b" + str(i): DOptional(int) for i in range(20)
+                },
+                **{
+                    "c" + str(i): DOptional(int) for i in range(20)
+                }
+            },
+            {
+                "field1": int
+            }
+        ],
+        id="multistage_merge"
+    ),
 ]
 
 

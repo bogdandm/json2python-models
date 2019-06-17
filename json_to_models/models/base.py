@@ -75,7 +75,7 @@ class GenericModelCodeGenerator:
         self.model = model
         self.post_init_converters = post_init_converters
         self.convert_unicode = convert_unicode
-        self.model.name = self.convert_class_name(self.model.name)
+        self.model.set_raw_name(self.convert_class_name(self.model.name), generated=self.model.is_name_generated)
 
     @cached_method
     def convert_class_name(self, name):

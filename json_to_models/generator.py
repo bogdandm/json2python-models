@@ -237,23 +237,24 @@ class MetadataGenerator:
 
         types = [self.optimize_type(t) for t in other_types]
 
-        if Unknown in types:
-            types.remove(Unknown)
-
-        optional = False
-        if Null in types:
-            optional = True
-            while Null in types:
-                types.remove(Null)
 
         if len(types) > 1:
+            if Unknown in types:
+                types.remove(Unknown)
+
+            optional = False
+            if Null in types:
+                optional = True
+                while Null in types:
+                    types.remove(Null)
+
             meta_type = DUnion(*types)
             if len(meta_type.types) == 1:
                 meta_type = meta_type.types[0]
+
+            if optional:
+                return DOptional(meta_type)
         else:
             meta_type = types[0]
 
-        if optional:
-            return DOptional(meta_type)
-        else:
-            return meta_type
+        return meta_type
