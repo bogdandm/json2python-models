@@ -179,8 +179,7 @@ class ModelRegistry:
             replaces.append((model_meta, group))
 
         for model_meta in self.models:
-            if model_meta.index not in replaces_ids:
-                generator.optimize_type(model_meta)
+            generator.optimize_type(model_meta)
         return replaces
 
     def _merge(self, generator, *models: ModelMeta):
