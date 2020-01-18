@@ -17,6 +17,7 @@ from .models import ModelsStructureType
 from .models.attr import AttrsModelCodeGenerator
 from .models.base import GenericModelCodeGenerator, generate_code
 from .models.dataclasses import DataclassModelCodeGenerator
+from .models.pydantic import PydanticModelCodeGenerator
 from .models.structure import compose_models, compose_models_flat
 from .registry import (
     ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
@@ -42,7 +43,9 @@ class Cli:
     MODEL_GENERATOR_MAPPING: Dict[str, Type[GenericModelCodeGenerator]] = {
         "base": convert_args(GenericModelCodeGenerator),
         "attrs": convert_args(AttrsModelCodeGenerator, meta=bool_js_style),
-        "dataclasses": convert_args(DataclassModelCodeGenerator, meta=bool_js_style, post_init_converters=bool_js_style)
+        "dataclasses": convert_args(DataclassModelCodeGenerator, meta=bool_js_style,
+                                    post_init_converters=bool_js_style),
+        "pydantic": convert_args(PydanticModelCodeGenerator),
     }
 
     def __init__(self):
