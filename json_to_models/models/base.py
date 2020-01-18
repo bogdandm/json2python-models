@@ -52,7 +52,7 @@ class GenericModelCodeGenerator:
     {%- for decorator in decorators -%}
     @{{ decorator }}
     {% endfor -%}
-    class {{ name }}:
+    class {{ name }}{% if bases %}({{ bases }}){% endif %}:
     
     {%- for code in nested %}
     {{ code }}
@@ -88,7 +88,8 @@ class GenericModelCodeGenerator:
     def convert_field_name(self, name):
         return inflection.underscore(prepare_label(name, convert_unicode=self.convert_unicode))
 
-    def generate(self, nested_classes: List[str] = None, extra: str = "") -> Tuple[ImportPathList, str]:
+    def generate(self, nested_classes: List[str] = None, bases: str = None, extra: str = "") \
+            -> Tuple[ImportPathList, str]:
         """
         :param nested_classes: list of strings that contains classes code
         :return: list of import data, class code
@@ -98,8 +99,9 @@ class GenericModelCodeGenerator:
         data = {
             "decorators": decorators,
             "name": self.model.name,
+            "bases": bases or [],
             "fields": fields,
-            "extra": extra
+            "extra": extra,
         }
         if nested_classes:
             data["nested"] = [indent(s) for s in nested_classes]
