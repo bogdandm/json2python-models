@@ -22,7 +22,7 @@ class SwaggerRef(StringSerializable, str):
 
 
 def load_data() -> dict:
-    with (Path(__file__) / ".." / ".." / "swagger.json").open() as f:
+    with (Path(__file__) / ".." / ".." / "swagger.json").resolve().open() as f:
         data = json.load(f)
     return data
 
