@@ -1,6 +1,6 @@
 from functools import partial
 from itertools import chain
-from typing import Dict, Iterable, List, Tuple, Type, Union
+from typing import AbstractSet, Dict, Iterable, List, Tuple, Type, Union
 
 from .base import BaseType, ImportPathList, MetaData, get_hash_string
 from .typing import metadata_to_typing
@@ -142,20 +142,48 @@ class DUnion(ComplexType):
     def __init__(self, *types: Union[type, BaseType, dict]):
         hashes = set()
         unique_types = []
+        use_literals = True
+        str_literals = set()
+
         # Ensure that types in union are unique
-        for t in types:
-            if isinstance(t, DUnion):
-                # Merging nested DUnions
-                for t2 in list(t._extract_nested_types()):
-                    h = get_hash_string(t2)
-                    if h not in hashes:
-                        unique_types.append(t2)
-                        hashes.add(h)
+
+        def handle_type(t, use_literals):
+            if t is str:
+                use_literals = False
+
+            if isinstance(t, StringLiteral):
+                if not use_literals:
+                    return
+
+                if t.overflowed:
+                    use_literals = False
+                else:
+                    str_literals.update(t.literals)
+
             else:
                 h = get_hash_string(t)
                 if h not in hashes:
                     unique_types.append(t)
                     hashes.add(h)
+            return use_literals
+
+        for t in types:
+            if isinstance(t, DUnion):
+                # Merging nested DUnions
+                for t2 in list(t._extract_nested_types()):
+                    use_literals = handle_type(t2, use_literals) and use_literals
+            else:
+                use_literals = handle_type(t, use_literals) and use_literals
+
+        if str_literals and use_literals:
+            literal = StringLiteral(str_literals)
+            if literal.overflowed:
+                use_literals = False
+            else:
+                unique_types.append(literal)
+
+        if not use_literals:
+            handle_type(str, use_literals=False)
         super().__init__(*unique_types)
 
     def _extract_nested_types(self):
@@ -206,3 +234,51 @@ class DDict(SingleType):
             [*imports, ('typing', 'Dict')],
             f"Dict[str, {nested}]"
         )
+
+
+class StringLiteral(BaseType):
+    MAX_LITERALS = 15
+    MAX_STRING_LENGTH = 20
+    __slots__ = ["_literals", "_hash", "_overflow"]
+
+    def __init__(self, literals: AbstractSet[str]):
+        self._overflow = (
+                len(literals) > self.MAX_LITERALS
+                or any(map(lambda s: len(s) >= self.MAX_STRING_LENGTH, literals))
+        )
+        self._literals = frozenset() if self._overflow else literals
+
+    def __iter__(self) -> Iterable['MetaData']:
+        return iter(())
+
+    def __str__(self):
+        return f"{type(self).__name__}[{self._repr_literals()}]"
+
+    def __repr__(self):
+        return f"<{type(self).__name__} [{self._repr_literals()}]>"
+
+    def __eq__(self, other):
+        return type(other) is type(self) and self._literals == other._literals
+
+    def replace(self, t: 'MetaData', **kwargs) -> 'StringLiteral':
+        return self
+
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
+        return [], 'str'
+
+    def _to_hash_string(self) -> str:
+        return f"{type(self).__name__}/{self._repr_literals()}"
+
+    @property
+    def literals(self):
+        return self._literals
+
+    @property
+    def overflowed(self):
+        return self._overflow
+
+    def _repr_literals(self):
+        if self._overflow:
+            return '...'
+        return ','.join(self._literals)
