@@ -23,7 +23,7 @@ class SwaggerRef(StringSerializable, str):
 
 
 def load_data() -> dict:
-    with (Path(__file__) / ".." / ".." / "spotify-swagger.yaml").open() as f:
+    with (Path(__file__) / ".." / ".." / "spotify-swagger.yaml").resolve().open() as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
     return data
 
