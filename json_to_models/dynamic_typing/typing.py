@@ -14,6 +14,7 @@ def metadata_to_typing(t: MetaData, types_style: Dict[Union['BaseType', Type['Ba
     :param t:
     :return:
     """
+    types_style = types_style or {}
     if isclass(t):
         if issubclass(t, StringSerializable):
             return t.to_typing_code(types_style)

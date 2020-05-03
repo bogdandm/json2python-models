@@ -1,6 +1,6 @@
 import keyword
 import re
-from typing import Iterable, List, Tuple, Type
+from typing import Dict, Iterable, List, Tuple, Type, Union
 
 import inflection
 from jinja2 import Template
@@ -10,7 +10,7 @@ from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER
 from .string_converters import get_string_field_paths
 from .structure import sort_fields
 from .utils import indent
-from ..dynamic_typing import (AbsoluteModelRef, ImportPathList, MetaData,
+from ..dynamic_typing import (AbsoluteModelRef, BaseType, ImportPathList, MetaData,
                               ModelMeta, compile_imports, metadata_to_typing)
 from ..utils import cached_method
 
@@ -73,8 +73,16 @@ class GenericModelCodeGenerator:
     STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
                                      % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
+    default_types_style = {}
 
-    def __init__(self, model: ModelMeta, post_init_converters=False, convert_unicode=True):
+    def __init__(
+            self,
+            model: ModelMeta,
+            post_init_converters=False,
+            convert_unicode=True,
+            types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None
+    ):
+        self.types_style = types_style if types_style is not None else self.default_types_style
         self.model = model
         self.post_init_converters = post_init_converters
         self.convert_unicode = convert_unicode
@@ -133,7 +141,7 @@ class GenericModelCodeGenerator:
         :param optional: Is field optional
         :return: imports, field data
         """
-        imports, typing = metadata_to_typing(meta)
+        imports, typing = metadata_to_typing(meta, types_style=self.types_style)
 
         data = {
             "name": self.convert_field_name(name),

@@ -40,9 +40,10 @@ class BaseType:
         t_cls = t if isclass(t) else type(t)
         mro = t_cls.__mro__
         for base in mro:
-            kwargs = types_style.get(base, ...)
-            if kwargs is not Ellipsis:
-                return kwargs
+            options = types_style.get(base, ...)
+            if options is not Ellipsis:
+                return options
+        return {}
 
     def to_hash_string(self) -> str:
         """
