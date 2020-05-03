@@ -121,9 +121,9 @@ test_data = {
                 "body": "attr.ib(default=None)"
             },
             "dict": {
-                "name": "dict",
+                "name": "dict_",
                 "type": "Dict[str, int]",
-                "body": "attr.ib()"
+                "body": f"attr.ib({field_meta('dict')})"
             },
             "not": {
                 "name": "not_",
@@ -154,7 +154,7 @@ test_data = {
         class Test:
             foo: int = attr.ib()
             qwerty: FloatString = attr.ib()
-            dict: Dict[str, int] = attr.ib()
+            dict_: Dict[str, int] = attr.ib({field_meta('dict')})
             not_: bool = attr.ib({field_meta('not')})
             one_day: int = attr.ib({field_meta('1day')})
             den_nedeli: str = attr.ib({field_meta('день_недели')})

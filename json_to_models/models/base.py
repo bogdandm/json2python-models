@@ -21,6 +21,9 @@ KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
                   "{% endfor %}"
 
 keywords_set = set(keyword.kwlist)
+builtins_set = set(__builtins__.keys())
+other_common_names_set = {'datetime', 'time', 'date', 'defaultdict'}
+blacklist_words = frozenset(keywords_set | builtins_set | other_common_names_set)
 ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
 
 
@@ -243,7 +246,7 @@ def sort_kwargs(kwargs: dict, ordering: Iterable[Iterable[str]]) -> dict:
 
 
 def prepare_label(s: str, convert_unicode: bool) -> str:
-    if s in keywords_set:
+    if s in blacklist_words:
         s += "_"
     if convert_unicode:
         s = unidecode(s)
