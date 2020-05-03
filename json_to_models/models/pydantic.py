@@ -2,7 +2,7 @@ from inspect import isclass
 from typing import List, Optional, Tuple
 
 from .base import GenericModelCodeGenerator, KWAGRS_TEMPLATE, sort_kwargs, template
-from ..dynamic_typing import BaseType, DDict, DList, DOptional, ImportPathList, MetaData, ModelMeta, StringSerializable
+from ..dynamic_typing import BaseType, DDict, DList, DOptional, ImportPathList, MetaData, ModelMeta, Null, StringSerializable, Unknown
 
 DEFAULT_ORDER = (
     "*",
@@ -31,6 +31,16 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
         )
         imports.append(('pydantic', ['BaseModel', 'Field']))
         return imports, body
+
+    def _filter_fields(self, fields):
+        fields = super()._filter_fields(fields)
+        filtered = []
+        for field in fields:
+            field_type = self.model.type[field]
+            if field_type in (Unknown, Null):
+                continue
+            filtered.append(field)
+        return filtered
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
         """

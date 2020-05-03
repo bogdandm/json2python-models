@@ -1,4 +1,5 @@
 import operator
+from datetime import date, datetime, time
 from inspect import isclass
 from typing import Dict, Set, Tuple
 
@@ -16,7 +17,10 @@ def metadata_to_typing(t: MetaData) -> Tuple[ImportPathList, str]:
         if issubclass(t, StringSerializable):
             return t.to_typing_code()
         else:
-            return ([], t.__name__)
+            imports = []
+            if issubclass(t, (date, datetime, time)):
+                imports.append((t.__module__, [t.__name__]))
+            return (imports, t.__name__)
     elif isinstance(t, dict):
         raise ValueError("Can not convert dict instance to typing code. It should be wrapped into ModelMeta instance")
     else:

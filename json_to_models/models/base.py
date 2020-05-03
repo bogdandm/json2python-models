@@ -152,11 +152,15 @@ class GenericModelCodeGenerator:
         imports: ImportPathList = []
         strings: List[str] = []
         for is_optional, fields in enumerate((required, optional)):
+            fields = self._filter_fields(fields)
             for field in fields:
                 field_imports, data = self.field_data(field, self.model.type[field], bool(is_optional))
                 imports.extend(field_imports)
                 strings.append(self.FIELD.render(**data))
         return imports, strings
+
+    def _filter_fields(self, fields):
+        return fields
 
     @property
     def string_field_paths(self) -> List[str]:
