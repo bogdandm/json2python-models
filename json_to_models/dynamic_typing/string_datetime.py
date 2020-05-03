@@ -71,6 +71,7 @@ class IsoDateString(StringSerializable, date):
     Parse date using dateutil.parser.isoparse. Representation format always is ``YYYY-MM-DD``.
     You can override to_representation method to customize it. Just don't forget to call registry.remove(IsoDateString)
     """
+    actual_type = date
 
     @classmethod
     def to_internal_value(cls, value: str) -> 'IsoDateString':
@@ -92,6 +93,7 @@ class IsoTimeString(StringSerializable, time):
     Parse time using dateutil.parser.parse. Representation format always is ``hh:mm:ss.ms``.
     You can override to_representation method to customize it.
     """
+    actual_type = time
 
     @classmethod
     def to_internal_value(cls, value: str) -> 'IsoTimeString':
@@ -113,6 +115,7 @@ class IsoDatetimeString(StringSerializable, datetime):
     Parse datetime using dateutil.parser.isoparse.
     Representation format always is ``YYYY-MM-DDThh:mm:ss.ms`` (datetime.isoformat method).
     """
+    actual_type = datetime
 
     @classmethod
     def to_internal_value(cls, value: str) -> 'IsoDatetimeString':

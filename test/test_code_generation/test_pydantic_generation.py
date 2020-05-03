@@ -86,12 +86,12 @@ test_data = {
             },
             "bar": {
                 "name": "bar",
-                "type": "Optional[IntString]",
+                "type": "Optional[int]",
                 "body": "None"
             },
             "qwerty": {
                 "name": "qwerty",
-                "type": "FloatString"
+                "type": "float"
             },
             "asdfg": {
                 "name": "asdfg",
@@ -119,20 +119,19 @@ test_data = {
             }
         },
         "generated": trim(f"""
-        from json_to_models.dynamic_typing import FloatString, IntString
         from pydantic import BaseModel, Field
         from typing import Dict, List, Optional
 
 
         class Test(BaseModel):
             foo: int
-            qwerty: FloatString
+            qwerty: float
             dict: Dict[str, int]
             not_: bool = Field(..., alias="not")
             one_day: int = Field(..., alias="1day")
             den_nedeli: str = Field(..., alias="день_недели")
             baz: Optional[List[List[str]]] = []
-            bar: Optional[IntString] = None
+            bar: Optional[int] = None
             asdfg: Optional[int] = None
         """)
     },
@@ -146,18 +145,17 @@ test_data = {
             "u": DUnion(DDict(IntString), DList(DList(IntString))),
         }),
         "generated": trim("""
-        from json_to_models.dynamic_typing import FloatString, IntString
         from pydantic import BaseModel, Field
         from typing import Dict, List, Optional, Union
 
 
         class Test(BaseModel):
             a: int
-            b: IntString
-            d: List[List[List[IntString]]]
-            e: Dict[str, IntString]
-            u: Union[Dict[str, IntString], List[List[IntString]]]
-            c: Optional[FloatString] = None
+            b: int
+            d: List[List[List[int]]]
+            e: Dict[str, int]
+            u: Union[Dict[str, int], List[List[int]]]
+            c: Optional[float] = None
         """)
     }
 }
