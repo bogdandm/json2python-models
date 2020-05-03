@@ -99,8 +99,9 @@ test_data = {
                 "body": "None"
             },
             "dict": {
-                "name": "dict",
+                "name": "dict_",
                 "type": "Dict[str, int]",
+                "body": 'Field(..., alias="dict")'
             },
             "not": {
                 "name": "not_",
@@ -126,7 +127,7 @@ test_data = {
         class Test(BaseModel):
             foo: int
             qwerty: float
-            dict: Dict[str, int]
+            dict_: Dict[str, int] = Field(..., alias="dict")
             not_: bool = Field(..., alias="not")
             one_day: int = Field(..., alias="1day")
             den_nedeli: str = Field(..., alias="день_недели")
