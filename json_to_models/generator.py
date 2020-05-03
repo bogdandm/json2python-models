@@ -202,6 +202,9 @@ class MetadataGenerator:
         elif isinstance(meta, ComplexType):
             # Optimize all nested types
             return meta.replace([self.optimize_type(nested) for nested in meta])
+        elif isinstance(meta, StringLiteral):
+            if meta.overflowed or not meta.literals:
+                return str
         return meta
 
     def _optimize_union(self, t: DUnion):

@@ -32,7 +32,7 @@ class BaseType:
         raise NotImplementedError()
 
     @classmethod
-    def get_kwargs_for_type(
+    def get_options_for_type(
             cls,
             t: Union['BaseType', Type['BaseType']],
             types_style: Dict[Union['BaseType', Type['BaseType']], dict]

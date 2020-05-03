@@ -2,6 +2,8 @@ from functools import partial
 from itertools import chain
 from typing import AbstractSet, Dict, Iterable, List, Tuple, Type, Union
 
+from typing_extensions import Literal
+
 from .base import BaseType, ImportPathList, MetaData, get_hash_string
 from .typing import metadata_to_typing
 
@@ -237,14 +239,22 @@ class DDict(SingleType):
 
 
 class StringLiteral(BaseType):
-    MAX_LITERALS = 15
+    class TypeStyle:
+        use_literals = 'use_literals'
+        max_literals = 'max_literals'
+
+    MAX_LITERALS = 15  # Hard limit for performance optimization
     MAX_STRING_LENGTH = 20
     __slots__ = ["_literals", "_hash", "_overflow"]
 
     def __init__(self, literals: AbstractSet[str]):
         self._overflow = (
                 len(literals) > self.MAX_LITERALS
-                or any(map(lambda s: len(s) >= self.MAX_STRING_LENGTH, literals))
+                or
+                any(map(
+                    lambda s: len(s) >= self.MAX_STRING_LENGTH,
+                    literals
+                ))
         )
         self._literals = frozenset() if self._overflow else literals
 
@@ -265,6 +275,13 @@ class StringLiteral(BaseType):
 
     def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
             -> Tuple[ImportPathList, str]:
+        options = self.get_options_for_type(self, types_style)
+        if options.get(self.TypeStyle.use_literals):
+            limit = options.get(self.TypeStyle.max_literals)
+            if limit is None or len(self.literals) < limit:
+                parts = ', '.join(f'"{s}"' for s in self.literals)
+                return [(Literal.__module__, 'Literal')], f"Literal[{parts}]"
+
         return [], 'str'
 
     def _to_hash_string(self) -> str:

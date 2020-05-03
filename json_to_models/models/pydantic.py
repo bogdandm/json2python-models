@@ -9,6 +9,7 @@ from ..dynamic_typing import (
     MetaData,
     ModelMeta,
     Null,
+    StringLiteral,
     StringSerializable,
     Unknown
 )
@@ -24,17 +25,31 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
     default_types_style = {
         StringSerializable: {
             StringSerializable.TypeStyle.use_actual_type: True
+        },
+        StringLiteral: {
+            StringLiteral.TypeStyle.use_literals: True
         }
     }
 
-    def __init__(self, model: ModelMeta, convert_unicode=True):
+    def __init__(self, model: ModelMeta, max_literals=10, convert_unicode=True):
         """
         :param model: ModelMeta instance
         :param meta: Enable generation of metadata as attrib argument
         :param post_init_converters: Enable generation of type converters in __post_init__ methods
         :param kwargs:
         """
-        super().__init__(model, post_init_converters=False, convert_unicode=convert_unicode)
+        super().__init__(
+            model,
+            post_init_converters=False,
+            convert_unicode=convert_unicode,
+            types_style={
+                **self.default_types_style,
+                StringLiteral: {
+                    **self.default_types_style[StringLiteral],
+                    StringLiteral.TypeStyle.max_literals: int(max_literals)
+                }
+            }
+        )
 
     def generate(self, nested_classes: List[str] = None, extra: str = "", **kwargs) \
             -> Tuple[ImportPathList, str]:

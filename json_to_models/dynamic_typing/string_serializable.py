@@ -40,7 +40,7 @@ class StringSerializable(BaseType):
         as a metadata instance but contains actual data
         """
         cls_name = cls.__name__
-        options = cls.get_kwargs_for_type(cls, types_style)
+        options = cls.get_options_for_type(cls, types_style)
         if options.get(cls.TypeStyle.use_actual_type):
             if cls.actual_type.__module__ != 'builtins':
                 return [(cls.actual_type.__module__, cls.actual_type.__name__)], cls.actual_type.__name__

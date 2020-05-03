@@ -3,3 +3,4 @@ inflection>=0.3.*
 unidecode>=1.0.*
 Jinja2>=2.10.*
 ordered-set==4.*
+typing-extensions>=3.1.*
