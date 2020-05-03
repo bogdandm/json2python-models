@@ -1,5 +1,5 @@
 from inspect import isclass
-from typing import Any, Generator, Iterable, List, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, List, Tuple, Type, Union
 
 ImportPathList = List[Tuple[str, Union[Iterable[str], str, None]]]
 
@@ -21,13 +21,28 @@ class BaseType:
         """
         raise NotImplementedError()
 
-    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
         """
         Return typing code that represents this metadata and import path of classes that are used in this code
 
+        :param types_style: Hints for .to_typing_code() for different type wrappers
         :return: ((module_name, (class_name, ...)), code)
         """
         raise NotImplementedError()
+
+    @classmethod
+    def get_kwargs_for_type(
+            cls,
+            t: Union['BaseType', Type['BaseType']],
+            types_style: Dict[Union['BaseType', Type['BaseType']], dict]
+    ) -> dict:
+        t_cls = t if isclass(t) else type(t)
+        mro = t_cls.__mro__
+        for base in mro:
+            kwargs = types_style.get(base, ...)
+            if kwargs is not Ellipsis:
+                return kwargs
 
     def to_hash_string(self) -> str:
         """
@@ -71,7 +86,8 @@ class UnknownType(BaseType):
     def replace(self, t: 'MetaData', **kwargs) -> 'UnknownType':
         return self
 
-    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
         return ([('typing', 'Any')], 'Any')
 
     def to_hash_string(self) -> str:
@@ -90,7 +106,8 @@ class NoneType(BaseType):
     def replace(self, t: 'MetaData', **kwargs) -> 'NoneType':
         return self
 
-    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
         return ([], 'None')
 
     def to_hash_string(self) -> str:

@@ -192,20 +192,20 @@ def test_absolute_model_ref():
     test_model = ModelMeta({"field": int}, "A")
     test_model.name = "test_model"
     test_ptr = ModelPtr(test_model)
-    assert test_ptr.to_typing_code()[1] == "'TestModel'"
+    assert test_ptr.to_typing_code({})[1] == "'TestModel'"
     with AbsoluteModelRef.inject({test_model: "Parent"}):
-        assert test_ptr.to_typing_code()[1] == "'Parent.TestModel'"
-    assert test_ptr.to_typing_code()[1] == "'TestModel'"
+        assert test_ptr.to_typing_code({})[1] == "'Parent.TestModel'"
+    assert test_ptr.to_typing_code({})[1] == "'TestModel'"
     with AbsoluteModelRef.inject({test_model: "Parent"}):
-        assert test_ptr.to_typing_code()[1] == "'Parent.TestModel'"
+        assert test_ptr.to_typing_code({})[1] == "'Parent.TestModel'"
         with AbsoluteModelRef.inject({test_model: "AnotherParent"}):
-            assert test_ptr.to_typing_code()[1] == "'AnotherParent.TestModel'"
-        assert test_ptr.to_typing_code()[1] == "'Parent.TestModel'"
+            assert test_ptr.to_typing_code({})[1] == "'AnotherParent.TestModel'"
+        assert test_ptr.to_typing_code({})[1] == "'Parent.TestModel'"
 
     wrapper = DList(DList(test_ptr))
-    assert wrapper.to_typing_code()[1] == "List[List['TestModel']]"
+    assert wrapper.to_typing_code({})[1] == "List[List['TestModel']]"
     with AbsoluteModelRef.inject({test_model: test_model}):
-        assert wrapper.to_typing_code()[1] == "List[List['TestModel.TestModel']]"
+        assert wrapper.to_typing_code({})[1] == "List[List['TestModel.TestModel']]"
 
 
 test_unicode_data = [
