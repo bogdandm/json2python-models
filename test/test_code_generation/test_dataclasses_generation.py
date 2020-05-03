@@ -94,11 +94,12 @@ test_data = {
                 "body": "None"
             },
             "dict": {
-                "name": "dict",
-                "type": "Dict[str, int]"
+                "name": "dict_",
+                "type": "Dict[str, int]",
+                "body": f"field({field_meta('dict')})"
             }
         },
-        "generated": trim("""
+        "generated": trim(f"""
         from dataclasses import dataclass, field
         from json_to_models.dynamic_typing import FloatString, IntString
         from json_to_models.models import ClassType
@@ -111,7 +112,7 @@ test_data = {
         class Test:
             foo: int
             qwerty: FloatString
-            dict: Dict[str, int]
+            dict_: Dict[str, int] = field({field_meta('dict')})
             baz: Optional[List[List[str]]] = field(default_factory=list)
             bar: Optional[IntString] = None
             asdfg: Optional[int] = None
