@@ -220,6 +220,7 @@ def _generate_code(
     """
     imports = []
     classes = []
+    generators = []
     for data in structure:
         nested_imports, nested_classes = _generate_code(
             data["nested"],
@@ -228,7 +229,11 @@ def _generate_code(
             lvl=lvl + 1
         )
         imports.extend(nested_imports)
-        gen = class_generator(data["model"], **class_generator_kwargs)
+        generators.append((
+            class_generator(data["model"], **class_generator_kwargs),
+            nested_classes
+        ))
+    for gen, nested_classes in generators:
         cls_imports, cls_string = gen.generate(nested_classes)
         imports.extend(cls_imports)
         classes.append(cls_string)
