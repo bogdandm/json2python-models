@@ -1,6 +1,6 @@
 from functools import partial
 from itertools import chain
-from typing import AbstractSet, Dict, Iterable, List, Tuple, Type, Union
+from typing import AbstractSet, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from typing_extensions import Literal
 
@@ -9,6 +9,7 @@ from .typing import metadata_to_typing
 
 
 class SingleType(BaseType):
+    _typing_cls = None
     __slots__ = ["_type", "_hash"]
 
     def __init__(self, t: MetaData):
@@ -40,11 +41,20 @@ class SingleType(BaseType):
         self.type = t
         return self
 
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
+        imports, nested = metadata_to_typing(self.type, types_style=types_style)
+        return (
+            [*imports, (self._typing_cls.__module__, self._typing_cls._name)],
+            f"{self._typing_cls._name}[{nested}]"
+        )
+
     def _to_hash_string(self) -> str:
         return f"{type(self).__name__}/{get_hash_string(self.type)}"
 
 
 class ComplexType(BaseType):
+    _typing_cls = None
     __slots__ = ["_types", "_sorted", "_hash"]
 
     def __init__(self, *types: MetaData):
@@ -114,8 +124,8 @@ class ComplexType(BaseType):
         imports, nested = zip(*map(partial(metadata_to_typing, types_style=types_style), self))
         nested = ", ".join(nested)
         return (
-            list(chain.from_iterable(imports)),
-            f"[{nested}]"
+            [*chain.from_iterable(imports), (self._typing_cls.__module__, self._typing_cls._name)],
+            f"{self._typing_cls._name}[{nested}]"
         )
 
     def _to_hash_string(self) -> str:
@@ -126,20 +136,14 @@ class DOptional(SingleType):
     """
     Field of this type may not be presented in JSON object
     """
-
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
-            -> Tuple[ImportPathList, str]:
-        imports, nested = metadata_to_typing(self.type, types_style=types_style)
-        return (
-            [*imports, ('typing', 'Optional')],
-            f"Optional[{nested}]"
-        )
+    _typing_cls = Optional
 
 
 class DUnion(ComplexType):
     """
     Same as typing.Union. Nested types are unique.
     """
+    _typing_cls = Union
 
     def __init__(self, *types: Union[type, BaseType, dict]):
         hashes = set()
@@ -198,36 +202,18 @@ class DUnion(ComplexType):
             else:
                 yield t
 
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
-            -> Tuple[ImportPathList, str]:
-        imports, nested = super().to_typing_code(types_style)
-        return (
-            [*imports, ('typing', 'Union')],
-            "Union" + nested
-        )
-
 
 class DTuple(ComplexType):
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
-            -> Tuple[ImportPathList, str]:
-        imports, nested = super().to_typing_code(types_style)
-        return (
-            [*imports, ('typing', 'Tuple')],
-            "Tuple" + nested
-        )
+    _typing_cls = Tuple
 
 
 class DList(SingleType):
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
-            -> Tuple[ImportPathList, str]:
-        imports, nested = metadata_to_typing(self.type, types_style=types_style)
-        return (
-            [*imports, ('typing', 'List')],
-            f"List[{nested}]"
-        )
+    _typing_cls = List
 
 
 class DDict(SingleType):
+    _typing_cls = Dict
+
     # Dict is single type because keys of JSON dict are always strings.
     def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
             -> Tuple[ImportPathList, str]:
