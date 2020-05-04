@@ -1,21 +1,23 @@
 import operator
 from datetime import date, datetime, time
 from inspect import isclass
-from typing import Dict, Set, Tuple
+from typing import Dict, Set, Tuple, Type, Union
 
-from .base import ImportPathList, MetaData
+from .base import BaseType, ImportPathList, MetaData
 from .string_serializable import StringSerializable
 
 
-def metadata_to_typing(t: MetaData) -> Tuple[ImportPathList, str]:
+def metadata_to_typing(t: MetaData, types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None) \
+        -> Tuple[ImportPathList, str]:
     """
     Shortcut function to call ``to_typing_code`` method of BaseType instances or return name of type otherwise
     :param t:
     :return:
     """
+    types_style = types_style or {}
     if isclass(t):
         if issubclass(t, StringSerializable):
-            return t.to_typing_code()
+            return t.to_typing_code(types_style)
         else:
             imports = []
             if issubclass(t, (date, datetime, time)):
@@ -24,7 +26,7 @@ def metadata_to_typing(t: MetaData) -> Tuple[ImportPathList, str]:
     elif isinstance(t, dict):
         raise ValueError("Can not convert dict instance to typing code. It should be wrapped into ModelMeta instance")
     else:
-        return t.to_typing_code()
+        return t.to_typing_code(types_style)
 
 
 def compile_imports(imports: ImportPathList) -> str:

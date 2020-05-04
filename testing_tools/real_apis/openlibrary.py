@@ -4,9 +4,9 @@ Example uses Open Library Books API (https://openlibrary.org/dev/docs/api/books)
 import requests
 
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models import compose_models
 from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
+from json_to_models.models.structure import compose_models
 from json_to_models.registry import ModelRegistry
 from testing_tools.real_apis import dump_response
 

@@ -1,8 +1,9 @@
 import threading
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Type, Union
 
 import inflection
 
+from . import BaseType
 from .base import ImportPathList, MetaData
 from .complex import SingleType
 from ..utils import distinct_words
@@ -94,7 +95,8 @@ class ModelMeta(SingleType):
     def remove_child_ref(self, ptr: 'ModelPtr'):
         self.child_pointers.remove(ptr)
 
-    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
         if self.name is None:
             raise ValueError('Model without name can not be typed')
         return [], self.name
@@ -130,8 +132,9 @@ class ModelPtr(SingleType):
         self.parent.add_child_ref(self)
         return self
 
-    def to_typing_code(self) -> Tuple[ImportPathList, str]:
-        return AbsoluteModelRef(self.type).to_typing_code()
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
+        return AbsoluteModelRef(self.type).to_typing_code(types_style)
 
     def _to_hash_string(self) -> str:
         return f"{type(self).__name__}_#{self.type.index}"
@@ -187,7 +190,8 @@ class AbsoluteModelRef:
     def __init__(self, model: ModelMeta):
         self.model = model
 
-    def to_typing_code(self) -> Tuple[ImportPathList, str]:
+    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+            -> Tuple[ImportPathList, str]:
         context_data = self.Context.data.context
         if context_data:
             model_path = context_data.get(self.model, "")
@@ -195,6 +199,6 @@ class AbsoluteModelRef:
                 model_path = model_path.name
         else:
             model_path = ""
-        imports, model = self.model.to_typing_code()
+        imports, model = self.model.to_typing_code(types_style)
         s = ".".join(filter(None, (model_path, model)))
         return imports, f"'{s}'"

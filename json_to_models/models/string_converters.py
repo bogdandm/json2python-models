@@ -3,8 +3,18 @@ from inspect import isclass
 from typing import Any, Callable, List, Optional, Tuple
 
 from . import ClassType
-from ..dynamic_typing import (BaseType, DDict, DList, DOptional, DUnion, MetaData, ModelMeta, ModelPtr,
-                              StringSerializable)
+from ..dynamic_typing import (
+    BaseType,
+    DDict,
+    DList,
+    DOptional,
+    DUnion,
+    MetaData,
+    ModelMeta,
+    ModelPtr,
+    StringLiteral,
+    StringSerializable
+)
 from ..dynamic_typing.base import NoneType
 
 
@@ -167,6 +177,8 @@ def get_string_field_paths(model: ModelMeta) -> List[Tuple[str, List[str]]]:
                     paths = []
                     break
                 elif cls is NoneType:
+                    continue
+                elif cls in (StringLiteral,):
                     continue
                 else:
                     raise TypeError(f"Unsupported meta-type for converter path {cls}")

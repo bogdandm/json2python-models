@@ -1,5 +1,5 @@
 from itertools import permutations
-from typing import ClassVar, Collection, Iterable, List, Set, Tuple, Type
+from typing import ClassVar, Collection, Dict, Iterable, List, Set, Tuple, Type, Union
 
 from .base import BaseType, ImportPathList
 
@@ -8,6 +8,10 @@ class StringSerializable(BaseType):
     """
     Mixin for classes which are used to (de-)serialize some values in a string form
     """
+
+    class TypeStyle:
+        use_actual_type = 'use_actual_type'
+
     actual_type: ClassVar[Type]
 
     @classmethod
@@ -30,12 +34,17 @@ class StringSerializable(BaseType):
         raise NotImplementedError()
 
     @classmethod
-    def to_typing_code(cls) -> Tuple[ImportPathList, str]:
+    def to_typing_code(cls, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) -> Tuple[ImportPathList, str]:
         """
         Unlike other BaseType's subclasses it's a class method because StringSerializable instance is not parameterized
         as a metadata instance but contains actual data
         """
         cls_name = cls.__name__
+        options = cls.get_options_for_type(cls, types_style)
+        if options.get(cls.TypeStyle.use_actual_type):
+            if cls.actual_type.__module__ != 'builtins':
+                return [(cls.actual_type.__module__, cls.actual_type.__name__)], cls.actual_type.__name__
+            return [], cls.actual_type.__name__
         return [('json_to_models.dynamic_typing', cls_name)], cls_name
 
     def __iter__(self):

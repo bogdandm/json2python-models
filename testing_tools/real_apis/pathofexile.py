@@ -6,8 +6,8 @@ from datetime import datetime
 import requests
 
 from json_to_models.generator import MetadataGenerator
-from json_to_models.models.attr import AttrsModelCodeGenerator
 from json_to_models.models.base import generate_code
+from json_to_models.models.pydantic import PydanticModelCodeGenerator
 from json_to_models.models.structure import compose_models_flat
 from json_to_models.registry import ModelRegistry
 from testing_tools.real_apis import dump_response
@@ -40,7 +40,7 @@ def main():
     # print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
     # print("=" * 20)
 
-    print(generate_code(structure, AttrsModelCodeGenerator))
+    print(generate_code(structure, PydanticModelCodeGenerator))
     print(f"{(datetime.now() - start_t).total_seconds():.4f} seconds")
 
 

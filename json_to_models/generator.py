@@ -3,8 +3,22 @@ from typing import Any, Callable, List, Optional, Pattern, Union
 
 from unidecode import unidecode
 
-from .dynamic_typing import (ComplexType, DDict, DList, DOptional, DUnion, MetaData, ModelPtr, Null, SingleType,
-                             StringSerializable, StringSerializableRegistry, Unknown, registry)
+from .dynamic_typing import (
+    ComplexType,
+    DDict,
+    DList,
+    DOptional,
+    DUnion,
+    MetaData,
+    ModelPtr,
+    Null,
+    SingleType,
+    StringLiteral,
+    StringSerializable,
+    StringSerializableRegistry,
+    Unknown,
+    registry
+)
 
 _static_types = {float, bool, int}
 
@@ -108,7 +122,7 @@ class MetadataGenerator:
                 except ValueError:
                     continue
                 return t
-            return str
+            return StringLiteral({value})
 
     def merge_field_sets(self, field_sets: List[MetaData]) -> MetaData:
         """
@@ -188,6 +202,9 @@ class MetadataGenerator:
         elif isinstance(meta, ComplexType):
             # Optimize all nested types
             return meta.replace([self.optimize_type(nested) for nested in meta])
+        elif isinstance(meta, StringLiteral):
+            if meta.overflowed or not meta.literals:
+                return str
         return meta
 
     def _optimize_union(self, t: DUnion):
@@ -199,7 +216,7 @@ class MetadataGenerator:
         str_types: List[Union[type, StringSerializable]] = []
         types_to_merge: List[dict] = []
         list_types: List[DList] = []
-        dict_types: List[DList] = []
+        dict_types: List[DDict] = []
         other_types: List[MetaData] = []
         for item in t.types:
             if isinstance(item, DOptional):

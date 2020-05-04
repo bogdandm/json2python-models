@@ -1,6 +1,7 @@
+import copy
 import keyword
 import re
-from typing import Iterable, List, Tuple, Type
+from typing import Dict, Iterable, List, Tuple, Type, Union
 
 import inflection
 from jinja2 import Template
@@ -10,8 +11,8 @@ from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER
 from .string_converters import get_string_field_paths
 from .structure import sort_fields
 from .utils import indent
-from ..dynamic_typing import (AbsoluteModelRef, ImportPathList, MetaData,
-                              ModelMeta, compile_imports, metadata_to_typing)
+from ..dynamic_typing import (AbsoluteModelRef, BaseType, ImportPathList, MetaData,
+                              ModelMeta, StringLiteral, compile_imports, metadata_to_typing)
 from ..utils import cached_method
 
 METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
@@ -73,11 +74,33 @@ class GenericModelCodeGenerator:
     STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
                                      % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
+    DEFAULT_MAX_LITERALS = 10
+    default_types_style = {
+        StringLiteral: {
+            StringLiteral.TypeStyle.use_literals: True
+        }
+    }
 
-    def __init__(self, model: ModelMeta, post_init_converters=False, convert_unicode=True):
+    def __init__(
+            self,
+            model: ModelMeta,
+            max_literals=DEFAULT_MAX_LITERALS,
+            post_init_converters=False,
+            convert_unicode=True,
+            types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None
+    ):
         self.model = model
         self.post_init_converters = post_init_converters
         self.convert_unicode = convert_unicode
+
+        resolved_types_style = copy.deepcopy(self.default_types_style)
+        types_style = types_style or {}
+        for t, style in types_style.items():
+            resolved_types_style.setdefault(t, {})
+            resolved_types_style[t].update(style)
+        resolved_types_style[StringLiteral][StringLiteral.TypeStyle.max_literals] = int(max_literals)
+        self.types_style = resolved_types_style
+
         self.model.set_raw_name(self.convert_class_name(self.model.name), generated=self.model.is_name_generated)
 
     @cached_method
@@ -133,7 +156,7 @@ class GenericModelCodeGenerator:
         :param optional: Is field optional
         :return: imports, field data
         """
-        imports, typing = metadata_to_typing(meta)
+        imports, typing = metadata_to_typing(meta, types_style=self.types_style)
 
         data = {
             "name": self.convert_field_name(name),

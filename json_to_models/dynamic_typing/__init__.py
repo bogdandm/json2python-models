@@ -1,7 +1,7 @@
 from .base import (
     BaseType, ImportPathList, MetaData, Null, Unknown, get_hash_string
 )
-from .complex import ComplexType, DDict, DList, DOptional, DTuple, DUnion, SingleType
+from .complex import ComplexType, DDict, DList, DOptional, DTuple, DUnion, SingleType, StringLiteral
 from .models_meta import AbsoluteModelRef, ModelMeta, ModelPtr
 from .string_datetime import IsoDateString, IsoDatetimeString, IsoTimeString, register_datetime_classes
 from .string_serializable import (

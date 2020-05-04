@@ -141,6 +141,18 @@ def test_script_pydantic(command):
 
 
 @pytest.mark.parametrize("command", test_commands)
+def test_script_pydantic_disable_literals(command):
+    command += " -f pydantic --code-generator-kwargs max_literals=0"
+    # Pydantic has native (str) -> (builtin_type) converters
+    command = command.replace('--strings-converters', '')
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = _validate_result(proc)
+    assert "(BaseModel):" in stdout
+    assert "Literal" not in stdout
+    print(stdout)
+
+
+@pytest.mark.parametrize("command", test_commands)
 def test_script_dataclasses(command):
     command += " -f dataclasses"
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
