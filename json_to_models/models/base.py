@@ -74,6 +74,7 @@ class GenericModelCodeGenerator:
     STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
                                      % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
+    DEFAULT_MAX_LITERALS = 10
     default_types_style = {
         StringLiteral: {
             StringLiteral.TypeStyle.use_literals: True
@@ -83,7 +84,7 @@ class GenericModelCodeGenerator:
     def __init__(
             self,
             model: ModelMeta,
-            max_literals=10,
+            max_literals=DEFAULT_MAX_LITERALS,
             post_init_converters=False,
             convert_unicode=True,
             types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None
