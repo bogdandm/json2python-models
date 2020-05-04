@@ -7,7 +7,7 @@ from .base import BaseType, ImportPathList, MetaData
 from .string_serializable import StringSerializable
 
 
-def metadata_to_typing(t: MetaData, types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None) \
+def metadata_to_typing(t: MetaData, types_style: Dict[Union[BaseType, Type[BaseType]], dict] = None) \
         -> Tuple[ImportPathList, str]:
     """
     Shortcut function to call ``to_typing_code`` method of BaseType instances or return name of type otherwise

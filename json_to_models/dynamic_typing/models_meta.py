@@ -95,7 +95,7 @@ class ModelMeta(SingleType):
     def remove_child_ref(self, ptr: 'ModelPtr'):
         self.child_pointers.remove(ptr)
 
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+    def to_typing_code(self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]) \
             -> Tuple[ImportPathList, str]:
         if self.name is None:
             raise ValueError('Model without name can not be typed')
@@ -132,7 +132,7 @@ class ModelPtr(SingleType):
         self.parent.add_child_ref(self)
         return self
 
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+    def to_typing_code(self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]) \
             -> Tuple[ImportPathList, str]:
         return AbsoluteModelRef(self.type).to_typing_code(types_style)
 
@@ -190,7 +190,7 @@ class AbsoluteModelRef:
     def __init__(self, model: ModelMeta):
         self.model = model
 
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
+    def to_typing_code(self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]) \
             -> Tuple[ImportPathList, str]:
         context_data = self.Context.data.context
         if context_data:
