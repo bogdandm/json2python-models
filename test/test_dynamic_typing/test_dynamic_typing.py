@@ -2,7 +2,7 @@ from builtins import complex
 
 import pytest
 
-from json_to_models.dynamic_typing import DUnion, get_hash_string
+from json_to_models.dynamic_typing import DUnion, StringLiteral, get_hash_string
 
 # *args | MetaData
 test_dunion = [
@@ -20,7 +20,22 @@ test_dunion = [
         [str, DUnion(int, DUnion(float, complex))],
         DUnion(int, float, complex, str),
         id="complex_merge"
-    )
+    ),
+    pytest.param(
+        [str, StringLiteral({'a'})],
+        DUnion(str),
+        id="str_literal_to_string"
+    ),
+    pytest.param(
+        [StringLiteral({'b'}), StringLiteral({'a'})],
+        DUnion(StringLiteral({'a', 'b'})),
+        id="str_literal_merge"
+    ),
+    pytest.param(
+        [StringLiteral({str(i)}) for i in range(100)],
+        DUnion(str),
+        id="str_literal_too_much"
+    ),
 ]
 
 

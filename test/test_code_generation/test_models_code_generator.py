@@ -1,9 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Type, Union
 
 import pytest
 
-from json_to_models.dynamic_typing import (AbsoluteModelRef, DDict, DList, DOptional, IntString, ModelMeta, ModelPtr,
-                                           Unknown, compile_imports)
+from json_to_models.dynamic_typing import (AbsoluteModelRef, BaseType, DDict, DList, DOptional, IntString, IsoDateString, ModelMeta, ModelPtr, StringLiteral, StringSerializable, Unknown, compile_imports)
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 from json_to_models.models.structure import sort_fields
 from json_to_models.models.utils import indent
@@ -288,7 +287,96 @@ test_unicode_data = [
 
 
 @pytest.mark.parametrize("value,kwargs,expected", test_unicode_data)
-def test_generated(value: ModelMeta, kwargs: dict, expected: str):
+def test_unicode(value: ModelMeta, kwargs: dict, expected: str):
     generated = generate_code(([{"model": value, "nested": []}], {}),
                               GenericModelCodeGenerator, class_generator_kwargs=kwargs)
+    assert generated.rstrip() == expected, generated
+
+
+# Data format:
+# (
+#   model metadata,
+#   style override,
+#   expected
+# )
+test_override_style_data = [
+    pytest.param(
+        model_factory("M", {
+            "bar": StringLiteral({'bar', 'foo'})
+        }),
+        {},
+        trim("""
+        from typing_extensions import Literal
+        
+        
+        class M:
+            bar: Literal["bar", "foo"]
+        """),
+        id='default_behaviour'
+    ),
+    pytest.param(
+        model_factory("M", {
+            "bar": StringLiteral({'bar', 'foo'})
+        }),
+        {StringLiteral: {
+            StringLiteral.TypeStyle.use_literals: False
+        }},
+        trim("""
+        class M:
+            bar: str
+        """),
+        id='disable_literal'
+    ),
+    pytest.param(
+        model_factory("M", {
+            "bar": IntString
+        }),
+        {IntString: {
+            IntString.TypeStyle.use_actual_type: True
+        }},
+        trim("""
+        class M:
+            bar: int
+        """),
+        id='string_serializable_use_actual_type'
+    ),
+    pytest.param(
+        model_factory("M", {
+            "bar": IntString
+        }),
+        {StringSerializable: {
+            StringSerializable.TypeStyle.use_actual_type: True
+        }},
+        trim("""
+        class M:
+            bar: int
+        """),
+        id='string_serializable_use_actual_type_wildcard'
+    ),
+    pytest.param(
+        model_factory("M", {
+            "bar": IsoDateString
+        }),
+        {IsoDateString: {
+            IsoDateString.TypeStyle.use_actual_type: True
+        }},
+        trim("""
+        from datetime import date
+        
+        
+        class M:
+            bar: date
+        """),
+        id='string_serializable_use_actual_type_date'
+    ),
+]
+
+
+@pytest.mark.parametrize("value,types_style,expected", test_override_style_data)
+def test_override_style(value: ModelMeta, types_style: Dict[Union['BaseType', Type['BaseType']], dict], expected: str):
+    generated = generate_code(
+        ([{"model": value, "nested": []}], {}),
+        GenericModelCodeGenerator,
+        class_generator_kwargs=dict(types_style=types_style)
+    )
     assert generated.rstrip() == expected, generated

@@ -279,7 +279,7 @@ class StringLiteral(BaseType):
         if options.get(self.TypeStyle.use_literals):
             limit = options.get(self.TypeStyle.max_literals)
             if limit is None or len(self.literals) < limit:
-                parts = ', '.join(f'"{s}"' for s in self.literals)
+                parts = ', '.join(f'"{s}"' for s in sorted(self.literals))
                 return [(Literal.__module__, 'Literal')], f"Literal[{parts}]"
 
         return [], 'str'
