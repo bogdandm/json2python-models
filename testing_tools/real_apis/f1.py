@@ -46,7 +46,8 @@ def main():
     register_datetime_classes()
     gen = MetadataGenerator()
     reg = ModelRegistry()
-    for name, data in (results_data, drivers_data, driver_standings_data):
+    # for name, data in (results_data, drivers_data, driver_standings_data):
+    for name, data in (driver_standings_data,):
         fields = gen.generate(*data)
         reg.process_meta_data(fields, model_name=inflection.camelize(name))
     reg.merge_models(generator=gen)

@@ -1,3 +1,4 @@
+import copy
 import keyword
 import re
 from typing import Dict, Iterable, List, Tuple, Type, Union
@@ -11,7 +12,7 @@ from .string_converters import get_string_field_paths
 from .structure import sort_fields
 from .utils import indent
 from ..dynamic_typing import (AbsoluteModelRef, BaseType, ImportPathList, MetaData,
-                              ModelMeta, compile_imports, metadata_to_typing)
+                              ModelMeta, StringLiteral, compile_imports, metadata_to_typing)
 from ..utils import cached_method
 
 METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
@@ -73,19 +74,32 @@ class GenericModelCodeGenerator:
     STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
                                      % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
-    default_types_style = {}
+    default_types_style = {
+        StringLiteral: {
+            StringLiteral.TypeStyle.use_literals: True
+        }
+    }
 
     def __init__(
             self,
             model: ModelMeta,
+            max_literals=10,
             post_init_converters=False,
             convert_unicode=True,
             types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None
     ):
-        self.types_style = types_style if types_style is not None else self.default_types_style
         self.model = model
         self.post_init_converters = post_init_converters
         self.convert_unicode = convert_unicode
+
+        resolved_types_style = copy.deepcopy(self.default_types_style)
+        types_style = types_style or {}
+        for t, style in types_style.items():
+            resolved_types_style.setdefault(t, {})
+            resolved_types_style[t].update(style)
+        resolved_types_style[StringLiteral][StringLiteral.TypeStyle.max_literals] = int(max_literals)
+        self.types_style = resolved_types_style
+
         self.model.set_raw_name(self.convert_class_name(self.model.name), generated=self.model.is_name_generated)
 
     @cached_method

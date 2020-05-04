@@ -31,25 +31,13 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
         }
     }
 
-    def __init__(self, model: ModelMeta, max_literals=10, convert_unicode=True):
+    def __init__(self, model: ModelMeta, **kwargs):
         """
         :param model: ModelMeta instance
-        :param meta: Enable generation of metadata as attrib argument
-        :param post_init_converters: Enable generation of type converters in __post_init__ methods
         :param kwargs:
         """
-        super().__init__(
-            model,
-            post_init_converters=False,
-            convert_unicode=convert_unicode,
-            types_style={
-                **self.default_types_style,
-                StringLiteral: {
-                    **self.default_types_style[StringLiteral],
-                    StringLiteral.TypeStyle.max_literals: int(max_literals)
-                }
-            }
-        )
+        kwargs['post_init_converters'] = False
+        super().__init__(model, **kwargs)
 
     def generate(self, nested_classes: List[str] = None, extra: str = "", **kwargs) \
             -> Tuple[ImportPathList, str]:
