@@ -1,11 +1,14 @@
 from typing import Dict, List, Type, Union
 
 import pytest
+from typing_extensions import Literal
 
 from json_to_models.dynamic_typing import (AbsoluteModelRef, BaseType, DDict, DList, DOptional, IntString, IsoDateString, ModelMeta, ModelPtr, StringLiteral, StringSerializable, Unknown, compile_imports)
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 from json_to_models.models.structure import sort_fields
 from json_to_models.models.utils import indent
+
+LITERAL_SOURCE = f"from {Literal.__module__}"
 
 # Data structure:
 # (string, indent lvl, indent string)
@@ -305,8 +308,8 @@ test_override_style_data = [
             "bar": StringLiteral({'bar', 'foo'})
         }),
         {},
-        trim("""
-        from typing_extensions import Literal
+        trim(f"""
+        {LITERAL_SOURCE} import Literal
         
         
         class M:
