@@ -9,6 +9,7 @@ htmlcov/
 .coverage.*
 coverage.xml
 
+.env
 *.pyc
 *.log
 *.tmp
