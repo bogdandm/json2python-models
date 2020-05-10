@@ -8,7 +8,8 @@
 ![Example](/etc/convert.png)
 
 json2python-models is a [Python](https://www.python.org/) tool that can generate Python models classes 
-(dataclasses, [attrs](https://github.com/python-attrs/attrs)) from JSON dataset. 
+([pydantic](https://github.com/samuelcolvin/pydantic), dataclasses, [attrs](https://github.com/python-attrs/attrs)) 
+from JSON dataset. 
 
 ## Features
 
@@ -17,11 +18,11 @@ json2python-models is a [Python](https://www.python.org/) tool that can generate
 * Fields and models **names** generation (unicode support included)
 * Similar **models generalization**
 * Handling **recursive data** structures (i.e family tree)
-* Detecting **string literals** (i.e. datetime or just stringify numbers) 
-    and providing decorators to easily convert into Python representation
+* Detecting **string serializable types** (i.e. datetime or just stringify numbers)
+* Detecting fields containing string constants (`Literal['foo', 'bar']`)
 * Generation models as **tree** (nested models) or **list**
 * Specifying when dictionaries should be processed as **`dict` type** (by default every dict is considered as some model)
-* **CLI** tool
+* **CLI** API with a lot of options
 
 ## Table of Contents
 
@@ -313,8 +314,8 @@ Arguments:
     
 * `-f`, `--framework` - Model framework for which python code is generated. 
     `base` (default) mean no framework so code will be generated without any decorators and additional meta-data.
-    * **Format**: `-f {base,attrs,dataclasses,custom}`
-    * **Example**: `-f attrs`
+    * **Format**: `-f {base, pydantic, attrs, dataclasses, custom}`
+    * **Example**: `-f pydantic`
     * **Default**: `-f base`
     
 * `-s`, `--structure` - Models composition style.
@@ -331,6 +332,13 @@ Arguments:
     
 * `--strings-converters` - Enable generation of string types converters (i.e. `IsoDatetimeString` or `BooleanString`).
     * **Default**: disabled
+    
+* `--max-strings-literals` -  Generate `Literal['foo', 'bar']` when field have less than NUMBER string constants as values.
+    * **Format**: `--max-strings-literals <NUMBER>` 
+    * **Default**: 10 (generator classes could override it)
+    * **Example**: `--max-strings-literals 5` - only 5 literals will be saved and used to code generation
+    * **Note**: There could not be more than **15** literals per field (for performance reasons)
+    * **Note**: `attrs` code generator do not use Literals and just generate `str` fields instead
 
 * `--merge` - Merge policy settings. Possible values are: 
     * **Format**: `--merge MERGE_POLICY [MERGE_POLICY ...]`
@@ -373,7 +381,7 @@ One of model arguments (`-m` or `-l`) is required.
 
 ### Low level API
 
-> Coming soon (Wiki)
+\-
 
 ## Tests
 
