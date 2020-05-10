@@ -39,7 +39,26 @@ from JSON dataset.
 * [Contributing](#contributing)
 * [License](#license)
 
-## Example
+## Examples
+
+### Part of Path of Exile public items API
+
+```python
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from typing_extensions import Literal
+
+
+class Tab(BaseModel):
+    id_: str = Field(..., alias="id")
+    public: bool
+    stash_type: Literal["CurrencyStash", "NormalStash", "PremiumStash"] = Field(..., alias="stashType")
+    items: List['Item']
+    account_name: Optional[str] = Field(None, alias="accountName")
+    last_character_name: Optional[str] = Field(None, alias="lastCharacterName")
+    stash: Optional[str] = None
+    league: Optional[Literal["Hardcore", "Standard"]] = None
+```
 
 ### F1 Season Results
 
