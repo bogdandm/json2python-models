@@ -268,7 +268,7 @@ class Cli:
         )
         parser.add_argument(
             "-s", "--structure",
-            default="nested",
+            default="flat",
             choices=list(cls.STRUCTURE_FN_MAPPING.keys()),
             help="Models composition style. By default nested models become nested Python classes.\n\n"
         )

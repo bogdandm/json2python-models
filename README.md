@@ -20,7 +20,7 @@ from JSON dataset.
 * Handling **recursive data** structures (i.e family tree)
 * Detecting **string serializable types** (i.e. datetime or just stringify numbers)
 * Detecting fields containing string constants (`Literal['foo', 'bar']`)
-* Generation models as **tree** (nested models) or **list**
+* Generation models as **list** (flat models structure) or **tree** (nested models)
 * Specifying when dictionaries should be processed as **`dict` type** (by default every dict is considered as some model)
 * **CLI** API with a lot of options
 
@@ -103,7 +103,7 @@ driver_standings.json
 ```
 
 ```
-json2models -f pydantic -s flat -l DriverStandings - driver_standings.json
+json2models -f pydantic -l DriverStandings - driver_standings.json
 ```
 
 ```python
@@ -161,7 +161,7 @@ It requires a lit bit of tweaking:
 * Disable string literals
 
 ```
-json2models -s flat -f dataclasses -m Swagger testing_tools/swagger.json \
+json2models -f dataclasses -m Swagger testing_tools/swagger.json \
     --dict-keys-fields securityDefinitions paths responses definitions properties \
     --merge percent_50 number --max-strings-literals 0
 ```
@@ -338,9 +338,9 @@ Arguments:
     * **Default**: `-f base`
     
 * `-s`, `--structure` - Models composition style.
-    * **Format**: `-s {nested, flat}` 
-    * **Example**: `-s flat`
-    * **Default**: `-s nested`
+    * **Format**: `-s {flat, nested}` 
+    * **Example**: `-s nested`
+    * **Default**: `-s flat`
     
 * `--datetime` - Enable datetime/date/time strings parsing.
     * **Default**: disabled
