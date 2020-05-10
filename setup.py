@@ -40,7 +40,7 @@ setup(
     url=f"https://github.com/{REPO}",
     author="bogdandm (Bogdan Kalashnikov)",
     author_email="bogdan.dm1995@yandex.ru",
-    description="Python models (attrs, dataclasses or custom) generator from JSON data with typing module support",
+    description="Python models (pydantic, attrs, dataclasses or custom) generator from JSON data with typing module support",
     long_description=long_description,
     long_description_content_type='text/markdown',
     license="MIT",
