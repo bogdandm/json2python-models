@@ -2,7 +2,7 @@ from inspect import isclass
 from typing import List, Tuple
 
 from .base import GenericModelCodeGenerator, KWAGRS_TEMPLATE, METADATA_FIELD_NAME, sort_kwargs, template
-from ..dynamic_typing import DDict, DList, DOptional, ImportPathList, MetaData, ModelMeta, StringSerializable
+from ..dynamic_typing import DDict, DList, DOptional, ImportPathList, MetaData, ModelMeta, StringLiteral, StringSerializable
 
 DEFAULT_ORDER = (
     ("default", "converter", "factory"),
@@ -14,17 +14,20 @@ DEFAULT_ORDER = (
 class AttrsModelCodeGenerator(GenericModelCodeGenerator):
     ATTRS = template(f"attr.s{{% if kwargs %}}({KWAGRS_TEMPLATE}){{% endif %}}")
     ATTRIB = template(f"attr.ib({KWAGRS_TEMPLATE})")
+    default_types_style = {
+        StringLiteral: {
+            StringLiteral.TypeStyle.use_literals: False
+        }
+    }
 
-    def __init__(self, model: ModelMeta, meta=False, post_init_converters=False, attrs_kwargs: dict = None,
-                 convert_unicode=True):
+    def __init__(self, model: ModelMeta, meta=False, attrs_kwargs: dict = None, **kwargs):
         """
         :param model: ModelMeta instance
         :param meta: Enable generation of metadata as attrib argument
-        :param post_init_converters: Enable generation of type converters in __post_init__ methods
         :param attrs_kwargs: kwargs for @attr.s() decorators
         :param kwargs:
         """
-        super().__init__(model, post_init_converters, convert_unicode)
+        super().__init__(model, **kwargs)
         self.no_meta = not meta
         self.attrs_kwargs = attrs_kwargs or {}
 

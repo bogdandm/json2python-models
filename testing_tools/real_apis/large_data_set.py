@@ -11,7 +11,7 @@ from json_to_models.registry import ModelRegistry
 
 
 def load_data() -> dict:
-    with (Path(__file__) / ".." / ".." / "large_data_set.json").open() as f:
+    with (Path(__file__) / ".." / ".." / "large_data_set.json").resolve().open() as f:
         data = json.load(f)
     return data
 

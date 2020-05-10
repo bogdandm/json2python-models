@@ -1,6 +1,7 @@
+import copy
 import keyword
 import re
-from typing import Iterable, List, Tuple, Type
+from typing import Dict, Iterable, List, Tuple, Type, Union
 
 import inflection
 from jinja2 import Template
@@ -10,8 +11,8 @@ from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER
 from .string_converters import get_string_field_paths
 from .structure import sort_fields
 from .utils import indent
-from ..dynamic_typing import (AbsoluteModelRef, ImportPathList, MetaData,
-                              ModelMeta, compile_imports, metadata_to_typing)
+from ..dynamic_typing import (AbsoluteModelRef, BaseType, ImportPathList, MetaData,
+                              ModelMeta, StringLiteral, compile_imports, metadata_to_typing)
 from ..utils import cached_method
 
 METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
@@ -52,7 +53,7 @@ class GenericModelCodeGenerator:
     {%- for decorator in decorators -%}
     @{{ decorator }}
     {% endfor -%}
-    class {{ name }}:
+    class {{ name }}{% if bases %}({{ bases }}){% endif %}:
     
     {%- for code in nested %}
     {{ code }}
@@ -73,11 +74,33 @@ class GenericModelCodeGenerator:
     STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
                                      % KWAGRS_TEMPLATE)
     FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
+    DEFAULT_MAX_LITERALS = 10
+    default_types_style = {
+        StringLiteral: {
+            StringLiteral.TypeStyle.use_literals: True
+        }
+    }
 
-    def __init__(self, model: ModelMeta, post_init_converters=False, convert_unicode=True):
+    def __init__(
+            self,
+            model: ModelMeta,
+            max_literals=DEFAULT_MAX_LITERALS,
+            post_init_converters=False,
+            convert_unicode=True,
+            types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None
+    ):
         self.model = model
         self.post_init_converters = post_init_converters
         self.convert_unicode = convert_unicode
+
+        resolved_types_style = copy.deepcopy(self.default_types_style)
+        types_style = types_style or {}
+        for t, style in types_style.items():
+            resolved_types_style.setdefault(t, {})
+            resolved_types_style[t].update(style)
+        resolved_types_style[StringLiteral][StringLiteral.TypeStyle.max_literals] = int(max_literals)
+        self.types_style = resolved_types_style
+
         self.model.set_raw_name(self.convert_class_name(self.model.name), generated=self.model.is_name_generated)
 
     @cached_method
@@ -88,7 +111,8 @@ class GenericModelCodeGenerator:
     def convert_field_name(self, name):
         return inflection.underscore(prepare_label(name, convert_unicode=self.convert_unicode))
 
-    def generate(self, nested_classes: List[str] = None, extra: str = "") -> Tuple[ImportPathList, str]:
+    def generate(self, nested_classes: List[str] = None, bases: str = None, extra: str = "") \
+            -> Tuple[ImportPathList, str]:
         """
         :param nested_classes: list of strings that contains classes code
         :return: list of import data, class code
@@ -98,8 +122,9 @@ class GenericModelCodeGenerator:
         data = {
             "decorators": decorators,
             "name": self.model.name,
+            "bases": bases or [],
             "fields": fields,
-            "extra": extra
+            "extra": extra,
         }
         if nested_classes:
             data["nested"] = [indent(s) for s in nested_classes]
@@ -131,7 +156,7 @@ class GenericModelCodeGenerator:
         :param optional: Is field optional
         :return: imports, field data
         """
-        imports, typing = metadata_to_typing(meta)
+        imports, typing = metadata_to_typing(meta, types_style=self.types_style)
 
         data = {
             "name": self.convert_field_name(name),
@@ -150,11 +175,15 @@ class GenericModelCodeGenerator:
         imports: ImportPathList = []
         strings: List[str] = []
         for is_optional, fields in enumerate((required, optional)):
+            fields = self._filter_fields(fields)
             for field in fields:
                 field_imports, data = self.field_data(field, self.model.type[field], bool(is_optional))
                 imports.extend(field_imports)
                 strings.append(self.FIELD.render(**data))
         return imports, strings
+
+    def _filter_fields(self, fields):
+        return fields
 
     @property
     def string_field_paths(self) -> List[str]:
@@ -191,6 +220,7 @@ def _generate_code(
     """
     imports = []
     classes = []
+    generators = []
     for data in structure:
         nested_imports, nested_classes = _generate_code(
             data["nested"],
@@ -199,7 +229,11 @@ def _generate_code(
             lvl=lvl + 1
         )
         imports.extend(nested_imports)
-        gen = class_generator(data["model"], **class_generator_kwargs)
+        generators.append((
+            class_generator(data["model"], **class_generator_kwargs),
+            nested_classes
+        ))
+    for gen, nested_classes in generators:
         cls_imports, cls_string = gen.generate(nested_classes)
         imports.extend(cls_imports)
         classes.append(cls_string)

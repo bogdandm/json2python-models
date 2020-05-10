@@ -98,7 +98,10 @@ def _validate_result(proc: subprocess.Popen, output=None, output_file: Path = No
     # Note: imp package is deprecated but I can't find a way to create dummy module using importlib
     module = imp.new_module("test_model")
     sys.modules["test_model"] = module
-    exec(compile(stdout, "test_model.py", "exec"), module.__dict__)
+    try:
+        exec(compile(stdout, "test_model.py", "exec"), module.__dict__)
+    except Exception as e:
+        assert not e, stdout
     return stdout, stderr
 
 
@@ -123,6 +126,29 @@ def test_script_attrs(command):
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = _validate_result(proc)
     assert "@attr.s" in stdout
+    print(stdout)
+
+
+@pytest.mark.parametrize("command", test_commands)
+def test_script_pydantic(command):
+    command += " -f pydantic"
+    # Pydantic has native (str) -> (builtin_type) converters
+    command = command.replace('--strings-converters', '')
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = _validate_result(proc)
+    assert "(BaseModel):" in stdout
+    print(stdout)
+
+
+@pytest.mark.parametrize("command", test_commands)
+def test_script_pydantic_disable_literals(command):
+    command += " -f pydantic --code-generator-kwargs max_literals=0"
+    # Pydantic has native (str) -> (builtin_type) converters
+    command = command.replace('--strings-converters', '')
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = _validate_result(proc)
+    assert "(BaseModel):" in stdout
+    assert "Literal" not in stdout
     print(stdout)
 
 

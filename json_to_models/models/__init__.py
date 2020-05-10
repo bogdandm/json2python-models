@@ -13,3 +13,4 @@ OBJECTS_DELIMITER = "\n" * 3  # 2 blank lines
 class ClassType(Enum):
     Dataclass = "dataclass"
     Attrs = "attrs"
+    Pydantic = "pydantic"

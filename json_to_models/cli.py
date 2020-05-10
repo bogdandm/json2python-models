@@ -17,6 +17,7 @@ from .models import ModelsStructureType
 from .models.attr import AttrsModelCodeGenerator
 from .models.base import GenericModelCodeGenerator, generate_code
 from .models.dataclasses import DataclassModelCodeGenerator
+from .models.pydantic import PydanticModelCodeGenerator
 from .models.structure import compose_models, compose_models_flat
 from .registry import (
     ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
@@ -42,7 +43,9 @@ class Cli:
     MODEL_GENERATOR_MAPPING: Dict[str, Type[GenericModelCodeGenerator]] = {
         "base": convert_args(GenericModelCodeGenerator),
         "attrs": convert_args(AttrsModelCodeGenerator, meta=bool_js_style),
-        "dataclasses": convert_args(DataclassModelCodeGenerator, meta=bool_js_style, post_init_converters=bool_js_style)
+        "dataclasses": convert_args(DataclassModelCodeGenerator, meta=bool_js_style,
+                                    post_init_converters=bool_js_style),
+        "pydantic": convert_args(PydanticModelCodeGenerator),
     }
 
     def __init__(self):
@@ -50,6 +53,7 @@ class Cli:
         self.models_data: Dict[str, Iterable[dict]] = {}  # -m/-l
         self.enable_datetime: bool = False  # --datetime
         self.strings_converters: bool = False  # --strings-converters
+        self.max_literals: int = -1  # --max-strings-literals
         self.merge_policy: List[ModelCmp] = []  # --merge
         self.structure_fn: STRUCTURE_FN_TYPE = None  # -s
         self.model_generator: Type[GenericModelCodeGenerator] = None  # -f & --code-generator
@@ -80,6 +84,7 @@ class Cli:
         self.enable_datetime = namespace.datetime
         disable_unicode_conversion = namespace.disable_unicode_conversion
         self.strings_converters = namespace.strings_converters
+        self.max_literals = namespace.max_strings_literals
         merge_policy = [m.split("_") if "_" in m else m for m in namespace.merge]
         structure = namespace.structure
         framework = namespace.framework
@@ -201,8 +206,11 @@ class Cli:
             m = importlib.import_module(module)
             self.model_generator = getattr(m, cls)
 
-        self.model_generator_kwargs = {} if not self.strings_converters else {'post_init_converters': True}
-        self.model_generator_kwargs['convert_unicode'] = not disable_unicode_conversion
+        self.model_generator_kwargs = dict(
+            post_init_converters=self.strings_converters,
+            convert_unicode=not disable_unicode_conversion,
+            max_literals=self.max_literals
+        )
         if code_generator_kwargs_raw:
             for item in code_generator_kwargs_raw:
                 if item[0] == '"':
@@ -275,6 +283,15 @@ class Cli:
             "--strings-converters",
             action="store_true",
             help="Enable generation of string types converters (i.e. IsoDatetimeString or BooleanString).\n\n"
+        )
+        parser.add_argument(
+            "--max-strings-literals",
+            type=int,
+            default=GenericModelCodeGenerator.DEFAULT_MAX_LITERALS,
+            metavar='NUMBER',
+            help="Generate Literal['foo', 'bar'] when field have less than NUMBER string constants as values.\n"
+                 f"Pass 0 to disable. By default NUMBER={GenericModelCodeGenerator.DEFAULT_MAX_LITERALS}"
+                 f" (some generator classes could override it)\n\n"
         )
         parser.add_argument(
             "--disable-unicode-conversion", "--no-unidecode",

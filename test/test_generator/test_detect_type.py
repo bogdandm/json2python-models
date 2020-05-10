@@ -1,6 +1,16 @@
 import pytest
 
-from json_to_models.dynamic_typing import BooleanString, DDict, DList, DUnion, FloatString, IntString, Null, Unknown
+from json_to_models.dynamic_typing import (
+    BooleanString,
+    DDict,
+    DList,
+    DUnion,
+    FloatString,
+    IntString,
+    Null,
+    StringLiteral,
+    Unknown
+)
 from json_to_models.generator import MetadataGenerator
 
 # JSON data | MetaData
@@ -8,16 +18,16 @@ test_data = [
     pytest.param(1.0, float, id="float"),
     pytest.param(1, int, id="int"),
     pytest.param(True, bool, id="bool"),
-    pytest.param("abc", str, id="str"),
+    pytest.param("abc", StringLiteral({"abc"}), id="str"),
     pytest.param(None, Null, id="null"),
     pytest.param([], DList(Unknown), id="list_empty"),
     pytest.param([1], DList(int), id="list_single"),
     pytest.param([*range(100)], DList(int), id="list_single_type"),
-    pytest.param([1, "a", 2, "c"], DList(DUnion(int, str)), id="list_multi"),
+    pytest.param([1, "a", 2, "c"], DList(DUnion(int, StringLiteral({'a', 'c'}))), id="list_multi"),
     pytest.param("1", IntString, id="int_str"),
     pytest.param("1.0", FloatString, id="float_str"),
     pytest.param("true", BooleanString, id="bool_str"),
-    pytest.param({"test_dict_field_a": 1, "test_dict_field_b": "a"}, DDict(DUnion(int, str)), id="dict"),
+    pytest.param({"test_dict_field_a": 1, "test_dict_field_b": "a"}, DDict(DUnion(int, StringLiteral({"a"}))), id="simple_dict"),
     pytest.param({}, DDict(Unknown))
 ]
 
@@ -50,7 +60,7 @@ def test_convert(models_generator: MetadataGenerator):
     meta = models_generator._convert(data)
     assert meta == {
         "dict_field": DDict(Unknown),
-        "another_dict_field": DDict(DUnion(int, str)),
+        "another_dict_field": DDict(DUnion(int, StringLiteral({"a"}))),
         "another_dict_field_2": DDict(int),
         "another_dict_field_3": DDict(int),
         "int_field": int,
