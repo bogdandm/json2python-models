@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.2.1](https://github.com/bogdandm/json2python-models/tree/v0.2.1) (2020-05-10)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.0...v0.2.1)
+
+* Update PyPi package description
+
 ## [v0.2.0](https://github.com/bogdandm/json2python-models/tree/v0.2.0) (2020-05-10)
 
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.1.2...v0.2.0)
