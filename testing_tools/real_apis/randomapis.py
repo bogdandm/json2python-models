@@ -1,7 +1,7 @@
 """
 Example uses the following APIs:
 - CHRONICLING API (https://chroniclingamerica.loc.gov/about/api/)
-- Launch Library Reading API (https://launchlibrary.net/docs/1.3/api.html)
+- Launch Library Reading V2 API (https://ll.thespacedevs.com/2.0.0/swagger)
 - University Domains and Names Data List (https://github.com/Hipo/university-domains-list)
 """
 import requests
@@ -18,8 +18,8 @@ def chroniclingamerica(tag="michigan"):
     return requests.get(f"http://chroniclingamerica.loc.gov/search/titles/results/?terms={tag}&format=json").json()
 
 
-def launchlibrary(mission_name="GPS"):
-    return requests.get(f"https://launchlibrary.net/1.3/mission/{mission_name}").json()
+def launchlibrary():
+    return requests.get(f"https://ll.thespacedevs.com/2.0.0/dashboard/starship/").json()
 
 
 def university_domains():
