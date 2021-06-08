@@ -105,11 +105,11 @@ class GenericModelCodeGenerator:
 
     @cached_method
     def convert_class_name(self, name):
-        return prepare_label(name, convert_unicode=self.convert_unicode)
+        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=False)
 
     @cached_method
     def convert_field_name(self, name):
-        return inflection.underscore(prepare_label(name, convert_unicode=self.convert_unicode))
+        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=True)
 
     def generate(self, nested_classes: List[str] = None, bases: str = None, extra: str = "") \
             -> Tuple[ImportPathList, str]:
@@ -279,13 +279,15 @@ def sort_kwargs(kwargs: dict, ordering: Iterable[Iterable[str]]) -> dict:
     return sorted_dict
 
 
-def prepare_label(s: str, convert_unicode: bool) -> str:
-    if s in blacklist_words:
-        s += "_"
+def prepare_label(s: str, convert_unicode: bool, to_snake_case: bool) -> str:
     if convert_unicode:
         s = unidecode(s)
     s = re.sub(r"\W", "", s)
     if not ('a' <= s[0].lower() <= 'z'):
         if '0' <= s[0] <= '9':
             s = ones[int(s[0])] + "_" + s[1:]
+    if to_snake_case:
+        s = inflection.underscore(s)
+    if s in blacklist_words:
+        s += "_"
     return s

@@ -29,7 +29,6 @@ def test_attrib_kwargs_sort():
         assert 0, "XPass"
 
 
-
 def field_meta(original_name):
     return f"metadata={{'{METADATA_FIELD_NAME}': '{original_name}'}}"
 
@@ -90,6 +89,7 @@ test_data = {
             "qwerty": FloatString,
             "asdfg": DOptional(int),
             "dict": DDict(int),
+            "ID": int,
             "not": bool,
             "1day": int,
             "день_недели": str,
@@ -125,6 +125,11 @@ test_data = {
                 "type": "Dict[str, int]",
                 "body": f"attr.ib({field_meta('dict')})"
             },
+            "ID": {
+                "name": "id_",
+                "type": "int",
+                "body": f"attr.ib({field_meta('ID')})"
+            },
             "not": {
                 "name": "not_",
                 "type": "bool",
@@ -155,6 +160,7 @@ test_data = {
             foo: int = attr.ib()
             qwerty: FloatString = attr.ib()
             dict_: Dict[str, int] = attr.ib({field_meta('dict')})
+            id_: int = attr.ib({field_meta('ID')})
             not_: bool = attr.ib({field_meta('not')})
             one_day: int = attr.ib({field_meta('1day')})
             den_nedeli: str = attr.ib({field_meta('день_недели')})
