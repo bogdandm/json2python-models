@@ -37,7 +37,7 @@ jobs:
   #        python-codacy-coverage -r coverage.xml
 
   release:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI
+    name: Build and publish
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
