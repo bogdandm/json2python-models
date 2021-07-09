@@ -1,7 +1,7 @@
 [![json2python-models](/etc/logo.png)](https://github.com/bogdandm/json2python-models)
 
 [![PyPI version](https://img.shields.io/pypi/v/json2python-models.svg?color=green)](https://badge.fury.io/py/json2python-models)
-[![Build Status](https://travis-ci.org/bogdandm/json2python-models.svg?branch=master)](https://travis-ci.org/bogdandm/json2python-models)
+[![Build](https://github.com/bogdandm/json2python-models/actions/workflows/test_and_release.yml/badge.svg)](https://github.com/bogdandm/json2python-models/actions/workflows/test_and_release.yml)
 [![Coverage Status](https://coveralls.io/repos/github/bogdandm/json2python-models/badge.svg?branch=master)](https://coveralls.io/github/bogdandm/json2python-models?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/11e13f2b81d7450eb0bca4b941d16d81)](https://www.codacy.com/app/bogdandm/json2python-models?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bogdandm/json2python-models&amp;utm_campaign=Badge_Grade)
 

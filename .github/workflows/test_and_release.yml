@@ -1,4 +1,4 @@
-name: Test with pytest and publish Python 🐍 distributions 📦 to PyPI
+name: Build 📦
 
 on: [ push, pull_request ]
 
