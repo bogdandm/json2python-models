@@ -29,8 +29,9 @@ jobs:
       run: |
         python setup.py test -a '--cov-config .coveragerc --cov=json_to_models -m "not no_expected" test/'
     - name: Coverage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         coverage xml
         coveralls
         python-codacy-coverage -r coverage.xml
-        
