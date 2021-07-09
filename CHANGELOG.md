@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.2.3](https://github.com/bogdandm/json2python-models/tree/v0.2.3) (2021-07-09)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.2...v0.2.3)
+
 ## [v0.2.2](https://github.com/bogdandm/json2python-models/tree/v0.2.2) (2021-06-08)
 
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.1...v0.2.2)
