@@ -34,4 +34,5 @@ jobs:
       run: |
         coverage xml
         coveralls --service=github
-        python-codacy-coverage -r coverage.xml
+# TODO: Fix codacy issue with token
+#        python-codacy-coverage -r coverage.xml
