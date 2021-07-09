@@ -22,7 +22,7 @@ jobs:
         python -m pip install --upgrade pip
         python setup.py sdist
         python setup.py install
-        python -m pip install pytest pytest-cov pytest-xdist requests coveralls codacy-coverage
+        python -m pip install wheel pytest pytest-cov pytest-xdist requests coveralls codacy-coverage
         pip install --ignore-installed pytest>=4.4.0
         pytest --version
     - name: Test with pytest
@@ -33,5 +33,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         coverage xml
-        coveralls
+        coveralls --service=github
         python-codacy-coverage -r coverage.xml
