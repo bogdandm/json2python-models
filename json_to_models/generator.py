@@ -56,6 +56,11 @@ class MetadataGenerator:
         """
         fields = dict()
         for key, value in data.items():
+            if not isinstance(key, str):
+                raise TypeError(f'You probably using some not JSON-compatible parser and have some {type(key)} as dict key. '
+                                f'This is not supported.\n'
+                                f'Context: {data}\n'
+                                f'(If you parsing yaml try to replace PyYaml with ruamel.yaml)')
             convert_dict = key not in self.dict_keys_fields
             fields[key] = self._detect_type(value, convert_dict)
         return fields

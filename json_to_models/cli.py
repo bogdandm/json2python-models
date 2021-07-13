@@ -12,10 +12,10 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, Union
 
 try:
-    import yaml
+    import ruamel.yaml as yaml
 except ImportError:
     try:
-        import ruamel.yaml as yaml
+        import yaml
     except ImportError:
         yaml = None
 
@@ -268,7 +268,7 @@ class Cli:
         )
         parser.add_argument(
             "-i", "--input-format",
-            metavar="FORMAT", default="json",
+            default="json",
             choices=['json', 'yaml', 'ini'],
             help="Input files parser ('PyYaml' is required to parse yaml files)\n\n"
         )
