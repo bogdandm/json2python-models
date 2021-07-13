@@ -277,10 +277,10 @@ class Response:
 
 @dataclass
 class Definition_Schema:
-	type_: str
-	required: Optional[List[str]] = field(default_factory=list)
-	properties: Optional[Dict[str, Union['Property', 'Property_2E']]] = field(default_factory=dict)
-	ref: Optional[str] = None
+    type_: str
+    required: Optional[List[str]] = field(default_factory=list)
+    properties: Optional[Dict[str, Union['Property', 'Property_2E']]] = field(default_factory=dict)
+    ref: Optional[str] = None
 ```
 
 </p>
@@ -308,103 +308,99 @@ from typing_extensions import Literal
 
 
 class Actions(BaseModel):
-	on: Union['On', List[Literal["push"]]]
-	jobs: Dict[str, 'Job']
-	name: Optional[str] = None
-	env: Optional[Dict[str, Union[int, str]]] = {}
+    on: Union['On', List[Literal["push"]]]
+    jobs: Dict[str, 'Job']
+    name: Optional[str] = None
+    env: Optional[Dict[str, Union[int, str]]] = {}
 
 
 class On(BaseModel):
-	push: Optional['Push'] = None
-	pull_request: Optional['PullRequest'] = None
-	release: Optional['Release'] = None
-	schedule: Optional[List['Schedule']] = []
-	workflow_dispatch: Optional[None] = None
+    push: Optional['Push'] = None
+    pull_request: Optional['PullRequest'] = None
+    release: Optional['Release'] = None
+    schedule: Optional[List['Schedule']] = []
+    workflow_dispatch: Optional[None] = None
 
 
 class Push(BaseModel):
-	branches: List[Literal["$default-branch"]]
-	tags: Optional[List[Literal["v*.*.*"]]] = []
+    branches: List[Literal["$default-branch"]]
+    tags: Optional[List[Literal["v*.*.*"]]] = []
 
 
 class PullRequest(BaseModel):
-	branches: List[Literal["$default-branch"]]
+    branches: List[Literal["$default-branch"]]
 
 
 class Release(BaseModel):
-	types: List[Literal["created", "published"]]
+    types: List[Literal["created", "published"]]
 
 
 class Schedule(BaseModel):
-	cron: Literal["$cron-daily"]
+    cron: Literal["$cron-daily"]
 
 
 class Job(BaseModel):
-	runson: Literal[
-		"${{ matrix.os }}", "macOS-latest", "macos-latest", "ubuntu-18.04", "ubuntu-latest", "windows-latest"] = Field(
-		..., alias="runs-on")
-	steps: List['Step']
-	name: Optional[str] = None
-	environment: Optional[Literal["production"]] = None
-	outputs: Optional['Output'] = None
-	container: Optional['Container'] = None
-	needs: Optional[Literal["build"]] = None
-	permissions: Optional['Permission'] = None
-	strategy: Optional['Strategy'] = None
-	defaults: Optional['Default'] = None
-	env: Optional[Dict[str, str]] = {}
+    runson: Literal["${{ matrix.os }}", "macOS-latest", "macos-latest", "ubuntu-18.04", "ubuntu-latest", "windows-latest"] = Field(..., alias="runs-on")
+    steps: List['Step']
+    name: Optional[str] = None
+    environment: Optional[Literal["production"]] = None
+    outputs: Optional['Output'] = None
+    container: Optional['Container'] = None
+    needs: Optional[Literal["build"]] = None
+    permissions: Optional['Permission'] = None
+    strategy: Optional['Strategy'] = None
+    defaults: Optional['Default'] = None
+    env: Optional[Dict[str, str]] = {}
 
 
 class Step(BaseModel):
-	uses: Optional[str] = None
-	name: Optional[str] = None
-	with_: Optional[Dict[str, Union[bool, float, str]]] = Field({}, alias="with")
-	run: Optional[str] = None
-	env: Optional[Dict[str, str]] = {}
-	workingdirectory: Optional[str] = Field(None, alias="working-directory")
-	id_: Optional[Literal[
-		"build-image", "composer-cache", "deploy-and-expose", "image-build", "login-ecr", "meta", "push-to-registry", "task-def"]] = Field(
-		None, alias="id")
-	if_: Optional[str] = Field(None, alias="if")
-	shell: Optional[Literal["Rscript {0}"]] = None
+    uses: Optional[str] = None
+    name: Optional[str] = None
+    with_: Optional[Dict[str, Union[bool, float, str]]] = Field({}, alias="with")
+    run: Optional[str] = None
+    env: Optional[Dict[str, str]] = {}
+    workingdirectory: Optional[str] = Field(None, alias="working-directory")
+    id_: Optional[Literal["build-image", "composer-cache", "deploy-and-expose", "image-build", "login-ecr", "meta", "push-to-registry", "task-def"]] = Field(None, alias="id")
+    if_: Optional[str] = Field(None, alias="if")
+    shell: Optional[Literal["Rscript {0}"]] = None
 
 
 class Output(BaseModel):
-	route: str = Field(..., alias="ROUTE")
-	selector: str = Field(..., alias="SELECTOR")
+    route: str = Field(..., alias="ROUTE")
+    selector: str = Field(..., alias="SELECTOR")
 
 
 class Container(BaseModel):
-	image: Literal["crystallang/crystal", "erlang:22.0.7"]
+    image: Literal["crystallang/crystal", "erlang:22.0.7"]
 
 
 class Permission(BaseModel):
-	contents: Literal["read"]
-	packages: Literal["write"]
+    contents: Literal["read"]
+    packages: Literal["write"]
 
 
 class Strategy(BaseModel):
-	matrix: Optional['Matrix'] = None
-	maxparallel: Optional[int] = Field(None, alias="max-parallel")
-	failfast: Optional[bool] = Field(None, alias="fail-fast")
+    matrix: Optional['Matrix'] = None
+    maxparallel: Optional[int] = Field(None, alias="max-parallel")
+    failfast: Optional[bool] = Field(None, alias="fail-fast")
 
 
 class Matrix(BaseModel):
-	rversion: Optional[List[float]] = Field([], alias="r-version")
-	pythonversion: Optional[List[float]] = Field([], alias="python-version")
-	deno: Optional[List[Literal["canary", "v1.x"]]] = []
-	os: Optional[List[Literal["macOS-latest", "ubuntu-latest", "windows-latest"]]] = []
-	rubyversion: Optional[List[float]] = Field([], alias="ruby-version")
-	nodeversion: Optional[List[Literal["12.x", "14.x", "16.x"]]] = Field([], alias="node-version")
-	configuration: Optional[List[Literal["Debug", "Release"]]] = []
+    rversion: Optional[List[float]] = Field([], alias="r-version")
+    pythonversion: Optional[List[float]] = Field([], alias="python-version")
+    deno: Optional[List[Literal["canary", "v1.x"]]] = []
+    os: Optional[List[Literal["macOS-latest", "ubuntu-latest", "windows-latest"]]] = []
+    rubyversion: Optional[List[float]] = Field([], alias="ruby-version")
+    nodeversion: Optional[List[Literal["12.x", "14.x", "16.x"]]] = Field([], alias="node-version")
+    configuration: Optional[List[Literal["Debug", "Release"]]] = []
 
 
 class Default(BaseModel):
-	run: 'Run'
+    run: 'Run'
 
 
 class Run(BaseModel):
-	shell: Literal["bash"]
+    shell: Literal["bash"]
 ```
 
 </p></details>
