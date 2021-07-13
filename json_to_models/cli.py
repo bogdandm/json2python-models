@@ -1,4 +1,5 @@
 import argparse
+import configparser
 import importlib
 import itertools
 import json
@@ -9,6 +10,14 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, Union
+
+try:
+    import yaml
+except ImportError:
+    try:
+        import ruamel.yaml as yaml
+    except ImportError:
+        yaml = None
 
 from . import __version__ as VERSION
 from .dynamic_typing import ModelMeta, register_datetime_classes
@@ -80,6 +89,7 @@ class Cli:
             (model_name, (lookup, Path(path)))
             for model_name, lookup, path in namespace.list or ()
         ]
+        parser = getattr(FileLoaders, namespace.input_format)
         self.output_file = namespace.output
         self.enable_datetime = namespace.datetime
         disable_unicode_conversion = namespace.disable_unicode_conversion
@@ -94,7 +104,7 @@ class Cli:
         dict_keys_fields: List[str] = namespace.dict_keys_fields
 
         self.validate(models, models_lists, merge_policy, framework, code_generator)
-        self.setup_models_data(models, models_lists)
+        self.setup_models_data(models, models_lists, parser)
         self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs_raw,
                       dict_keys_regex, dict_keys_fields, disable_unicode_conversion)
 
@@ -157,16 +167,20 @@ class Cli:
         elif framework != 'custom' and code_generator is not None:
             raise ValueError("--code-generator argument has no effect without '--framework custom' argument")
 
-    def setup_models_data(self, models: Iterable[Tuple[str, Iterable[Path]]],
-                          models_lists: Iterable[Tuple[str, Tuple[str, Path]]]):
+    def setup_models_data(
+            self,
+            models: Iterable[Tuple[str, Iterable[Path]]],
+            models_lists: Iterable[Tuple[str, Tuple[str, Path]]],
+            parser: 'FileLoaders.T'
+    ):
         """
         Initialize lazy loaders for models data
         """
         models_dict: Dict[str, List[Iterable[dict]]] = defaultdict(list)
         for model_name, paths in models:
-            models_dict[model_name].append(map(safe_json_load, paths))
+            models_dict[model_name].append(parser(path) for path in paths)
         for model_name, (lookup, path) in models_lists:
-            models_dict[model_name].append(iter_json_file(path, lookup))
+            models_dict[model_name].append(iter_json_file(parser(path), lookup))
 
         self.models_data = {
             model_name: itertools.chain(*list_of_gen)
@@ -251,6 +265,12 @@ class Cli:
 
                  "I.e. for file that contains dict {\"a\": {\"b\": [model_data, ...]}} you should\n"
                  "pass 'a.b' as <JSON key>.\n\n"
+        )
+        parser.add_argument(
+            "-i", "--input-format",
+            metavar="FORMAT", default="json",
+            choices=['json', 'yaml', 'ini'],
+            help="Input files parser ('PyYaml' is required to parse yaml files)\n\n"
         )
         parser.add_argument(
             "-o", "--output",
@@ -385,7 +405,31 @@ def path_split(path: str) -> List[str]:
     return folders
 
 
-def dict_lookup(d: dict, lookup: str) -> Union[dict, list]:
+class FileLoaders:
+    T = Callable[[Path], Union[dict, list]]
+
+    @staticmethod
+    def json(path: Path) -> Union[dict, list]:
+        with path.open() as fp:
+            return json.load(fp)
+
+    @staticmethod
+    def yaml(path: Path) -> Union[dict, list]:
+        if yaml is None:
+            print('Yaml parser is not installed. To parse yaml files PyYaml (or ruamel.yaml) is required.')
+            raise ImportError('yaml')
+        with path.open() as fp:
+            return yaml.safe_load(fp)
+
+    @staticmethod
+    def ini(path: Path) -> dict:
+        config = configparser.ConfigParser()
+        with path.open() as fp:
+            config.read_file(fp)
+        return {s: dict(config.items(s)) for s in config.sections()}
+
+
+def dict_lookup(d: Union[dict, list], lookup: str) -> Union[dict, list]:
     """
     Extract nested dictionary value from key path.
     If lookup is "-" returns dict as is.
@@ -403,7 +447,7 @@ def dict_lookup(d: dict, lookup: str) -> Union[dict, list]:
     return d
 
 
-def iter_json_file(path: Path, lookup: str) -> Generator[Union[dict, list], Any, None]:
+def iter_json_file(data: Union[dict, list], lookup: str) -> Generator[Union[dict, list], Any, None]:
     """
     Loads given 'path' file, perform lookup and return generator over json list.
     Does not open file until iteration is started.
@@ -412,19 +456,9 @@ def iter_json_file(path: Path, lookup: str) -> Generator[Union[dict, list], Any,
     :param lookup: Dot separated lookup path
     :return:
     """
-    with path.open() as f:
-        l = json.load(f)
-    l = dict_lookup(l, lookup)
+    l = dict_lookup(data, lookup)
     assert isinstance(l, list), f"Dict lookup return {type(l)} but list is expected, check your lookup path"
     yield from l
-
-
-def safe_json_load(path: Path) -> Union[dict, list]:
-    """
-    Open file, load json and close it.
-    """
-    with path.open(encoding="utf-8") as f:
-        return json.load(f)
 
 
 def _process_path(path: str) -> Iterable[Path]:
