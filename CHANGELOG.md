@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.2.4](https://github.com/bogdandm/json2python-models/tree/v0.2.4) (2021-07-22)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.3...v0.2.4)
+
+**Implemented enhancements:**
+
+- add yaml , ini [\#37](https://github.com/bogdandm/json2python-models/issues/37)
+
+**Merged pull requests:**
+
+- Add yaml and ini
+  parsers [\#39](https://github.com/bogdandm/json2python-models/pull/39) ([bogdandm](https://github.com/bogdandm))
+
 ## [v0.2.3](https://github.com/bogdandm/json2python-models/tree/v0.2.3) (2021-07-09)
 
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.2...v0.2.3)
