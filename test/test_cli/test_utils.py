@@ -1,9 +1,10 @@
+import json
 import sys
 from pathlib import Path
 
 import pytest
 
-from json_to_models.cli import _process_path, dict_lookup, iter_json_file, path_split, safe_json_load
+from json_to_models.cli import _process_path, dict_lookup, iter_json_file, path_split
 from json_to_models.utils import convert_args
 
 echo = lambda *args, **kwargs: (args, kwargs)
@@ -97,8 +98,20 @@ def test_dict_lookup(value, expected):
 
 
 test_iter_json_file_data = [
-    pytest.param((path / "data" / "users.json", "-"), lambda data: len(data) == 10),
-    pytest.param((path / "data" / "photos.json", "items"), lambda data: len(data) == 5000),
+    pytest.param(
+        (
+            json.load((path / "data" / "users.json").open()),
+            "-"
+        ),
+        lambda data: len(data) == 10
+    ),
+    pytest.param(
+        (
+            json.load((path / "data" / "photos.json").open()),
+            "items"
+        ),
+        lambda data: len(data) == 5000
+    ),
 ]
 
 
@@ -106,10 +119,6 @@ test_iter_json_file_data = [
 def test_iter_json_file(value, expected):
     result = list(iter_json_file(*value))
     assert expected(result) is True, f"(in value: {value})"
-
-
-def test_safe_json_load():
-    assert safe_json_load(path / "data" / "users.json")
 
 
 abs_path = path.absolute()

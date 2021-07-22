@@ -23,7 +23,7 @@ KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
 
 keywords_set = set(keyword.kwlist)
 builtins_set = set(__builtins__.keys())
-other_common_names_set = {'datetime', 'time', 'date', 'defaultdict'}
+other_common_names_set = {'datetime', 'time', 'date', 'defaultdict', 'schema'}
 blacklist_words = frozenset(keywords_set | builtins_set | other_common_names_set)
 ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
 

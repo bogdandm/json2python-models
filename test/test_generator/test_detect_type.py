@@ -28,7 +28,7 @@ test_data = [
     pytest.param("1.0", FloatString, id="float_str"),
     pytest.param("true", BooleanString, id="bool_str"),
     pytest.param({"test_dict_field_a": 1, "test_dict_field_b": "a"}, DDict(DUnion(int, StringLiteral({"a"}))), id="simple_dict"),
-    pytest.param({}, DDict(Unknown))
+    pytest.param({}, DDict(Unknown), id="empty_dict")
 ]
 
 test_dict = {param.id: param.values[0] for param in test_data}

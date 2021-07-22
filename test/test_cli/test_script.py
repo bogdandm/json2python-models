@@ -64,8 +64,10 @@ test_commands = [
                                   -l User - "{test_data_path / 'users.json'}" """,
                  id="list1_list2"),
 
-    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files""", id="gists"),
-    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --datetime""", id="gists_datetime"),
+    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files""",
+                 id="gists"),
+    pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --datetime""",
+                 id="gists_datetime"),
     pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --merge percent number_10""",
                  id="gists_merge_policy"),
     pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --merge exact""",
@@ -81,6 +83,10 @@ test_commands = [
                  id="dont_convert_unicode"),
     pytest.param(f"""{executable} -m SomeUnicode "{test_data_path / 'unicode.json'}" --disable-unicode-conversion""",
                  id="dont_convert_unicode_2"),
+    pytest.param(f"""{executable} -m YamlFile "{test_data_path / 'spotify-swagger.yaml'}" -i yaml""",
+                 id="yaml_file"),
+    pytest.param(f"""{executable} -m IniFile "{test_data_path / 'file.ini'}" -i ini""",
+                 id="ini_file"),
 ]
 
 
