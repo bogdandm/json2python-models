@@ -171,7 +171,7 @@ test_data = {
             "f": StringLiteral({'with \\ // slash'}),
         }),
         "fields": {
-            "imports": "from typing_extensions import Literal",
+            "imports": f"{LITERAL_SOURCE} import Literal",
             "fields": [
                 'a: Literal["basic"]',
                 'b: Literal["with space"]',
@@ -181,8 +181,8 @@ test_data = {
                 'f: Literal["with \\\\ // slash"]'
             ]
         },
-        "generated": trim("""
-        from typing_extensions import Literal
+        "generated": trim(f"""
+        {LITERAL_SOURCE} import Literal
 
 
         class Test:
