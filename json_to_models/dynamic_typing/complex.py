@@ -1,3 +1,4 @@
+import json
 from functools import partial
 from itertools import chain
 from typing import AbstractSet, Dict, Iterable, List, Optional, Tuple, Type, Union
@@ -266,7 +267,7 @@ class StringLiteral(BaseType):
             limit = options.get(self.TypeStyle.max_literals)
             if limit is None or len(self.literals) < limit:
                 parts = ', '.join(
-                    '"{}"'.format(s.replace('\\', '\\\\').replace('"', '\\"'))
+                    json.dumps(s)
                     for s in sorted(self.literals)
                 )
                 return [(Literal.__module__, 'Literal')], f"Literal[{parts}]"

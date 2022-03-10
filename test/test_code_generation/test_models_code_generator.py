@@ -3,7 +3,21 @@ from typing import Dict, List, Type, Union
 import pytest
 from typing_extensions import Literal
 
-from json_to_models.dynamic_typing import (AbsoluteModelRef, BaseType, DDict, DList, DOptional, IntString, IsoDateString, ModelMeta, ModelPtr, StringLiteral, StringSerializable, Unknown, compile_imports)
+from json_to_models.dynamic_typing import (
+    AbsoluteModelRef,
+    BaseType,
+    DDict,
+    DList,
+    DOptional,
+    IntString,
+    IsoDateString,
+    ModelMeta,
+    ModelPtr,
+    StringLiteral,
+    StringSerializable,
+    Unknown,
+    compile_imports,
+)
 from json_to_models.models.base import GenericModelCodeGenerator, generate_code
 from json_to_models.models.structure import sort_fields
 from json_to_models.models.utils import indent
@@ -145,6 +159,39 @@ test_data = {
             bar: IntString
             d: Dict[str, Any]
             baz: Optional[List[List[str]]]
+        """)
+    },
+    "literals": {
+        "model": ("Test", {
+            "a": StringLiteral({'basic'}),
+            "b": StringLiteral({'with space'}),
+            "c": StringLiteral({'with\ttab'}),
+            "d": StringLiteral({'with\nnew_line'}),
+            "e": StringLiteral({'with \'"qoutes"\''}),
+            "f": StringLiteral({'with \\ // slash'}),
+        }),
+        "fields": {
+            "imports": f"{LITERAL_SOURCE} import Literal",
+            "fields": [
+                'a: Literal["basic"]',
+                'b: Literal["with space"]',
+                'c: Literal["with\\ttab"]',
+                'd: Literal["with\\nnew_line"]',
+                'e: Literal["with \'\\"qoutes\\"\'"]',
+                'f: Literal["with \\\\ // slash"]'
+            ]
+        },
+        "generated": trim(f"""
+        {LITERAL_SOURCE} import Literal
+
+
+        class Test:
+            a: Literal["basic"]
+            b: Literal["with space"]
+            c: Literal["with\\ttab"]
+            d: Literal["with\\nnew_line"]
+            e: Literal["with \'\\"qoutes\\"\'"]
+            f: Literal["with \\\\ // slash"]
         """)
     }
 }
