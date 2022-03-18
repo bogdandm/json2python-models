@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.2.5](https://github.com/bogdandm/json2python-models/tree/v0.2.5) (2022-03-10)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.4...v0.2.5)
+
+**Fixed bugs:**
+
+- i think it needs the \n quotation [\#42](https://github.com/bogdandm/json2python-models/issues/42)
+
+**Merged pull requests:**
+
+- Fix invalid chars in Literal
+  value [\#43](https://github.com/bogdandm/json2python-models/pull/43) ([bogdandm](https://github.com/bogdandm))
+
 ## [v0.2.4](https://github.com/bogdandm/json2python-models/tree/v0.2.4) (2021-07-22)
 
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.3...v0.2.4)
