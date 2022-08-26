@@ -89,8 +89,13 @@ test_commands = [
                  id="ini_file"),
 ]
 
+# def _validate_result(proc: subprocess.Popen, output=None, output_file: Path = None) -> Tuple[str, str]:
 
-def _validate_result(proc: subprocess.Popen, output=None, output_file: Path = None) -> Tuple[str, str]:
+
+def execute_test(command, output_file: Path = None, output=None) -> Tuple[str, str]:
+    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # stdout, stderr = _validate_result(proc)
+
     stdout, stderr = map(bytes.decode, proc.communicate())
     if output_file:
         assert output is None
@@ -108,31 +113,27 @@ def _validate_result(proc: subprocess.Popen, output=None, output_file: Path = No
         exec(compile(stdout, "test_model.py", "exec"), module.__dict__)
     except Exception as e:
         assert not e, stdout
-    return stdout, stderr
+
+    print(stdout)
+    return stdout
 
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script(command):
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc)
-    print(stdout)
+    execute_test(command)
 
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script_flat(command):
     command += " -s flat"
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc)
-    print(stdout)
+    execute_test(command)
 
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script_attrs(command):
     command += " -f attrs"
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc)
+    stdout = execute_test(command)
     assert "@attr.s" in stdout
-    print(stdout)
 
 
 @pytest.mark.parametrize("command", test_commands)
@@ -140,10 +141,8 @@ def test_script_pydantic(command):
     command += " -f pydantic"
     # Pydantic has native (str) -> (builtin_type) converters
     command = command.replace('--strings-converters', '')
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc)
+    stdout = execute_test(command)
     assert "(BaseModel):" in stdout
-    print(stdout)
 
 
 @pytest.mark.parametrize("command", test_commands)
@@ -151,30 +150,39 @@ def test_script_pydantic_disable_literals(command):
     command += " -f pydantic --code-generator-kwargs max_literals=0"
     # Pydantic has native (str) -> (builtin_type) converters
     command = command.replace('--strings-converters', '')
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc)
+    stdout = execute_test(command)
     assert "(BaseModel):" in stdout
     assert "Literal" not in stdout
-    print(stdout)
 
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script_dataclasses(command):
     command += " -f dataclasses"
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc)
+    stdout = execute_test(command)
     assert "@dataclass" in stdout
-    print(stdout)
 
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script_custom(command):
     command += " -f custom --code-generator json_to_models.models.attr.AttrsModelCodeGenerator"
     command += ' --code-generator-kwargs "meta=true"'
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc)
+    stdout = execute_test(command)
     assert "@attr.s" in stdout
-    print(stdout)
+
+
+@pytest.mark.parametrize("command", test_commands)
+def test_add_preamble(command):
+    PREAMBLE_TEXT = """
+# this is some test code
+# to be added to the file
+
+
+# let's see if it works
+    """
+
+    command += ' --preamble "' + PREAMBLE_TEXT + '"'
+    stdout = execute_test(command)
+    assert "let's see if it works" in stdout
 
 
 wrong_arguments_commands = [
@@ -195,14 +203,11 @@ wrong_arguments_commands = [
 @pytest.mark.parametrize("command", wrong_arguments_commands)
 def test_wrong_arguments(command):
     print("Command:", command)
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    _validate_result(proc)
+    execute_test(command)
 
 
 @pytest.mark.parametrize("command", test_commands)
 def test_script_output_file(command):
     file = tmp_path / 'out.py'
     command += f" -o {file}"
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = _validate_result(proc, output_file=file)
-    print(stdout)
+    execute_test(command, output_file=file)
