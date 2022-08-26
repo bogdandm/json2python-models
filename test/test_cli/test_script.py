@@ -89,13 +89,9 @@ test_commands = [
                  id="ini_file"),
 ]
 
-# def _validate_result(proc: subprocess.Popen, output=None, output_file: Path = None) -> Tuple[str, str]:
-
 
 def execute_test(command, output_file: Path = None, output=None) -> Tuple[str, str]:
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # stdout, stderr = _validate_result(proc)
-
     stdout, stderr = map(bytes.decode, proc.communicate())
     if output_file:
         assert output is None

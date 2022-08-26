@@ -1,4 +1,4 @@
-dr[![json2python-models](/etc/logo.png)](https://github.com/bogdandm/json2python-models)
+[![json2python-models](/etc/logo.png)](https://github.com/bogdandm/json2python-models)
 
 [![PyPI version](https://img.shields.io/pypi/v/json2python-models.svg?color=green)](https://badge.fury.io/py/json2python-models)
 [![Build](https://github.com/bogdandm/json2python-models/actions/workflows/test_and_release.yml/badge.svg)](https://github.com/bogdandm/json2python-models/actions/workflows/test_and_release.yml)
@@ -9,7 +9,7 @@ dr[![json2python-models](/etc/logo.png)](https://github.com/bogdandm/json2python
 
 json2python-models is a [Python](https://www.python.org/) tool that can generate Python models classes
 ([pydantic](https://github.com/samuelcolvin/pydantic), dataclasses, [attrs](https://github.com/python-attrs/attrs))
-from JSON dataset.
+from JSON datasets.
 
 ## Features
 
@@ -26,23 +26,18 @@ from JSON dataset.
 
 ## Table of Contents
 
-- [Features](#features)
-- [Table of Contents](#table-of-contents)
-- [Examples](#examples)
-  - [Part of Path of Exile public items API](#part-of-path-of-exile-public-items-api)
-  - [F1 Season Results](#f1-season-results)
-  - [Swagger](#swagger)
-  - [Github-actions config files](#github-actions-config-files)
-  - [Example with preamble](#example-with-preamble)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [CLI](#cli)
-  - [Low level API](#low-level-api)
-- [Tests](#tests)
-  - [Test examples](#test-examples)
-- [Built With](#built-with)
-- [Contributing](#contributing)
-- [License](#license)
+* [Features](#features)
+* [Table of Contents](#table-of-contents)
+* [Example](#example)
+* [Installation](#installation)
+* [Usage](#usage)
+    * [CLI](#cli)
+    * [Low level API]()
+* [Tests](#tests)
+    * [Test examples](#test-examples)
+* [Built With](#built-with)
+* [Contributing](#contributing)
+* [License](#license)
 
 ## Examples
 
