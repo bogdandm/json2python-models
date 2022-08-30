@@ -240,7 +240,7 @@ class Cli:
 
         self.dict_keys_regex = [re.compile(rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
         self.dict_keys_fields = dict_keys_fields or ()
-        self.preamble = preamble or None
+        self.preamble = preamble.strip() or None
         self.initialized = True
 
     @classmethod
