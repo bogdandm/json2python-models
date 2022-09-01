@@ -168,17 +168,51 @@ def test_script_custom(command):
 
 @pytest.mark.parametrize("command", test_commands)
 def test_add_preamble(command):
+
     PREAMBLE_TEXT = """
 # this is some test code
 # to be added to the file
 
 
 # let's see if it works
-    """
 
-    command += ' --preamble "' + PREAMBLE_TEXT + '"'
-    stdout = execute_test(command)
+
+    """
+    stdout = execute_test(command + ' --preamble "' + PREAMBLE_TEXT + '"')
     assert "let's see if it works" in stdout
+
+
+@pytest.mark.parametrize("command", test_commands)
+def test_add_trim_preamble(command):
+
+    def trim_header(line_string):
+        """remove the quoted command and everything from the first class declaration onwards"""
+        lines = line_string.splitlines()
+        start = 0
+        end = 0
+        line_no = 0
+        for l in lines:
+            if l.startswith('"""'):
+                start = line_no
+            if l.startswith('class '):
+                end = line_no
+                break
+            line_no += 1
+
+        return lines[start:end]
+
+    expected_result = execute_test(command)
+
+    BLANK_SPACE = """
+
+
+
+
+        """
+    # ensure blank space does not get propagated
+    stdout = execute_test(command + ' --preamble "' + BLANK_SPACE + '"')
+
+    assert trim_header(expected_result) == trim_header(stdout)
 
 
 wrong_arguments_commands = [
