@@ -54,11 +54,11 @@ class GenericModelCodeGenerator:
     @{{ decorator }}
     {% endfor -%}
     class {{ name }}{% if bases %}({{ bases }}){% endif %}:
-    
+
     {%- for code in nested %}
     {{ code }}
     {% endfor -%}
-    
+
     {%- if fields -%}
     {%- for field in fields %}
         {{ field }}
@@ -66,7 +66,7 @@ class GenericModelCodeGenerator:
     {%- else %}
         pass
     {%- endif -%}
-    {%- if extra %}    
+    {%- if extra %}
     {{ extra }}
     {%- endif -%}
     """)
@@ -210,7 +210,7 @@ def _generate_code(
         lvl=0
 ) -> Tuple[ImportPathList, List[str]]:
     """
-    Walk thought models structure and covert them into code
+    Walk through the model structures and convert them into code
 
     :param structure: Result of compose_models or similar function
     :param class_generator: GenericModelCodeGenerator subclass
@@ -241,7 +241,9 @@ def _generate_code(
 
 
 def generate_code(structure: ModelsStructureType, class_generator: Type[GenericModelCodeGenerator],
-                  class_generator_kwargs: dict = None, objects_delimiter: str = OBJECTS_DELIMITER) -> str:
+                  class_generator_kwargs: dict = None,
+                  objects_delimiter: str = OBJECTS_DELIMITER,
+                  preamble: str = None) -> str:
     """
     Generate ready-to-use code
 
@@ -249,15 +251,18 @@ def generate_code(structure: ModelsStructureType, class_generator: Type[GenericM
     :param class_generator: GenericModelCodeGenerator subclass
     :param class_generator_kwargs: kwags for GenericModelCodeGenerator init
     :param objects_delimiter: Delimiter between root level classes
+    :param preamble: code to insert after the imports and before the classes
     :return: Generated code
     """
     root, mapping = structure
     with AbsoluteModelRef.inject(mapping):
         imports, classes = _generate_code(root, class_generator, class_generator_kwargs or {})
+        imports_str = ""
     if imports:
         imports_str = compile_imports(imports) + objects_delimiter
-    else:
-        imports_str = ""
+    if preamble:
+        imports_str += preamble + objects_delimiter
+
     return imports_str + objects_delimiter.join(classes) + "\n"
 
 

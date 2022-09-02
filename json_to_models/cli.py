@@ -102,11 +102,12 @@ class Cli:
         code_generator_kwargs_raw: List[str] = namespace.code_generator_kwargs
         dict_keys_regex: List[str] = namespace.dict_keys_regex
         dict_keys_fields: List[str] = namespace.dict_keys_fields
+        preamble: str = namespace.preamble
 
-        self.validate(models, models_lists, merge_policy, framework, code_generator)
+        self.validate(models_lists, merge_policy, framework, code_generator)
         self.setup_models_data(models, models_lists, parser)
         self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs_raw,
-                      dict_keys_regex, dict_keys_fields, disable_unicode_conversion)
+                      dict_keys_regex, dict_keys_fields, disable_unicode_conversion, preamble)
 
     def run(self):
         if self.enable_datetime:
@@ -122,8 +123,11 @@ class Cli:
         registry.merge_models(generator)
         registry.generate_names()
         structure = self.structure_fn(registry.models_map)
-        output = self.version_string + \
-                 generate_code(structure, self.model_generator, class_generator_kwargs=self.model_generator_kwargs)
+        output = self.version_string + generate_code(
+            structure,
+            self.model_generator,
+            class_generator_kwargs=self.model_generator_kwargs,
+            preamble=self.preamble)
         if self.output_file:
             with open(self.output_file, "w", encoding="utf-8") as f:
                 f.write(output)
@@ -140,11 +144,10 @@ class Cli:
             '"""\n'
         )
 
-    def validate(self, models, models_list, merge_policy, framework, code_generator):
+    def validate(self, models_list, merge_policy, framework, code_generator):
         """
         Validate parsed args
 
-        :param models:  List of pairs (model name, list of filesystem path)
         :param models_list: List of pairs (model name, list of lookup expr and filesystem path)
         :param merge_policy: List of merge policies. Each merge policy is either string or string and policy arguments
         :param framework: Framework name (predefined code generator)
@@ -196,7 +199,8 @@ class Cli:
             code_generator_kwargs_raw: List[str],
             dict_keys_regex: List[str],
             dict_keys_fields: List[str],
-            disable_unicode_conversion: bool
+            disable_unicode_conversion: bool,
+            preamble: str,
     ):
         """
         Convert CLI args to python representation and set them to appropriate object attributes
@@ -236,7 +240,9 @@ class Cli:
 
         self.dict_keys_regex = [re.compile(rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
         self.dict_keys_fields = dict_keys_fields or ()
-
+        if preamble:
+            preamble = preamble.strip()
+        self.preamble = preamble or None
         self.initialized = True
 
     @classmethod
@@ -365,6 +371,11 @@ class Cli:
                  "    argument_name=value or \"argument_name=value with space\"\n"
                  "Boolean values should be passed in JS style: true | false"
                  "\n\n"
+        )
+        parser.add_argument(
+            "--preamble",
+            type=str,
+            help="Code to insert into the generated file after the imports and before the list of classes\n\n"
         )
 
         return parser
