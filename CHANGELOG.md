@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.2.6](https://github.com/bogdandm/json2python-models/tree/v0.2.6) (2022-09-02)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.5...v0.2.6)
+
+**Implemented enhancements:**
+
+- Add section after imports and before dependencies [\#44](https://github.com/bogdandm/json2python-models/issues/44)
+
+**Merged pull requests:**
+
+- Add preamble
+  section [\#45](https://github.com/bogdandm/json2python-models/pull/45) ([ialarmedalien](https://github.com/ialarmedalien))
+
 ## [v0.2.5](https://github.com/bogdandm/json2python-models/tree/v0.2.5) (2022-03-10)
 
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.4...v0.2.5)
