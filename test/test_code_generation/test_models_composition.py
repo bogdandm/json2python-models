@@ -1,5 +1,5 @@
-from typing import Dict, List, Set, Tuple
-
+from typing import Dict, List, Set, Tuple, Union, Any
+from copy import deepcopy
 import pytest
 
 from json_to_models.dynamic_typing import ModelMeta
@@ -21,71 +21,70 @@ def test_list_ex():
     assert l == [0, 'a', *range(1, 6), 'b', *range(6, 10)]
 
 
+def generate_list_input(input_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert input into a list format.
+
+    Mimics the case where the JSON in a file has a list
+    at the top level, rather than a dictionary.
+
+    :param input_dict: dict with keys 'value', 'expected', and 'id'
+    :type input_dict: dict
+    :return: duplicate of the input structure but with the 'value' value as a list
+    :rtype: dict
+    """
+    outputs = {
+        "expected": deepcopy(input_dict["expected"]),
+        "id": input_dict["id"] + "_list",
+        "value": []
+    }
+
+    for item in input_dict["value"]:
+        # item is a tuple of model name and model data
+        model = [{key: deepcopy(value)} for key, value in item[1].items()]
+        outputs["value"].append((item[0], model))
+
+    return outputs
+
+
 # This test relies on model names as a some sort of models ids
 # and may fail if some logic of their generation will be changed
 # List of Tuple[root_model_name, JSON data] | Dict[model_name, Set[root_model_names]]
-test_extract_root_data = [
-    pytest.param(
-        [
-            ("TestModelA", {
-                "count": 1,
-                "items": [
-                    {
-                        "x": .5,
-                        "y": .1
-                    }
-                ]
-            }),
-            ("TestModelB", {
-                "next": "some_url",
-                "prev": None,
-                "count": 2000,
-                "items": [
-                    {
-                        "x": .5,
-                        "y": .1
-                    }
-                ]
-            }),
+extract_root_data_input = [
+    {
+        "value": [
+            ("TestModelA", {"count": 1, "items": [{"x": 0.5, "y": 0.1}]}),
+            (
+                "TestModelB",
+                {
+                    "next": "some_url",
+                    "prev": None,
+                    "count": 2000,
+                    "items": [{"x": 0.5, "y": 0.1}],
+                },
+            ),
         ],
-        {
-            'Item': {'TestModelA', 'TestModelB'},
-            'TestModelA': set()
-        }
-    ),
-    pytest.param(
-        [
-            ("TestModelA", {
-                "count": 1,
-                "items": [
-                    {
-                        "x": .5,
-                        "y": .1
-                    }
-                ]
-            }),
-            ("TestModelB", {
-                "count": 1,
-                "items": [
-                    {
-                        "x": .5,
-                        "y": .1
-                    }
-                ]
-            }),
+        "expected": {"Item": {"TestModelA", "TestModelB"}, "TestModelA": set()},
+        "id": "separate_roots"
+    },{
+        "value": [
+            ("TestModelA", {"count": 1, "items": [{"x": 0.5, "y": 0.1}]}),
+            ("TestModelB", {"count": 1, "items": [{"x": 0.5, "y": 0.1}]}),
         ],
-        {
-            'Item': {'TestModelA_TestModelB'},
-            'TestModelA_TestModelB': set()
-        },
-        id="merge_root"
-    )
-]
+        "expected": {"Item": {"TestModelA_TestModelB"}, "TestModelA_TestModelB": set()},
+        "id": "merge_root",
+    }]
 
+extract_root_data_input_list = [generate_list_input(i) for i in extract_root_data_input]
+test_extract_root_data = [pytest.param(inpt["value"], inpt["expected"], id=inpt["id"]) for inpt in extract_root_data_input + extract_root_data_input_list]
 
 @pytest.mark.parametrize("value,expected", test_extract_root_data)
-def test_extract_root(models_generator: MetadataGenerator, models_registry: ModelRegistry,
-                      value: List[Tuple[str, dict]], expected: Dict[str, Set[str]]):
+def test_extract_root(
+    models_generator: MetadataGenerator,
+    models_registry: ModelRegistry,
+    value: List[Tuple[str, Union[dict, list]]],
+    expected: Dict[str, Set[str]],
+):
     for model_name, data in value:
         fields = models_generator.generate(data)
         models_registry.process_meta_data(fields, model_name=model_name)
@@ -103,7 +102,7 @@ base_dict = {"field_" + str(i): int for i in range(20)}
 
 
 def _test_compose_models(
-        function, request,
+        function,
         models_generator: MetadataGenerator, models_registry: ModelRegistry,
         value: List[Tuple[str, dict]], expected: List[Tuple[str, list]], expected_mapping: Dict[str, str]
 ):
@@ -299,11 +298,10 @@ test_compose_models_data = [
 
 @pytest.mark.parametrize("value,expected,expected_mapping", test_compose_models_data)
 def test_compose_models(
-        request,
         models_generator: MetadataGenerator, models_registry: ModelRegistry,
         value: List[Tuple[str, dict]], expected: List[Tuple[str, list]], expected_mapping: Dict[str, str]
 ):
-    _test_compose_models(compose_models, request, models_generator, models_registry, value, expected, expected_mapping)
+    _test_compose_models(compose_models, models_generator, models_registry, value, expected, expected_mapping)
 
 
 test_compose_models_flat_data = [
@@ -606,9 +604,8 @@ test_compose_models_flat_data = [
 
 @pytest.mark.parametrize("value,expected,expected_mapping", test_compose_models_flat_data)
 def test_compose_models_flat(
-        request,
         models_generator: MetadataGenerator, models_registry: ModelRegistry,
         value: List[Tuple[str, dict]], expected: List[Tuple[str, list]], expected_mapping: Dict[str, str]
 ):
-    _test_compose_models(compose_models_flat, request, models_generator, models_registry, value, expected,
+    _test_compose_models(compose_models_flat, models_generator, models_registry, value, expected,
                          expected_mapping)

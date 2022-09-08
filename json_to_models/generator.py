@@ -46,6 +46,8 @@ class MetadataGenerator:
         """
         Convert given list of data variants to metadata dict
         """
+        if isinstance(data_variants[0], list):
+            data_variants = [item for sublist in data_variants for item in sublist]
         fields_sets = [self._convert(data) for data in data_variants]
         fields = self.merge_field_sets(fields_sets)
         return self.optimize_type(fields)
@@ -54,13 +56,13 @@ class MetadataGenerator:
         """
         Key and string value converting
         """
-        fields = dict()
+        fields = {}
         for key, value in data.items():
             if not isinstance(key, str):
-                raise TypeError(f'You probably using some not JSON-compatible parser and have some {type(key)} as dict key. '
+                raise TypeError(f'You are probably using a parser that is not JSON compatible and have data with some {type(key)}s as dict keys. '
                                 f'This is not supported.\n'
                                 f'Context: {data}\n'
-                                f'(If you parsing yaml try to replace PyYaml with ruamel.yaml)')
+                                f'(If you are parsing yaml, try replacing PyYaml with ruamel.yaml)')
             convert_dict = key not in self.dict_keys_fields
             fields[key] = self._detect_type(value, convert_dict)
         return fields
