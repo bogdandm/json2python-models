@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.2.7](https://github.com/bogdandm/json2python-models/tree/v0.2.7) (2022-09-08)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.6...v0.2.7)
+
+**Merged pull requests:**
+
+- Fix `generate` method to work with lists and
+  dicts [\#46](https://github.com/bogdandm/json2python-models/pull/46) ([ialarmedalien](https://github.com/ialarmedalien))
+
 ## [v0.2.6](https://github.com/bogdandm/json2python-models/tree/v0.2.6) (2022-09-02)
 
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.5...v0.2.6)
