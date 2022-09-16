@@ -81,14 +81,6 @@ class Cli:
         namespace = parser.parse_args(args)
 
         # Extract args
-        models: List[Tuple[str, Iterable[Path]]] = [
-            (model_name, itertools.chain(*map(_process_path, paths)))
-            for model_name, *paths in namespace.model or ()
-        ]
-        models_lists: List[Tuple[str, Tuple[str, Path]]] = [
-            (model_name, (lookup, Path(path)))
-            for model_name, lookup, path in namespace.list or ()
-        ]
         parser = getattr(FileLoaders, namespace.input_format)
         self.output_file = namespace.output
         self.enable_datetime = namespace.datetime
@@ -104,8 +96,8 @@ class Cli:
         dict_keys_fields: List[str] = namespace.dict_keys_fields
         preamble: str = namespace.preamble
 
-        self.validate(models_lists, merge_policy, framework, code_generator)
-        self.setup_models_data(models, models_lists, parser)
+        self.setup_models_data(namespace.model or (), namespace.list or (), parser)
+        self.validate(merge_policy, framework, code_generator)
         self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs_raw,
                       dict_keys_regex, dict_keys_fields, disable_unicode_conversion, preamble)
 
@@ -144,20 +136,15 @@ class Cli:
             '"""\n'
         )
 
-    def validate(self, models_list, merge_policy, framework, code_generator):
+    def validate(self, merge_policy, framework, code_generator):
         """
         Validate parsed args
 
-        :param models_list: List of pairs (model name, list of lookup expr and filesystem path)
         :param merge_policy: List of merge policies. Each merge policy is either string or string and policy arguments
         :param framework: Framework name (predefined code generator)
         :param code_generator: Code generator import string
         :return:
         """
-        names = {name for name, _ in models_list}
-        if len(names) != len(models_list):
-            raise ValueError("Model names under -l flag should be unique")
-
         for m in merge_policy:
             if isinstance(m, list):
                 if m[0] not in self.MODEL_CMP_MAPPING:
@@ -172,23 +159,33 @@ class Cli:
 
     def setup_models_data(
             self,
-            models: Iterable[Tuple[str, Iterable[Path]]],
-            models_lists: Iterable[Tuple[str, Tuple[str, Path]]],
+            models: Iterable[Union[
+                Tuple[str, str],
+                Tuple[str, str, str],
+            ]],
+            models_lists: Iterable[Tuple[str, str, str]],
             parser: 'FileLoaders.T'
     ):
         """
         Initialize lazy loaders for models data
         """
-        models_dict: Dict[str, List[Iterable[dict]]] = defaultdict(list)
-        for model_name, paths in models:
-            models_dict[model_name].append(parser(path) for path in paths)
-        for model_name, (lookup, path) in models_lists:
-            models_dict[model_name].append(iter_json_file(parser(path), lookup))
+        models_dict: Dict[str, List[dict]] = defaultdict(list)
 
-        self.models_data = {
-            model_name: itertools.chain(*list_of_gen)
-            for model_name, list_of_gen in models_dict.items()
-        }
+        models = list(models) + list(models_lists)
+        for model_tuple in models:
+            if len(model_tuple) == 2:
+                model_name, path_raw = model_tuple
+                lookup = '-'
+            elif len(model_tuple) == 3:
+                model_name, lookup, path_raw = model_tuple
+            else:
+                raise RuntimeError('`--model` argument should contain exactly 2 or 3 strings')
+
+            for real_path in process_path(path_raw):
+                iterator = iter_json_file(parser(real_path), lookup)
+                models_dict[model_name].extend(iterator)
+
+        self.models_data = models_dict
 
     def set_args(
             self,
@@ -257,20 +254,13 @@ class Cli:
 
         parser.add_argument(
             "-m", "--model",
-            nargs="+", action="append", metavar=("<Model name>", "<JSON files>"),
+            nargs="+", action="append", metavar=("<Model name> [<JSON lookup>] <File path or pattern>", ""),
             help="Model name and its JSON data as path or unix-like path pattern.\n"
                  "'*',  '**' or '?' patterns symbols are supported.\n\n"
-        )
-        parser.add_argument(
-            "-l", "--list",
-            nargs=3, action="append", metavar=("<Model name>", "<JSON key>", "<JSON file>"),
-            help="Like -m but given json file should contain list of model data.\n"
+                 "JSON data could be array of models or single model\n\n"
                  "If this file contains dict with nested list than you can pass\n"
-                 "<JSON key> to lookup. Deep lookups are supported by dot-separated path.\n"
-                 "If no lookup needed pass '-' as <JSON key>\n\n"
-
-                 "I.e. for file that contains dict {\"a\": {\"b\": [model_data, ...]}} you should\n"
-                 "pass 'a.b' as <JSON key>.\n\n"
+                 "<JSON lookup>. Deep lookups are supported by dot-separated path.\n"
+                 "If no lookup needed pass '-' as <JSON lookup> (default)\n\n"
         )
         parser.add_argument(
             "-i", "--input-format",
@@ -377,6 +367,11 @@ class Cli:
             type=str,
             help="Code to insert into the generated file after the imports and before the list of classes\n\n"
         )
+        parser.add_argument(
+            "-l", "--list",
+            nargs=3, action="append", metavar=("<Model name>", "<JSON lookup>", "<JSON file>"),
+            help="DEPRECATED, use --model argument instead"
+        )
 
         return parser
 
@@ -393,27 +388,6 @@ def main():
     cli = Cli()
     cli.parse_args()
     print(cli.run())
-
-
-def path_split(path: str) -> List[str]:
-    """
-    Split path into list of components
-
-    :param path: string path
-    :return: List of files/patterns
-    """
-    folders = []
-    while True:
-        path, folder = os.path.split(path)
-
-        if folder:
-            folders.append(folder)
-        else:
-            if path:
-                folders.append(path)
-            break
-    folders.reverse()
-    return folders
 
 
 class FileLoaders:
@@ -442,7 +416,7 @@ class FileLoaders:
 
 def dict_lookup(d: Union[dict, list], lookup: str) -> Union[dict, list]:
     """
-    Extract nested dictionary value from key path.
+    Extract nested value from key path.
     If lookup is "-" returns dict as is.
 
     :param d: Nested dict
@@ -460,25 +434,26 @@ def dict_lookup(d: Union[dict, list], lookup: str) -> Union[dict, list]:
 
 def iter_json_file(data: Union[dict, list], lookup: str) -> Generator[Union[dict, list], Any, None]:
     """
-    Loads given 'path' file, perform lookup and return generator over json list.
+    Perform lookup and return generator over json list.
     Does not open file until iteration is started.
 
-    :param path: File Path instance
+    :param data: JSON data
     :param lookup: Dot separated lookup path
-    :return:
+    :return: Generator of the model data
     """
-    l = dict_lookup(data, lookup)
-    assert isinstance(l, list), f"Dict lookup return {type(l)} but list is expected, check your lookup path"
-    yield from l
+    item = dict_lookup(data, lookup)
+    if isinstance(item, list):
+        yield from item
+    elif isinstance(item, dict):
+        yield item
+    else:
+        raise TypeError(f'dict or list is expected at {lookup if lookup != "-" else "JSON root"}, not {type(item)}')
 
 
-def _process_path(path: str) -> Iterable[Path]:
+def process_path(path: str) -> Iterable[Path]:
     """
     Convert path pattern into path iterable.
     If non-pattern path is given return tuple of one element: (path,)
-
-    :param path:
-    :return:
     """
     split_path = path_split(path)
     clean_path = list(itertools.takewhile(
@@ -502,3 +477,24 @@ def _process_path(path: str) -> Iterable[Path]:
         return path.glob(pattern_path)
     else:
         return path,
+
+
+def path_split(path: str) -> List[str]:
+    """
+    Split path into list of components
+
+    :param path: string path
+    :return: List of files/patterns
+    """
+    folders = []
+    while True:
+        path, folder = os.path.split(path)
+
+        if folder:
+            folders.append(folder)
+        else:
+            if path:
+                folders.append(path)
+            break
+    folders.reverse()
+    return folders

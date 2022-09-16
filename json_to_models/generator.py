@@ -15,7 +15,7 @@ from .dynamic_typing import (
     StringSerializable,
     StringSerializableRegistry,
     Unknown,
-    registry
+    registry,
 )
 
 _static_types = {float, bool, int}
@@ -46,8 +46,6 @@ class MetadataGenerator:
         """
         Convert given list of data variants to metadata dict
         """
-        if isinstance(data_variants[0], list):
-            data_variants = [item for sublist in data_variants for item in sublist]
         fields_sets = [self._convert(data) for data in data_variants]
         fields = self.merge_field_sets(fields_sets)
         return self.optimize_type(fields)

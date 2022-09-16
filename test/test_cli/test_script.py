@@ -52,16 +52,20 @@ def test_help():
 
 
 test_commands = [
-    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" """, id="list1"),
-    pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2"),
+    pytest.param(f"""{executable} -m Photo items "{test_data_path / 'photos.json'}" """, id="list1"),
+    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" """, id="list1_legacy"),
+    pytest.param(f"""{executable} -m User "{test_data_path / 'users.json'}" """, id="list2"),
+    pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2_legacy"),
     pytest.param(f"""{executable} -m Photos "{test_data_path / 'photos.json'}" """, id="model1"),
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" \
+                              -m Model - "{test_data_path / 'users.json'}" """, id="duplicate_name"),
 
-    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" \
+    pytest.param(f"""{executable} -m Photo items "{test_data_path / 'photos.json'}" \
                                   -m Photos "{test_data_path / 'photos.json'}" """,
                  id="list1_model1"),
 
-    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" \
-                                  -l User - "{test_data_path / 'users.json'}" """,
+    pytest.param(f"""{executable} -m Photo items "{test_data_path / 'photos.json'}" \
+                                  -m User "{test_data_path / 'users.json'}" """,
                  id="list1_list2"),
 
     pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files""",
@@ -75,7 +79,7 @@ test_commands = [
     pytest.param(f"""{executable} -m Gist "{tmp_path / '*.gist'}" --dkf files --datetime --strings-converters""",
                  id="gists_strings_converters"),
 
-    pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" --strings-converters""",
+    pytest.param(f"""{executable} -m User "{test_data_path / 'users.json'}" --strings-converters""",
                  id="users_strings_converters"),
     pytest.param(f"""{executable} -m SomeUnicode "{test_data_path / 'unicode.json'}" """,
                  id="convert_unicode"),
@@ -216,20 +220,22 @@ def test_add_trim_preamble(command):
 
 
 wrong_arguments_commands = [
-    pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}" \
-                                  -l Model - "{test_data_path / 'users.json'}" """, id="duplicate_name"),
-    pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}" --merge unknown""",
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" --merge unknown""",
                  id="wrong_merge_policy"),
-    pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}" --merge unknown_10""",
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" --merge unknown_10""",
                  id="wrong_merge_policy"),
-    pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}" -f custom""",
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" -f custom""",
                  id="custom_model_generator_without_class_link"),
-    pytest.param(f"""{executable} -l Model items "{test_data_path / 'photos.json'}" --code-generator test""",
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" --code-generator test""",
                  id="class_link_without_custom_model_generator_enabled"),
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" another_arg --code-generator test""",
+                 id="4_args_model"),
+    pytest.param(f"""{executable} -m Model total "{test_data_path / 'photos.json'}" --code-generator test""",
+                 id="non_dict_or_list_data"),
 ]
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail(strict=True)
 @pytest.mark.parametrize("command", wrong_arguments_commands)
 def test_wrong_arguments(command):
     print("Command:", command)

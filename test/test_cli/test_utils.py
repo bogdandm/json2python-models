@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from json_to_models.cli import _process_path, dict_lookup, iter_json_file, path_split
+from json_to_models.cli import dict_lookup, iter_json_file, path_split, process_path
 from json_to_models.utils import convert_args
 
 echo = lambda *args, **kwargs: (args, kwargs)
@@ -158,5 +158,5 @@ test_process_path_data = [
 
 @pytest.mark.parametrize("value,expected", test_process_path_data)
 def test_process_path(value, expected):
-    result = set(str(p).replace("\\", "/") for p in _process_path(value))
+    result = set(str(p).replace("\\", "/") for p in process_path(value))
     assert result == expected, f"(in value: {value})"
