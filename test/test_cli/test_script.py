@@ -57,6 +57,8 @@ test_commands = [
     pytest.param(f"""{executable} -m User "{test_data_path / 'users.json'}" """, id="list2"),
     pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2_legacy"),
     pytest.param(f"""{executable} -m Photos "{test_data_path / 'photos.json'}" """, id="model1"),
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" \
+                              -m Model - "{test_data_path / 'users.json'}" """, id="duplicate_name"),
 
     pytest.param(f"""{executable} -m Photo items "{test_data_path / 'photos.json'}" \
                                   -m Photos "{test_data_path / 'photos.json'}" """,
@@ -218,8 +220,6 @@ def test_add_trim_preamble(command):
 
 
 wrong_arguments_commands = [
-    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" \
-                                  -m Model - "{test_data_path / 'users.json'}" """, id="duplicate_name"),
     pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" --merge unknown""",
                  id="wrong_merge_policy"),
     pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" --merge unknown_10""",
@@ -231,7 +231,7 @@ wrong_arguments_commands = [
 ]
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail(strict=True)
 @pytest.mark.parametrize("command", wrong_arguments_commands)
 def test_wrong_arguments(command):
     print("Command:", command)
