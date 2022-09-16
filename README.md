@@ -476,8 +476,8 @@ Arguments:
   `*`,  `**` or `?` patterns symbols are supported.
   JSON data could be an array of models or single model.
   If this file contains dict with nested list than you can pass
-  <JSON lookup>. Deep lookups are supported by dot-separated path.
-  If no lookup needed pass '-' as <JSON lookup> (default)
+  `<JSON lookup>`. Deep lookups are supported by dot-separated path.
+  If no lookup needed pass '-' as `<JSON lookup>` (default)
   * **Format**: `-m <Model name> [<JSON lookup>] <File path or pattern>`
   * **Example**: `-m Car audi.json -m Car results reno.json`
 
