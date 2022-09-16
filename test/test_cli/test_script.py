@@ -228,6 +228,10 @@ wrong_arguments_commands = [
                  id="custom_model_generator_without_class_link"),
     pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" --code-generator test""",
                  id="class_link_without_custom_model_generator_enabled"),
+    pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" another_arg --code-generator test""",
+                 id="4_args_model"),
+    pytest.param(f"""{executable} -m Model total "{test_data_path / 'photos.json'}" --code-generator test""",
+                 id="non_dict_or_list_data"),
 ]
 
 
