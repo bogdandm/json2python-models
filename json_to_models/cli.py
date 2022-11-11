@@ -20,7 +20,7 @@ except ImportError:
         yaml = None
 
 from . import __version__ as VERSION
-from .dynamic_typing import ModelMeta, register_datetime_classes
+from .dynamic_typing import ModelMeta, register_datetime_classes, registry
 from .generator import MetadataGenerator
 from .models import ModelsStructureType
 from .models.attr import AttrsModelCodeGenerator
@@ -95,6 +95,9 @@ class Cli:
         dict_keys_regex: List[str] = namespace.dict_keys_regex
         dict_keys_fields: List[str] = namespace.dict_keys_fields
         preamble: str = namespace.preamble
+
+        for name in namespace.disable_str_serializable_types:
+            registry.remove_by_name(name)
 
         self.setup_models_data(namespace.model or (), namespace.list or (), parser)
         self.validate(merge_policy, framework, code_generator)
@@ -366,6 +369,16 @@ class Cli:
             "--preamble",
             type=str,
             help="Code to insert into the generated file after the imports and before the list of classes\n\n"
+        )
+        parser.add_argument(
+            "--disable-str-serializable-types",
+            metavar="TYPE",
+            default=[],
+            nargs="*", type=str,
+            help="List of python types for which StringSerializable should be disabled, i.e:\n"
+                 "--disable-str-serializable-types float int\n"
+                 "Alternatively you could use the name of StringSerializable subclass itself (i.e. IntString)"
+                 "\n\n"
         )
         parser.add_argument(
             "-l", "--list",
