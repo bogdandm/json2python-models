@@ -1,5 +1,6 @@
 import imp
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -94,7 +95,7 @@ test_commands = [
 ]
 
 
-def execute_test(command, output_file: Path = None, output=None) -> Tuple[str, str]:
+def execute_test(command, output_file: Path = None, output=None) -> str:
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = map(bytes.decode, proc.communicate())
     if output_file:
@@ -172,7 +173,6 @@ def test_script_custom(command):
 
 @pytest.mark.parametrize("command", test_commands)
 def test_add_preamble(command):
-
     PREAMBLE_TEXT = """
 # this is some test code
 # to be added to the file
@@ -187,8 +187,13 @@ def test_add_preamble(command):
 
 
 @pytest.mark.parametrize("command", test_commands)
-def test_add_trim_preamble(command):
+def test_disable_some_string_types_smoke(command):
+    command += " --disable-str-serializable-types float int"
+    execute_test(command)
 
+
+@pytest.mark.parametrize("command", test_commands)
+def test_add_trim_preamble(command):
     def trim_header(line_string):
         """remove the quoted command and everything from the first class declaration onwards"""
         lines = line_string.splitlines()
@@ -247,3 +252,17 @@ def test_script_output_file(command):
     file = tmp_path / 'out.py'
     command += f" -o {file}"
     execute_test(command, output_file=file)
+
+
+cmds = [
+    pytest.param(f"""{executable} -m User "{test_data_path / 'users.json'}" -f pydantic --disable-str-serializable-types float int""",
+                 id="users")
+]
+
+
+@pytest.mark.parametrize("command", cmds)
+def test_disable_some_string_types(command):
+    stdout = execute_test(command)
+    assert 'lat: str' in stdout
+    assert 'lng: str' in stdout
+    assert not any(re.match(r'\s+zipcode:.+int.+', line) for line in stdout.split('\n')), "zipcode should not be parsed as int"

@@ -86,7 +86,7 @@ class StringSerializableRegistry:
 
         return decorator
 
-    def remove(self, cls: type):
+    def remove(self, cls: T_StringSerializable):
         """
         Unregister given class
 
@@ -96,6 +96,11 @@ class StringSerializableRegistry:
         for base, replace in list(self.replaces):
             if replace is cls or base is cls:
                 self.replaces.remove((base, replace))
+
+    def remove_by_name(self, name: str):
+        for cls in self.types[:]:
+            if cls.__name__ == name or cls.actual_type.__name__ == name:
+                self.remove(cls)
 
     def resolve(self, *types: T_StringSerializable) -> Collection[T_StringSerializable]:
         """

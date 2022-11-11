@@ -568,7 +568,11 @@ Arguments:
     * **Example**:  `--code-generator-kwargs kwarg1=true kwarg2=10 "kwarg3=It is string with spaces"`
     * **Optional**
 
-One of model arguments (`-m` or `-l`) is required.
+* `--disable-str-serializable-types` - List of python types for which StringSerializable should be disabled.
+    Alternatively you could use the name of StringSerializable subclass itself (i.e. IntString).
+    * **Format**: `--disable-str-serializable-types [TYPE [TYPE ...]]`
+    * **Example**:  `--disable-str-serializable-types float int BooleanString IsoDatetimeString`
+    * **Optional**
 
 ### Low level API
 
