@@ -14,3 +14,4 @@ class ClassType(Enum):
     Dataclass = "dataclass"
     Attrs = "attrs"
     Pydantic = "pydantic"
+    SqlModel = "sqlmodel"

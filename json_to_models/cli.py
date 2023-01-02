@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, Union
 
+from .models.sqlmodel import SqlModelCodeGenerator
+
 try:
     import ruamel.yaml as yaml
 except ImportError:
@@ -55,6 +57,7 @@ class Cli:
         "dataclasses": convert_args(DataclassModelCodeGenerator, meta=bool_js_style,
                                     post_init_converters=bool_js_style),
         "pydantic": convert_args(PydanticModelCodeGenerator),
+        "sqlmodel": convert_args(SqlModelCodeGenerator),
     }
 
     def __init__(self):
@@ -122,7 +125,8 @@ class Cli:
             structure,
             self.model_generator,
             class_generator_kwargs=self.model_generator_kwargs,
-            preamble=self.preamble)
+            preamble=self.preamble
+        )
         if self.output_file:
             with open(self.output_file, "w", encoding="utf-8") as f:
                 f.write(output)
