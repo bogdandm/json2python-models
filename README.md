@@ -8,16 +8,17 @@
 ![Example](/etc/convert.png)
 
 json2python-models is a [Python](https://www.python.org/) tool that can generate Python models classes
-([pydantic](https://github.com/samuelcolvin/pydantic), dataclasses, [attrs](https://github.com/python-attrs/attrs))
+([pydantic](https://docs.pydantic.dev/), ([sqlmodel](https://sqlmodel.tiangolo.com/),
+dataclasses, [attrs](https://www.attrs.org/en/stable/))
 from JSON datasets.
 
 ## Features
 
 * Full **`typing` module** support
-* **Types merging** - if some field contains data of different types this will be represent as `Union` type
+* **Types merging** - if some field contains data of different types this will be represented as `Union` type
 * Fields and models **names** generation (unicode support included)
 * Similar **models generalization**
-* Handling **recursive data** structures (i.e family tree)
+* Handling **recursive data** structures (i.e. family tree)
 * Detecting **string serializable types** (i.e. datetime or just stringify numbers)
 * Detecting fields containing string constants (`Literal['foo', 'bar']`)
 * Generation models as **list** (flat models structure) or **tree** (nested models)
@@ -157,7 +158,7 @@ class Constructor(BaseModel):
 
 It requires a bit of tweaking:
 * Some fields store routes/models specs as dicts
-* There are a lot of optinal fields so we reduce merging threshold
+* There are a lot of optional fields, so we reduce merging threshold
 * Disable string literals
 
 ```
@@ -495,9 +496,10 @@ Arguments:
 
 * `-f`, `--framework` - Model framework for which python code is generated.
   `base` (default) mean no framework so code will be generated without any decorators and additional meta-data.
-    * **Format**: `-f {base, pydantic, attrs, dataclasses, custom}`
+    * **Format**: `-f {base, pydantic, sqlmodel, attrs, dataclasses, custom}`
     * **Example**: `-f pydantic`
     * **Default**: `-f base`
+    * **Warning**: SQLModel generator does not support Relationships and Foreign keys, they have to be added manually
 
 * `-s`, `--structure` - Models composition style.
     * **Format**: `-s {flat, nested}`
@@ -546,7 +548,7 @@ Arguments:
     this dict will be marked as dict field but not nested model.
     * **Format**: `--dkr RegEx [RegEx ...]`
     * **Example**: `--dkr node_\d+ \d+_\d+_\d+`
-    * **Note**: `^` and `$` (string borders) tokens will be added automatically but you
+    * **Note**: `^` and `$` (string borders) tokens will be added automatically, but you
         have to escape other special characters manually.
     * **Optional**
 
@@ -588,7 +590,7 @@ cd json2python-models
 python setup.py test -a '<pytest additional arguments>'
 ```
 
-Also I would recommend you to install `pytest-sugar` for pretty printing test results
+Also, I would recommend you to install `pytest-sugar` for pretty printing test results
 
 ### Test examples
 

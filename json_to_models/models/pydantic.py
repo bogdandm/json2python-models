@@ -70,7 +70,6 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
         """
         imports, data = super().field_data(name, meta, optional)
         default: Optional[str] = None
-        body_kwargs = {}
         if optional:
             meta: DOptional
             if isinstance(meta.type, DList):
@@ -80,8 +79,7 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
             else:
                 default = "None"
 
-        if name != data["name"]:
-            body_kwargs["alias"] = f'"{name}"'
+        body_kwargs = self._get_field_kwargs(name, meta, optional, data)
         if body_kwargs:
             data["body"] = self.PYDANTIC_FIELD.render(
                 default=default or '...',
@@ -90,3 +88,9 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
         elif default is not None:
             data["body"] = default
         return imports, data
+
+    def _get_field_kwargs(self, name: str, meta: MetaData, optional: bool, data: dict):
+        body_kwargs = {}
+        if name != data["name"]:
+            body_kwargs["alias"] = f'"{name}"'
+        return body_kwargs
