@@ -1,13 +1,40 @@
 # Changelog
 
+## [Unreleased](https://github.com/bogdandm/json2python-models/tree/HEAD)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.3.0...HEAD)
+
+**Implemented enhancements:**
+
+- SQLModel support [\#49](https://github.com/bogdandm/json2python-models/issues/49)
+
+## [v0.3.0](https://github.com/bogdandm/json2python-models/tree/v0.3.0) (2023-01-02)
+
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.7...v0.3.0)
+
+**Fixed bugs:**
+
+- Encoding with utf-8 in input file error [\#53](https://github.com/bogdandm/json2python-models/issues/53)
+
+**Closed issues:**
+
+- Generator would parse version number as float string [\#50](https://github.com/bogdandm/json2python-models/issues/50)
+
+**Merged pull requests:**
+
+- Add python3.11 to test matrix [\#55](https://github.com/bogdandm/json2python-models/pull/55) ([bogdandm](https://github.com/bogdandm))
+- SQLModel support [\#54](https://github.com/bogdandm/json2python-models/pull/54) ([bogdandm](https://github.com/bogdandm))
+- Remove Travis CI conf [\#52](https://github.com/bogdandm/json2python-models/pull/52) ([bogdandm](https://github.com/bogdandm))
+- CLI: Add option to unregister string serializable fields [\#51](https://github.com/bogdandm/json2python-models/pull/51) ([bogdandm](https://github.com/bogdandm))
+- Handle list data with regular --model argument [\#48](https://github.com/bogdandm/json2python-models/pull/48) ([bogdandm](https://github.com/bogdandm))
+
 ## [v0.2.7](https://github.com/bogdandm/json2python-models/tree/v0.2.7) (2022-09-08)
 
 [Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.2.6...v0.2.7)
 
 **Merged pull requests:**
 
-- Fix `generate` method to work with lists and
-  dicts [\#46](https://github.com/bogdandm/json2python-models/pull/46) ([ialarmedalien](https://github.com/ialarmedalien))
+- Fix `generate` method to work with lists and dicts [\#46](https://github.com/bogdandm/json2python-models/pull/46) ([ialarmedalien](https://github.com/ialarmedalien))
 
 ## [v0.2.6](https://github.com/bogdandm/json2python-models/tree/v0.2.6) (2022-09-02)
 
@@ -19,8 +46,7 @@
 
 **Merged pull requests:**
 
-- Add preamble
-  section [\#45](https://github.com/bogdandm/json2python-models/pull/45) ([ialarmedalien](https://github.com/ialarmedalien))
+- Add preamble section [\#45](https://github.com/bogdandm/json2python-models/pull/45) ([ialarmedalien](https://github.com/ialarmedalien))
 
 ## [v0.2.5](https://github.com/bogdandm/json2python-models/tree/v0.2.5) (2022-03-10)
 
@@ -32,8 +58,7 @@
 
 **Merged pull requests:**
 
-- Fix invalid chars in Literal
-  value [\#43](https://github.com/bogdandm/json2python-models/pull/43) ([bogdandm](https://github.com/bogdandm))
+- Fix invalid chars in Literal value [\#43](https://github.com/bogdandm/json2python-models/pull/43) ([bogdandm](https://github.com/bogdandm))
 
 ## [v0.2.4](https://github.com/bogdandm/json2python-models/tree/v0.2.4) (2021-07-22)
 
@@ -45,8 +70,7 @@
 
 **Merged pull requests:**
 
-- Add yaml and ini
-  parsers [\#39](https://github.com/bogdandm/json2python-models/pull/39) ([bogdandm](https://github.com/bogdandm))
+- Add yaml and ini parsers [\#39](https://github.com/bogdandm/json2python-models/pull/39) ([bogdandm](https://github.com/bogdandm))
 
 ## [v0.2.3](https://github.com/bogdandm/json2python-models/tree/v0.2.3) (2021-07-09)
 
@@ -58,20 +82,16 @@
 
 **Fixed bugs:**
 
-- Please change the Launch Library link to Launch Library
-  2 [\#34](https://github.com/bogdandm/json2python-models/issues/34)
+- Please change the Launch Library link to Launch Library 2 [\#34](https://github.com/bogdandm/json2python-models/issues/34)
 
 **Closed issues:**
 
-- Dependabot couldn't authenticate
-  with https://pypi.python.org/simple/ [\#33](https://github.com/bogdandm/json2python-models/issues/33)
+- Dependabot couldn't authenticate with https://pypi.python.org/simple/ [\#33](https://github.com/bogdandm/json2python-models/issues/33)
 
 **Merged pull requests:**
 
-- Fix bug when field gets converted to blacklisted
-  word [\#36](https://github.com/bogdandm/json2python-models/pull/36) ([a1d4r](https://github.com/a1d4r))
-- Upgrade to GitHub-native
-  Dependabot [\#35](https://github.com/bogdandm/json2python-models/pull/35) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Fix bug when field gets converted to blacklisted word [\#36](https://github.com/bogdandm/json2python-models/pull/36) ([a1d4r](https://github.com/a1d4r))
+- Upgrade to GitHub-native Dependabot [\#35](https://github.com/bogdandm/json2python-models/pull/35) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [v0.2.1](https://github.com/bogdandm/json2python-models/tree/v0.2.1) (2020-05-10)
 
@@ -83,16 +103,11 @@
 
 **Merged pull requests:**
 
-- Change default classes structure type to
-  FLAT [\#32](https://github.com/bogdandm/json2python-models/pull/32) ([bogdandm](https://github.com/bogdandm))
-- Add python3.8 and 3.9-dev to test
-  matrix [\#31](https://github.com/bogdandm/json2python-models/pull/31) ([bogdandm](https://github.com/bogdandm))
-- Pydantic models
-  generation [\#29](https://github.com/bogdandm/json2python-models/pull/29) ([bogdandm](https://github.com/bogdandm))
-- Add more reserved
-  words [\#28](https://github.com/bogdandm/json2python-models/pull/28) ([bogdandm](https://github.com/bogdandm))
-- Update ordered-set requirement from ==3.\* to
-  ==4.\* [\#27](https://github.com/bogdandm/json2python-models/pull/27) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Change default classes structure type to FLAT [\#32](https://github.com/bogdandm/json2python-models/pull/32) ([bogdandm](https://github.com/bogdandm))
+- Add python3.8 and 3.9-dev to test matrix [\#31](https://github.com/bogdandm/json2python-models/pull/31) ([bogdandm](https://github.com/bogdandm))
+- Pydantic models generation [\#29](https://github.com/bogdandm/json2python-models/pull/29) ([bogdandm](https://github.com/bogdandm))
+- Add more reserved words [\#28](https://github.com/bogdandm/json2python-models/pull/28) ([bogdandm](https://github.com/bogdandm))
+- Update ordered-set requirement from ==3.\* to ==4.\* [\#27](https://github.com/bogdandm/json2python-models/pull/27) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 
 ## [v0.1.2](https://github.com/bogdandm/json2python-models/tree/v0.1.2) (2019-06-17)
 
@@ -100,8 +115,7 @@
 
 **Implemented enhancements:**
 
-- Could you please add a flag to close the conversion of unicode fields in a
-  json [\#23](https://github.com/bogdandm/json2python-models/issues/23)
+- Could you please add a flag to close the conversion of unicode fields in a json [\#23](https://github.com/bogdandm/json2python-models/issues/23)
 
 **Merged pull requests:**
 
@@ -154,8 +168,7 @@
 
 **Merged pull requests:**
 
-- Add --dict-keys-regex and --dict-keys-fields
-  arguments; [\#11](https://github.com/bogdandm/json2python-models/pull/11) ([bogdandm](https://github.com/bogdandm))
+- Add --dict-keys-regex and --dict-keys-fields arguments; [\#11](https://github.com/bogdandm/json2python-models/pull/11) ([bogdandm](https://github.com/bogdandm))
 
 ## [v0.1a1](https://github.com/bogdandm/json2python-models/tree/v0.1a1) (2018-11-27)
 
@@ -164,17 +177,14 @@
 **Merged pull requests:**
 
 - Cli [\#10](https://github.com/bogdandm/json2python-models/pull/10) ([bogdandm](https://github.com/bogdandm))
-- Dict key as
-  data [\#9](https://github.com/bogdandm/json2python-models/pull/9) ([bogdandm](https://github.com/bogdandm))
-- Datetime
-  parsing [\#7](https://github.com/bogdandm/json2python-models/pull/7) ([bogdandm](https://github.com/bogdandm))
+- Dict key as data [\#9](https://github.com/bogdandm/json2python-models/pull/9) ([bogdandm](https://github.com/bogdandm))
+- Datetime parsing [\#7](https://github.com/bogdandm/json2python-models/pull/7) ([bogdandm](https://github.com/bogdandm))
 - Optimization [\#5](https://github.com/bogdandm/json2python-models/pull/5) ([bogdandm](https://github.com/bogdandm))
 - Attrs [\#4](https://github.com/bogdandm/json2python-models/pull/4) ([bogdandm](https://github.com/bogdandm))
-- Absolute forward
-  ref [\#3](https://github.com/bogdandm/json2python-models/pull/3) ([bogdandm](https://github.com/bogdandm))
-- Models code
-  generation [\#2](https://github.com/bogdandm/json2python-models/pull/2) ([bogdandm](https://github.com/bogdandm))
+- Absolute forward ref [\#3](https://github.com/bogdandm/json2python-models/pull/3) ([bogdandm](https://github.com/bogdandm))
+- Models code generation [\#2](https://github.com/bogdandm/json2python-models/pull/2) ([bogdandm](https://github.com/bogdandm))
 - Travis [\#1](https://github.com/bogdandm/json2python-models/pull/1) ([bogdandm](https://github.com/bogdandm))
 
-\* *This Changelog was automatically generated
-by [github_changelog_generator]      (https://github.com/github-changelog-generator/github-changelog-generator)*
+
+
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
