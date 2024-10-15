@@ -4,14 +4,25 @@ from typing import Any, Optional, Type, Union
 
 import dateutil.parser
 
-from .string_serializable import StringSerializable, StringSerializableRegistry, registry
+from .string_serializable import (
+    StringSerializable,
+    StringSerializableRegistry,
+    registry,
+)
 
-_dt_args_getter = operator.attrgetter('year', 'month', 'day', 'hour', 'minute', 'second', 'microsecond', 'tzinfo')
-_d_args_getter = operator.attrgetter('year', 'month', 'day')
-_t_args_getter = operator.attrgetter('hour', 'minute', 'second', 'microsecond', 'tzinfo')
+_dt_args_getter = operator.attrgetter(
+    "year", "month", "day", "hour", "minute", "second", "microsecond", "tzinfo"
+)
+_d_args_getter = operator.attrgetter("year", "month", "day")
+_t_args_getter = operator.attrgetter(
+    "hour", "minute", "second", "microsecond", "tzinfo"
+)
 
 
-def extend_datetime(d: Union[date, time, datetime], cls: Union[Type[date], Type[time], Type[datetime]]) -> Any:
+def extend_datetime(
+    d: Union[date, time, datetime],
+    cls: Union[Type[date], Type[time], Type[datetime]],
+) -> Any:
     """
     Wrap datetime object into datetime subclass
 
@@ -30,7 +41,7 @@ def extend_datetime(d: Union[date, time, datetime], cls: Union[Type[date], Type[
 
 _check_values_date = (
     datetime(2018, 1, 2, 0, 4, 5, 678, tzinfo=None),
-    datetime(2018, 1, 2, 9, 4, 5, 678, tzinfo=None)
+    datetime(2018, 1, 2, 9, 4, 5, 678, tzinfo=None),
 )
 
 
@@ -41,17 +52,15 @@ def is_date(s: str) -> Optional[date]:
     :param s: string
     :return: date or None
     """
-    # dateutil.parser.parse replaces missing parts of datetime with values from default value
-    # so if there is hour part in given string then d1 and d2 would be equal and string is not pure date
+    # dateutil.parser.parse replaces missing parts of datetime with values
+    # from default value so if there is hour part in given string then d1 and
+    # d2 would be equal and string is not pure date
     d1 = dateutil.parser.parse(s, default=_check_values_date[0])
     d2 = dateutil.parser.parse(s, default=_check_values_date[1])
     return None if d1 == d2 else d1.date()
 
 
-_check_values_time = (
-    datetime(2018, 10, 11),
-    datetime(2018, 12, 30)
-)
+_check_values_time = (datetime(2018, 10, 11), datetime(2018, 12, 30))
 
 
 def is_time(s: str) -> Optional[time]:
@@ -68,13 +77,17 @@ def is_time(s: str) -> Optional[time]:
 
 class IsoDateString(StringSerializable, date):
     """
-    Parse date using dateutil.parser.isoparse. Representation format always is ``YYYY-MM-DD``.
-    You can override to_representation method to customize it. Just don't forget to call registry.remove(IsoDateString)
+    Parse date using dateutil.parser.isoparse. Representation format always
+    is ``YYYY-MM-DD``.
+
+    You can override to_representation method to customize it. Just don't
+    forget to call registry.remove(IsoDateString)
     """
+
     actual_type = date
 
     @classmethod
-    def to_internal_value(cls, value: str) -> 'IsoDateString':
+    def to_internal_value(cls, value: str) -> "IsoDateString":
         if not is_date(value):
             raise ValueError(f"'{value}' is not valid date")
         dt = dateutil.parser.isoparse(value)
@@ -83,20 +96,21 @@ class IsoDateString(StringSerializable, date):
     def to_representation(self):
         return self.isoformat()
 
-    def replace(self, *args, **kwargs) -> 'IsoDateString':
+    def replace(self, *args, **kwargs) -> "IsoDateString":
         # noinspection PyTypeChecker
         return date.replace(self, *args, **kwargs)
 
 
 class IsoTimeString(StringSerializable, time):
     """
-    Parse time using dateutil.parser.parse. Representation format always is ``hh:mm:ss.ms``.
-    You can override to_representation method to customize it.
+    Parse time using dateutil.parser.parse. Representation format always is
+    ``hh:mm:ss.ms``. You can override to_representation method to customize it.
     """
+
     actual_type = time
 
     @classmethod
-    def to_internal_value(cls, value: str) -> 'IsoTimeString':
+    def to_internal_value(cls, value: str) -> "IsoTimeString":
         t = is_time(value)
         if not t:
             raise ValueError(f"'{value}' is not valid time")
@@ -105,7 +119,7 @@ class IsoTimeString(StringSerializable, time):
     def to_representation(self):
         return self.isoformat()
 
-    def replace(self, *args, **kwargs) -> 'IsoTimeString':
+    def replace(self, *args, **kwargs) -> "IsoTimeString":
         # noinspection PyTypeChecker
         return time.replace(self, *args, **kwargs)
 
@@ -113,27 +127,31 @@ class IsoTimeString(StringSerializable, time):
 class IsoDatetimeString(StringSerializable, datetime):
     """
     Parse datetime using dateutil.parser.isoparse.
-    Representation format always is ``YYYY-MM-DDThh:mm:ss.ms`` (datetime.isoformat method).
+    Representation format always is ``YYYY-MM-DDThh:mm:ss.ms`` (
+    datetime.isoformat method).
     """
+
     actual_type = datetime
 
     @classmethod
-    def to_internal_value(cls, value: str) -> 'IsoDatetimeString':
+    def to_internal_value(cls, value: str) -> "IsoDatetimeString":
         dt = dateutil.parser.isoparse(value)
         return extend_datetime(dt, cls)
 
     def to_representation(self):
         return self.isoformat()
 
-    def replace(self, *args, **kwargs) -> 'IsoDatetimeString':
+    def replace(self, *args, **kwargs) -> "IsoDatetimeString":
         # noinspection PyTypeChecker
         return datetime.replace(self, *args, **kwargs)
 
 
 def register_datetime_classes(registry: StringSerializableRegistry = registry):
     """
-    Register datetime classes in given registry (using default registry if no arguments is passed).
-    Date parsing is expensive operation so this classes are disabled by default
+    Register datetime classes in given registry (using default registry if no
+    arguments is passed).
+
+    Date parsing is expensive operation so these classes are disabled by default
     """
     registry.add(cls=IsoDateString)
     registry.add(cls=IsoTimeString)

@@ -11,6 +11,7 @@ from json_to_models.models.base import generate_code
 from json_to_models.models.pydantic import PydanticModelCodeGenerator
 from json_to_models.models.structure import compose_models_flat
 from json_to_models.registry import ModelRegistry
+
 from .test_script import test_data_path
 
 test_self_validate_pydantic_data = [
@@ -26,9 +27,7 @@ def test_self_validate_pydantic(data, data_type):
     with data.open() as f:
         data = json.load(f)
 
-    gen = MetadataGenerator(
-        dict_keys_fields=['files']
-    )
+    gen = MetadataGenerator(dict_keys_fields=["files"])
     reg = ModelRegistry()
     if data_type is not list:
         data = [data]
@@ -47,6 +46,7 @@ def test_self_validate_pydantic(data, data_type):
         assert not e, code
 
     import test_models
+
     for name in dir(test_models):
         cls = getattr(test_models, name)
         if isclass(cls) and issubclass(cls, pydantic.BaseModel):

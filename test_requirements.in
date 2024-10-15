@@ -1,0 +1,9 @@
+-c core_requirements.txt
+
+attrs
+pydantic
+pytest
+pytest-xdist
+requests
+ruamel.yaml
+tqdm

@@ -15,19 +15,22 @@ from testing_tools.pprint_meta_data import pretty_format_meta
 from testing_tools.real_apis import dump_response
 
 
-def results(season='current', round_code='last'):
-    return requests.get(f"http://ergast.com/api/f1/{season}/{round_code}/results.json") \
-        .json()['MRData']['RaceTable']['Races']
+def results(season="current", round_code="last"):
+    return requests.get(
+        f"http://ergast.com/api/f1/{season}/{round_code}/results.json"
+    ).json()["MRData"]["RaceTable"]["Races"]
 
 
-def drivers(season='current', round_code='last'):
-    return requests.get(f"http://ergast.com/api/f1/{season}/{round_code}/drivers.json") \
-        .json()['MRData']['DriverTable']['Drivers']
+def drivers(season="current", round_code="last"):
+    return requests.get(
+        f"http://ergast.com/api/f1/{season}/{round_code}/drivers.json"
+    ).json()["MRData"]["DriverTable"]["Drivers"]
 
 
-def driver_standings(season='current', round_code='last'):
-    return requests.get(f"http://ergast.com/api/f1/{season}/{round_code}/driverStandings.json") \
-        .json()['MRData']['StandingsTable']['StandingsLists']
+def driver_standings(season="current", round_code="last"):
+    return requests.get(
+        f"http://ergast.com/api/f1/{season}/{round_code}/driverStandings.json"
+    ).json()["MRData"]["StandingsTable"]["StandingsLists"]
 
 
 def main():
@@ -55,14 +58,18 @@ def main():
 
     for model in reg.models:
         print(pretty_format_meta(model))
-        print("=" * 20, end='')
+        print("=" * 20, end="")
 
     structure = compose_models_flat(reg.models_map)
-    # print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
-    # print("=" * 20)
+    # print('\n', json_format([structure[0], {str(a): str(b) for a,
+    # b in structure[1].items()}])) print("=" * 20)
 
-    print(generate_code(structure, PydanticModelCodeGenerator, class_generator_kwargs={}))
+    print(
+        generate_code(
+            structure, PydanticModelCodeGenerator, class_generator_kwargs={}
+        )
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

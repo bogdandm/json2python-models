@@ -23,13 +23,16 @@ class ModelFieldsEquals(ModelCmp):
 
 
 class ModelFieldsPercentMatch(ModelCmp):
-    DEFAULT = .7
+    DEFAULT = 0.7
 
     def __init__(self, percent_fields: float = DEFAULT):
         self.percent_fields = percent_fields
 
     def cmp(self, fields_a: set, fields_b: set) -> bool:
-        return len(fields_a & fields_b) / len(fields_a | fields_b) >= self.percent_fields
+        return (
+            len(fields_a & fields_b) / len(fields_a | fields_b)
+            >= self.percent_fields
+        )
 
 
 class ModelFieldsNumberMatch(ModelCmp):
@@ -47,7 +50,8 @@ class ModelRegistry:
 
     def __init__(self, *models_cmp: ModelCmp):
         """
-        :param models_cmp: list of model comparators. If you want merge only equals models pass ModelFieldsEquals()
+        :param models_cmp: list of model comparators. If you want merge only
+        equals models pass ModelFieldsEquals()
         """
         self._models_cmp = models_cmp or self.DEFAULT_MODELS_CMP
         self._registry: Dict[str, ModelMeta] = {}
@@ -62,22 +66,31 @@ class ModelRegistry:
         return self._registry
 
     def process_meta_data(
-            self, meta: MetaData,
-            model_name: str = None,
-            parent: MetaData = None,
-            parent_model: Tuple[ModelMeta, str] = (None, None),
-            replace_kwargs=None
+        self,
+        meta: MetaData,
+        model_name: str = None,
+        parent: MetaData = None,
+        parent_model: Tuple[ModelMeta, str] = (None, None),
+        replace_kwargs=None,
     ) -> ModelPtr:
         """
         Convert metadata (dict) to model and return a pointer to this model
 
-        :param meta: Dict[str, MetaData] - usually result of MetadataGenerator.generate method call
-        :param model_name: Raw model name. Will be set as is.
-            It is recommended to set it for root level models because names can not be generated for such models
+        :param meta: Dict[str, MetaData] - usually result of
+        MetadataGenerator.generate method call
+
+        :param model_name: Raw model name. Will be set as is. It is recommended
+        to set it for root level models because names can not be generated for
+        such models
+
         :param parent: System attribute for recursive call
-        :param parent_model: Pair of (ModelMeta, field name). System attribute for recursive call
+        :param parent_model: A Pair of (ModelMeta, field name). System attribute
+        for recursive call
+
         :param replace_kwargs: System attribute for recursive call
+
         :return:
+
         """
         replace_kwargs = replace_kwargs or {}
         ptr = None
@@ -85,13 +98,19 @@ class ModelRegistry:
         if isinstance(meta, dict):
             # Register model
             model_meta = self._register(meta)
-            ptr = ModelPtr(model_meta, parent=parent_model[0], parent_field_name=parent_model[1])
+            ptr = ModelPtr(
+                model_meta,
+                parent=parent_model[0],
+                parent_field_name=parent_model[1],
+            )
             if parent:
                 parent.replace(ptr, **replace_kwargs)
 
             # Process nested data
             for key, value in meta.items():
-                nested_ptr = self.process_meta_data(value, parent_model=(model_meta, key))
+                nested_ptr = self.process_meta_data(
+                    value, parent_model=(model_meta, key)
+                )
                 if nested_ptr:
                     meta[key] = nested_ptr
 
@@ -107,7 +126,7 @@ class ModelRegistry:
                         nested_meta,
                         parent=meta,
                         parent_model=parent_model,
-                        replace_kwargs={'parent': meta, 'index': i}
+                        replace_kwargs={"parent": meta, "index": i},
                     )
 
         if model_name is not None:
@@ -115,7 +134,11 @@ class ModelRegistry:
         return ptr
 
     def _register(self, meta: MetaData):
-        model_meta = ModelMeta(meta, self._index()) if not isinstance(meta, ModelMeta) else meta
+        model_meta = (
+            ModelMeta(meta, self._index())
+            if not isinstance(meta, ModelMeta)
+            else meta
+        )
         self._registry[model_meta.index] = model_meta
         return model_meta
 
@@ -130,13 +153,17 @@ class ModelRegistry:
         fields_b = set(model_b.type.keys())
         return any(cmp.cmp(fields_a, fields_b) for cmp in self._models_cmp)
 
-    def merge_models(self, generator, strict=False) -> List[Tuple[ModelMeta, Set[ModelMeta]]]:
+    def merge_models(
+        self, generator, strict=False
+    ) -> List[Tuple[ModelMeta, Set[ModelMeta]]]:
         """
-        Optimize whole models registry by merging same or similar models (uses given models comparators)
+        Optimize whole models registry by merging same or similar models
+        (uses given models comparators)
 
-        :param generator: Generator instance that will be used to metadata merging and optimization
-        :param strict: if True ALL models in merge group should meet the conditions
-            else groups will form from pairs of models as is.
+        :param generator: Generator instance that will be used to metadata
+        merging and optimization
+        :param strict: if True ALL models in merge group should meet the
+        conditions else groups will form from pairs of models as is.
         :return: pairs of (new model, set of old models)
         """
         # TODO: Implement strict mode
@@ -147,9 +174,12 @@ class ModelRegistry:
                 models2merge[model_b].add(model_a)
 
         # Groups of models to merge
-        groups: Iterable[Set[ModelMeta]] = [{model, *models} for model, models in models2merge.items()]
+        groups: Iterable[Set[ModelMeta]] = [
+            {model, *models} for model, models in models2merge.items()
+        ]
         # Make groups non-overlapping.
-        # This is not optimal algorithm but it works and we probably will not have thousands of models here.
+        # This is not optimal algorithm, but it works, and we probably will not
+        # have thousands of models here.
         flag = True
         while flag:
             flag = False
@@ -197,7 +227,9 @@ class ModelRegistry:
         metadata = generator.merge_field_sets([model.type for model in models])
         model_meta = ModelMeta(metadata, self._index(), original_fields)
         if originals_names:
-            model_meta.set_raw_name(ModelMeta.name_joiner(*sorted(originals_names)))
+            model_meta.set_raw_name(
+                ModelMeta.name_joiner(*sorted(originals_names))
+            )
         for model in models:
             self._unregister(model)
             for ptr in tuple(model.pointers):
@@ -216,7 +248,9 @@ class ModelRegistry:
         for model in self.models:
             counter[model.name or model.index] += 1
             if counter[model.name] > 1:
-                model.set_raw_name(model.name_joiner(model.name, model.index), generated=True)
+                model.set_raw_name(
+                    model.name_joiner(model.name, model.index), generated=True
+                )
 
     def generate_names(self):
         for model in self.models:

@@ -3,7 +3,7 @@ from typing import Generic, TypeVar, Union
 
 from . import INDENT
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ListEx(list, Generic[T]):
@@ -38,7 +38,8 @@ class ListEx(list, Generic[T]):
 
 
 class PositionsDict(defaultdict):
-    # Dict contains mapping Index -> position, where position is list index to insert nested element of Index
+    # Dict contains mapping Index -> position, where position is list index
+    # to insert nested element of Index
     INC = object()
 
     def __init__(self, default_factory=int, **kwargs):
@@ -49,7 +50,8 @@ class PositionsDict(defaultdict):
         Shift all elements which are placed after updated one
 
         :param key: Index or "root"
-        :param value: Could be position or PositionsDict.INC to perform quick increment (x+=1)
+        :param value: Could be position or PositionsDict.INC to perform quick
+        increment (x+=1)
         :return:
         """
         if value is self.INC:

@@ -1,6 +1,7 @@
 """
 Example uses Open Library Books API (https://openlibrary.org/dev/docs/api/books)
 """
+
 import requests
 
 from json_to_models.generator import MetadataGenerator
@@ -15,19 +16,18 @@ session = requests.Session()
 
 def search(s: str) -> dict:
     print(f"Search {s}")
-    return session.get("http://openlibrary.org/search.json", params={
-        'q': s
-    }).json()
+    return session.get(
+        "http://openlibrary.org/search.json", params={"q": s}
+    ).json()
 
 
 def get_book(isbn: str) -> dict:
     isbn = f"ISBN:{isbn}"
     print(f"Get {isbn}")
-    return session.get("https://openlibrary.org/api/books", params={
-        'bibkeys': isbn,
-        'jscmd': 'details',
-        'format': 'json'
-    }).json()[isbn]
+    return session.get(
+        "https://openlibrary.org/api/books",
+        params={"bibkeys": isbn, "jscmd": "details", "format": "json"},
+    ).json()[isbn]
 
 
 def main():
@@ -35,12 +35,12 @@ def main():
 
     search_result = search(SYMBOL)
     dump_response("openlibrary", "search", search_result)
-    search_result = search_result['docs']
+    search_result = search_result["docs"]
 
     books = [
-        get_book(item['isbn'][0])
+        get_book(item["isbn"][0])
         for item in search_result
-        if item.get('isbn', None)
+        if item.get("isbn", None)
     ]
     dump_response("openlibrary", "book", books[0])
 
@@ -58,5 +58,5 @@ def main():
     print(generate_code(structure, AttrsModelCodeGenerator))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -3,10 +3,10 @@ from typing import Dict, List, Optional, Set, Tuple, Type, Union
 
 import inflection
 
+from ..utils import distinct_words
 from . import BaseType
 from .base import ImportPathList, MetaData
 from .complex import SingleType
-from ..utils import distinct_words
 
 
 class ModelMeta(SingleType):
@@ -14,10 +14,14 @@ class ModelMeta(SingleType):
 
     def __init__(self, t: MetaData, index, _original_fields=None):
         super().__init__(t)
-        self.original_fields: List[List[str]] = _original_fields or [list(self.type.keys())]
+        self.original_fields: List[List[str]] = _original_fields or [
+            list(self.type.keys())
+        ]
         self.index: str = index
         self.pointers: Set[ModelPtr] = set()
-        self.child_pointers: Set[ModelPtr] = set()  # parent ref (pointers that have ptr.parent == self)
+        self.child_pointers: Set[ModelPtr] = (
+            set()
+        )  # parent ref (pointers that have ptr.parent == self)
         self._name: Optional[str] = None
         self._name_generated: Optional[bool] = None
 
@@ -39,12 +43,18 @@ class ModelMeta(SingleType):
     def generate_name(self):
         """
         Generate model name based on fields to which his model is assigned.
-        Will overwrite existed name so check is_name_generated before call this method
+        Will overwrite existed name so check is_name_generated before call
+        this method
         """
-        base_names = (inflection.singularize(inflection.underscore(ptr.parent_field_name))
-                      for ptr in self.pointers if ptr.parent is not None)
+        base_names = (
+            inflection.singularize(inflection.underscore(ptr.parent_field_name))
+            for ptr in self.pointers
+            if ptr.parent is not None
+        )
         filtered_names = distinct_words(*base_names)
-        new_name = self.name_joiner(*map(inflection.camelize, sorted(filtered_names)))
+        new_name = self.name_joiner(
+            *map(inflection.camelize, sorted(filtered_names))
+        )
         if new_name:
             self._name = new_name
             self._name_generated = True
@@ -52,7 +62,8 @@ class ModelMeta(SingleType):
     @classmethod
     def name_joiner(cls, *names: str) -> str:
         """
-        Join words to form a model name. Uses in different places so override WORDS_SEPARATOR to change it globally.
+        Join words to form a model name. Uses in different places so override
+        WORDS_SEPARATOR to change it globally.
         """
         return cls.WORDS_SEPARATOR.join(names)
 
@@ -74,7 +85,8 @@ class ModelMeta(SingleType):
 
     def set_raw_name(self, name, generated=False):
         """
-        Set model name and is_name_generated flag as is without any conversion made
+        Set model name and is_name_generated flag as is without any
+        conversion made
         """
         self._name = name
         self._name_generated = generated
@@ -83,22 +95,23 @@ class ModelMeta(SingleType):
     def is_name_generated(self):
         return self._name_generated
 
-    def connect(self, ptr: 'ModelPtr'):
+    def connect(self, ptr: "ModelPtr"):
         self.pointers.add(ptr)
 
-    def disconnect(self, ptr: 'ModelPtr'):
+    def disconnect(self, ptr: "ModelPtr"):
         self.pointers.remove(ptr)
 
-    def add_child_ref(self, ptr: 'ModelPtr'):
+    def add_child_ref(self, ptr: "ModelPtr"):
         self.child_pointers.add(ptr)
 
-    def remove_child_ref(self, ptr: 'ModelPtr'):
+    def remove_child_ref(self, ptr: "ModelPtr"):
         self.child_pointers.remove(ptr)
 
-    def to_typing_code(self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]) \
-            -> Tuple[ImportPathList, str]:
+    def to_typing_code(
+        self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]
+    ) -> Tuple[ImportPathList, str]:
         if self.name is None:
-            raise ValueError('Model without name can not be typed')
+            raise ValueError("Model without name can not be typed")
         return [], self.name
 
 
@@ -106,9 +119,15 @@ class ModelPtr(SingleType):
     """
     Model wrapper (pointer)
     """
+
     type: ModelMeta
 
-    def __init__(self, meta: ModelMeta, parent: ModelMeta = None, parent_field_name: str = None):
+    def __init__(
+        self,
+        meta: ModelMeta,
+        parent: ModelMeta = None,
+        parent_field_name: str = None,
+    ):
         super().__init__(meta)
         self.parent = parent
         self.parent_field_name = parent_field_name
@@ -119,21 +138,22 @@ class ModelPtr(SingleType):
     def __hash__(self):
         return id(self)
 
-    def replace(self, t: ModelMeta, **kwargs) -> 'ModelPtr':
+    def replace(self, t: ModelMeta, **kwargs) -> "ModelPtr":
         self.type.disconnect(self)
         super().replace(t, **kwargs)
         self.type.connect(self)
         return self
 
-    def replace_parent(self, t: ModelMeta, **kwargs) -> 'ModelPtr':
+    def replace_parent(self, t: ModelMeta) -> "ModelPtr":
         self._hash = None
         self.parent.remove_child_ref(self)
         self.parent = t
         self.parent.add_child_ref(self)
         return self
 
-    def to_typing_code(self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]) \
-            -> Tuple[ImportPathList, str]:
+    def to_typing_code(
+        self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]
+    ) -> Tuple[ImportPathList, str]:
         return AbsoluteModelRef(self.type).to_typing_code(types_style)
 
     def _to_hash_string(self) -> str:
@@ -145,7 +165,9 @@ ContextInjectionType = Dict[ModelMeta, Union[ModelMeta, str]]
 
 class AbsoluteModelRef:
     """
-    Model forward absolute references. Using ContextManager to inject real models paths into typing code.
+    Model forward absolute references. Using ContextManager to inject real
+    models paths into typing code.
+
     Forward reference is the typing string like ``List['MyModel']``.
     If the model is defined as child model and is used by another nested model
     than the reference to this model should be an absolute path:
@@ -158,8 +180,8 @@ class AbsoluteModelRef:
             data: 'Model.GenericChildModel'  # <--- this
 
     This information is only available at the models code generation stage
-    while typing code is generated from raw metadata and passing this absolute path as argument
-    to each ModelPtr would be annoying.
+    while typing code is generated from raw metadata and passing this
+    absolute path as argument to each ModelPtr would be annoying.
 
     Usage:
 
@@ -169,11 +191,11 @@ class AbsoluteModelRef:
 
     class Context:
         data = threading.local()
-        data.context: ContextInjectionType = None
+        data.context = None
 
         def __init__(self, patches: ContextInjectionType):
             self.context: ContextInjectionType = patches
-            self._old: ContextInjectionType = None
+            self._old: ContextInjectionType | None = None
 
         def __enter__(self):
             self._old = self.data.context
@@ -190,8 +212,9 @@ class AbsoluteModelRef:
     def __init__(self, model: ModelMeta):
         self.model = model
 
-    def to_typing_code(self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]) \
-            -> Tuple[ImportPathList, str]:
+    def to_typing_code(
+        self, types_style: Dict[Union[BaseType, Type[BaseType]], dict]
+    ) -> Tuple[ImportPathList, str]:
         context_data = self.Context.data.context
         if context_data:
             model_path = context_data.get(self.model, "")
