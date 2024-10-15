@@ -1,0 +1,103 @@
+[tool.ruff]
+fix = true
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+]
+
+line-length = 80
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
+#select = ["E", "F", "I", "PL", "I", "B"]
+ignore = ["B008"]
+ignore-init-module-imports = true
+unfixable = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F403", "F405", "E501"]
+"consts.py" = ["E501"]
+
+[tool.black]
+line-length = 80
+target-version = ['py310', 'py311', 'py312']
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  | blib2to3
+  | tests/data
+  | profiling
+)/
+'''
+[tool.isort]
+profile = "black"
+line_length = 80
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "json2python-models"
+version = "0.3.0"  # Replace this with the actual version from `json_to_models.__version__`
+description = "Python models (pydantic, attrs, dataclasses or custom) generator from JSON data with typing module support"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.7"
+authors = [
+    { name = "bogdandm (Bogdan Kalashnikov)", email = "bogdan.dm1995@yandex.ru" }
+]
+
+[project.urls]
+"Repository" = "https://github.com/bogdandm/json2python-models"
+
+[project.optional-dependencies]
+test = [
+  "pytest>=4.4.0",
+  "pytest-xdist",
+  "requests",
+  "attrs",
+  "pydantic>=1.3",
+  "ruamel.yaml"
+]
+
+[project.scripts]
+json2models = "json_to_models.cli:main"
+
+[tool.setuptools]
+packages = { find = { exclude = ["test", "testing_tools"] } }
+
+[tool.setuptools.dynamic]
+dependencies = {file=["core_requirements.txt"]}
+optional-dependencies = {dev = { file = ['dev_requirements.txt'] }}
+version= {attr = "json_to_models.__version__"}
+readme = {file = ['README.md']}
+
+[tool.setuptools.package-data]
+"*" = ['*.txt.', '*.ini', ".coveragerc", "LICENSE", "*.md"]
+
+[tool.pytest.ini_options]
+addopts = "-n 4"  # You can dynamically set this to `multiprocessing.cpu_count()` in your own environment
+testpaths = ["tests"]

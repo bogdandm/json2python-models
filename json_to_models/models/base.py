@@ -7,25 +7,48 @@ import inflection
 from jinja2 import Template
 from unidecode import unidecode
 
-from . import INDENT, ModelsStructureType, OBJECTS_DELIMITER
+from ..dynamic_typing import (
+    AbsoluteModelRef,
+    BaseType,
+    ImportPathList,
+    MetaData,
+    ModelMeta,
+    StringLiteral,
+    compile_imports,
+    metadata_to_typing,
+)
+from ..utils import cached_method
+from . import INDENT, OBJECTS_DELIMITER, ModelsStructureType
 from .string_converters import get_string_field_paths
 from .structure import sort_fields
 from .utils import indent
-from ..dynamic_typing import (AbsoluteModelRef, BaseType, ImportPathList, MetaData,
-                              ModelMeta, StringLiteral, compile_imports, metadata_to_typing)
-from ..utils import cached_method
 
 METADATA_FIELD_NAME = "J2M_ORIGINAL_FIELD"
-KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
-                  "{{ key }}={{ value }}" \
-                  "{% if not loop.last %}, {% endif %}" \
-                  "{% endfor %}"
+KWAGRS_TEMPLATE = (
+    "{% for key, value in kwargs.items() %}"
+    "{{ key }}={{ value }}"
+    "{% if not loop.last %}, {% endif %}"
+    "{% endfor %}"
+)
 
 keywords_set = set(keyword.kwlist)
 builtins_set = set(__builtins__.keys())
-other_common_names_set = {'datetime', 'time', 'date', 'defaultdict', 'schema'}
-blacklist_words = frozenset(keywords_set | builtins_set | other_common_names_set)
-ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+other_common_names_set = {"datetime", "time", "date", "defaultdict", "schema"}
+blacklist_words = frozenset(
+    keywords_set | builtins_set | other_common_names_set
+)
+ones = [
+    "",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+]
 
 
 def template(pattern: str, indent: str = INDENT) -> Template:
@@ -39,17 +62,22 @@ def template(pattern: str, indent: str = INDENT) -> Template:
             if not lines[i].strip():
                 del lines[i]
 
-        pattern = "\n".join(line[n:] if line[:n] == indent else line
-                            for line in lines)
+        pattern = "\n".join(
+            line[n:] if line[:n] == indent else line for line in lines
+        )
     return Template(pattern)
 
 
 class GenericModelCodeGenerator:
     """
-    Core of model code generator. Extend it to customize fields of model or add some decorators.
-    Note that this class has nothing to do with models structure. It only can add nested models as strings.
+    Core of model code generator. Extend it to customize fields of model or
+    add some decorators.
+    Note that this class has nothing to do with models structure. It only can
+    add nested models as strings.
     """
-    BODY = template("""
+
+    BODY = template(
+        """
     {%- for decorator in decorators -%}
     @{{ decorator }}
     {% endfor -%}
@@ -69,25 +97,28 @@ class GenericModelCodeGenerator:
     {%- if extra %}
     {{ extra }}
     {%- endif -%}
-    """)
+    """
+    )
 
-    STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
-                                     % KWAGRS_TEMPLATE)
-    FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
+    STR_CONVERT_DECORATOR = template(
+        "convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
+        % KWAGRS_TEMPLATE
+    )
+    FIELD: Template = template(
+        "{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}"
+    )
     DEFAULT_MAX_LITERALS = 10
     default_types_style = {
-        StringLiteral: {
-            StringLiteral.TypeStyle.use_literals: True
-        }
+        StringLiteral: {StringLiteral.TypeStyle.use_literals: True}
     }
 
     def __init__(
-            self,
-            model: ModelMeta,
-            max_literals=DEFAULT_MAX_LITERALS,
-            post_init_converters=False,
-            convert_unicode=True,
-            types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None
+        self,
+        model: ModelMeta,
+        max_literals=DEFAULT_MAX_LITERALS,
+        post_init_converters=False,
+        convert_unicode=True,
+        types_style: Dict[Union["BaseType", Type["BaseType"]], dict] = None,
     ):
         self.model = model
         self.post_init_converters = post_init_converters
@@ -98,21 +129,34 @@ class GenericModelCodeGenerator:
         for t, style in types_style.items():
             resolved_types_style.setdefault(t, {})
             resolved_types_style[t].update(style)
-        resolved_types_style[StringLiteral][StringLiteral.TypeStyle.max_literals] = int(max_literals)
+        resolved_types_style[StringLiteral][
+            StringLiteral.TypeStyle.max_literals
+        ] = int(max_literals)
         self.types_style = resolved_types_style
 
-        self.model.set_raw_name(self.convert_class_name(self.model.name), generated=self.model.is_name_generated)
+        self.model.set_raw_name(
+            self.convert_class_name(self.model.name),
+            generated=self.model.is_name_generated,
+        )
 
     @cached_method
     def convert_class_name(self, name):
-        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=False)
+        return prepare_label(
+            name, convert_unicode=self.convert_unicode, to_snake_case=False
+        )
 
     @cached_method
     def convert_field_name(self, name):
-        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=True)
+        return prepare_label(
+            name, convert_unicode=self.convert_unicode, to_snake_case=True
+        )
 
-    def generate(self, nested_classes: List[str] = None, bases: str = None, extra: str = "") \
-            -> Tuple[ImportPathList, str]:
+    def generate(
+        self,
+        nested_classes: List[str] = None,
+        bases: str = None,
+        extra: str = "",
+    ) -> Tuple[ImportPathList, str]:
         """
         :param nested_classes: list of strings that contains classes code
         :return: list of import data, class code
@@ -140,14 +184,25 @@ class GenericModelCodeGenerator:
             str_fields = self.string_field_paths
             decorator_imports, decorator_kwargs = self.convert_strings_kwargs
             if str_fields and decorator_kwargs:
-                imports.extend([
-                    *decorator_imports,
-                    ('json_to_models.models.string_converters', ['convert_strings']),
-                ])
-                decorators.append(self.STR_CONVERT_DECORATOR.render(str_fields=str_fields, kwargs=decorator_kwargs))
+                imports.extend(
+                    [
+                        *decorator_imports,
+                        (
+                            "json_to_models.models.string_converters",
+                            ["convert_strings"],
+                        ),
+                    ]
+                )
+                decorators.append(
+                    self.STR_CONVERT_DECORATOR.render(
+                        str_fields=str_fields, kwargs=decorator_kwargs
+                    )
+                )
         return imports, decorators
 
-    def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
+    def field_data(
+        self, name: str, meta: MetaData, optional: bool
+    ) -> Tuple[ImportPathList, dict]:
         """
         Form field data for template
 
@@ -158,10 +213,7 @@ class GenericModelCodeGenerator:
         """
         imports, typing = metadata_to_typing(meta, types_style=self.types_style)
 
-        data = {
-            "name": self.convert_field_name(name),
-            "type": typing
-        }
+        data = {"name": self.convert_field_name(name), "type": typing}
         return imports, data
 
     @property
@@ -171,13 +223,17 @@ class GenericModelCodeGenerator:
 
         :return: imports, list of fields as string
         """
-        required, optional = sort_fields(self.model, unicode_fix=not self.convert_unicode)
+        required, optional = sort_fields(
+            self.model, unicode_fix=not self.convert_unicode
+        )
         imports: ImportPathList = []
         strings: List[str] = []
         for is_optional, fields in enumerate((required, optional)):
             fields = self._filter_fields(fields)
             for field in fields:
-                field_imports, data = self.field_data(field, self.model.type[field], bool(is_optional))
+                field_imports, data = self.field_data(
+                    field, self.model.type[field], bool(is_optional)
+                )
                 imports.extend(field_imports)
                 strings.append(self.FIELD.render(**data))
         return imports, strings
@@ -190,24 +246,28 @@ class GenericModelCodeGenerator:
         """
         Get paths for convert_strings function
         """
-        return [self.convert_field_name(name) + ('#' + '.'.join(path) if path else '')
-                for name, path in get_string_field_paths(self.model)]
+        return [
+            self.convert_field_name(name)
+            + ("#" + ".".join(path) if path else "")
+            for name, path in get_string_field_paths(self.model)
+        ]
 
     @property
     def convert_strings_kwargs(self) -> Tuple[ImportPathList, dict]:
         """
         Override it to enable generation of string types converters
 
-        :return: Imports and Dict with kw-arguments for `json_to_models.models.string_converters.convert_strings` decorator.
+        :return: Imports and Dict with kw-arguments for
+        `json_to_models.models.string_converters.convert_strings` decorator.
         """
         return [], {}
 
 
 def _generate_code(
-        structure: List[dict],
-        class_generator: Type[GenericModelCodeGenerator],
-        class_generator_kwargs: dict,
-        lvl=0
+    structure: List[dict],
+    class_generator: Type[GenericModelCodeGenerator],
+    class_generator_kwargs: dict,
+    lvl=0,
 ) -> Tuple[ImportPathList, List[str]]:
     """
     Walk through the model structures and convert them into code
@@ -223,16 +283,15 @@ def _generate_code(
     generators = []
     for data in structure:
         nested_imports, nested_classes = _generate_code(
-            data["nested"],
-            class_generator,
-            class_generator_kwargs,
-            lvl=lvl + 1
+            data["nested"], class_generator, class_generator_kwargs, lvl=lvl + 1
         )
         imports.extend(nested_imports)
-        generators.append((
-            class_generator(data["model"], **class_generator_kwargs),
-            nested_classes
-        ))
+        generators.append(
+            (
+                class_generator(data["model"], **class_generator_kwargs),
+                nested_classes,
+            )
+        )
     for gen, nested_classes in generators:
         cls_imports, cls_string = gen.generate(nested_classes)
         imports.extend(cls_imports)
@@ -240,10 +299,13 @@ def _generate_code(
     return imports, classes
 
 
-def generate_code(structure: ModelsStructureType, class_generator: Type[GenericModelCodeGenerator],
-                  class_generator_kwargs: dict = None,
-                  objects_delimiter: str = OBJECTS_DELIMITER,
-                  preamble: str = None) -> str:
+def generate_code(
+    structure: ModelsStructureType,
+    class_generator: Type[GenericModelCodeGenerator],
+    class_generator_kwargs: dict = None,
+    objects_delimiter: str = OBJECTS_DELIMITER,
+    preamble: str = None,
+) -> str:
     """
     Generate ready-to-use code
 
@@ -256,7 +318,9 @@ def generate_code(structure: ModelsStructureType, class_generator: Type[GenericM
     """
     root, mapping = structure
     with AbsoluteModelRef.inject(mapping):
-        imports, classes = _generate_code(root, class_generator, class_generator_kwargs or {})
+        imports, classes = _generate_code(
+            root, class_generator, class_generator_kwargs or {}
+        )
         imports_str = ""
     if imports:
         imports_str = compile_imports(imports) + objects_delimiter
@@ -288,8 +352,8 @@ def prepare_label(s: str, convert_unicode: bool, to_snake_case: bool) -> str:
     if convert_unicode:
         s = unidecode(s)
     s = re.sub(r"\W", "", s)
-    if not ('a' <= s[0].lower() <= 'z'):
-        if '0' <= s[0] <= '9':
+    if not ("a" <= s[0].lower() <= "z"):
+        if "0" <= s[0] <= "9":
             s = ones[int(s[0])] + "_" + s[1:]
     if to_snake_case:
         s = inflection.underscore(s)

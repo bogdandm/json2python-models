@@ -43,7 +43,6 @@ def print_open_files():
     print("Opened files:", file=sys.stderr)
     for file in open_files:
         print(
-            f'{file.name}:\n'
-            f'{"".join(traceback.format_list(file.stack))}',
-            file=sys.stderr
+            f"{file.name}:\n" f'{"".join(traceback.format_list(file.stack))}',
+            file=sys.stderr,
         )

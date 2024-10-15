@@ -5,16 +5,16 @@ from typing import Callable, Optional, Set
 
 class Index:
     def __init__(self):
-        self.ch = 'A'
+        self.ch = "A"
         self.i = 1
 
     def __call__(self, *args, **kwargs):
-        value = f'{self.i}{self.ch}'
+        value = f"{self.i}{self.ch}"
         ch = chr(ord(self.ch) + 1)
-        if ch <= 'Z':
+        if ch <= "Z":
             self.ch = ch
         else:
-            self.ch = 'A'
+            self.ch = "A"
             self.i += 1
         return value
 
@@ -25,7 +25,8 @@ def json_format(x) -> str:
 
 def distinct_words(*words: str) -> Set[str]:
     """
-    Filters strings so only unique strings without extended ones will be exists in resulted set, e.g.
+    Filters strings so only unique strings without extended ones will be
+    existed in resulted set, e.g.
     >>> distinct_words('test', 'another_test', 'foo', 'qwerty_foo_bar')
     {'test', 'foo'}
 
@@ -48,10 +49,15 @@ def distinct_words(*words: str) -> Set[str]:
     return filtered_words
 
 
-def convert_args(fn: Callable, *args_converters: Optional[type], **kwargs_converters: Optional[type]) -> Callable:
+def convert_args(
+    fn: Callable,
+    *args_converters: Optional[type],
+    **kwargs_converters: Optional[type],
+) -> Callable:
     """
-    Decorator. Apply ``args_converters`` to callable arguments and kwargs_converters to kwargs.
-    If converter is None then argument will passed as is.
+    Decorator. Apply ``args_converters`` to callable arguments and
+    kwargs_converters to kwargs.
+    If converter is None then argument will be passed as is.
 
     :param fn: Function or class
     :param args_converters: Arguments converters
@@ -62,15 +68,18 @@ def convert_args(fn: Callable, *args_converters: Optional[type], **kwargs_conver
     @wraps(fn)
     def wrapper(*args, **kwargs):
         converted = (
-            t(value) if t else value
-            for value, t in zip(args, args_converters)
+            t(value) if t else value for value, t in zip(args, args_converters)
         )
         kwargs_converted = {
-            name: kwargs_converters[name](kwargs[name]) if kwargs_converters.get(name, None) else kwargs[name]
+            name: (
+                kwargs_converters[name](kwargs[name])
+                if kwargs_converters.get(name, None)
+                else kwargs[name]
+            )
             for name in kwargs.keys()
         }
         if len(args_converters) < len(args):
-            remain = args[len(args_converters):]
+            remain = args[len(args_converters) :]
         else:
             remain = ()
         return fn(*converted, *remain, **kwargs_converted)
@@ -78,7 +87,9 @@ def convert_args(fn: Callable, *args_converters: Optional[type], **kwargs_conver
     return wrapper
 
 
-def convert_args_decorator(*args_converters: type, method=False, **kwargs_converters):
+def convert_args_decorator(
+    *args_converters: type, method=False, **kwargs_converters
+):
     """
     Decorator factory.
 
@@ -104,8 +115,8 @@ def cached_method(func: Callable):
 
     @wraps(func)
     def cached_fn(self, *args):
-        if getattr(self, '__cache__', None) is None:
-            setattr(self, '__cache__', {})
+        if getattr(self, "__cache__", None) is None:
+            self.__cache__ = {}
         value = self.__cache__.get(args, ...)
         if value is Ellipsis:
             value = func(self, *args)

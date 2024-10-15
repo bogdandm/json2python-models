@@ -25,21 +25,28 @@ class MetadataGenerator:
     CONVERTER_TYPE = Optional[Callable[[str], Any]]
 
     def __init__(
-            self,
-            str_types_registry: StringSerializableRegistry = None,
-            dict_keys_regex: List[Union[Pattern, str]] = None,
-            dict_keys_fields: List[str] = None
+        self,
+        str_types_registry: StringSerializableRegistry = None,
+        dict_keys_regex: List[Union[Pattern, str]] = None,
+        dict_keys_fields: List[str] = None,
     ):
         """
 
-        :param str_types_registry: StringSerializableRegistry instance. Default registry will be used if None passed .
+        :param str_types_registry: StringSerializableRegistry instance. Default
+        registry will be used if None passed .
         :param dict_keys_regex: List of RegExpressions (compiled or not).
-            If all keys of some dict are match one of them then this dict will be marked as dict field
+            If all keys of some dict are match one of them then this dict will
+            be marked as dict field
             but not nested model.
-        :param dict_keys_fields: List of model fields names that will be marked as dict field
+        :param dict_keys_fields: List of model fields names that will be marked
+        as dict field
         """
-        self.str_types_registry = str_types_registry if str_types_registry is not None else registry
-        self.dict_keys_regex = [re.compile(r) for r in dict_keys_regex] if dict_keys_regex else []
+        self.str_types_registry = (
+            str_types_registry if str_types_registry is not None else registry
+        )
+        self.dict_keys_regex = (
+            [re.compile(r) for r in dict_keys_regex] if dict_keys_regex else []
+        )
         self.dict_keys_fields = set(dict_keys_fields or ())
 
     def generate(self, *data_variants: dict) -> dict:
@@ -57,10 +64,15 @@ class MetadataGenerator:
         fields = {}
         for key, value in data.items():
             if not isinstance(key, str):
-                raise TypeError(f'You are probably using a parser that is not JSON compatible and have data with some {type(key)}s as dict keys. '
-                                f'This is not supported.\n'
-                                f'Context: {data}\n'
-                                f'(If you are parsing yaml, try replacing PyYaml with ruamel.yaml)')
+                raise TypeError(
+                    f"You are probably using a parser that is not JSON "
+                    f"compatible and have data with some {type(key)}s as dict "
+                    f"keys."
+                    f"This is not supported.\n"
+                    f"Context: {data}\n"
+                    f"(If you are parsing yaml, try replacing PyYaml with "
+                    f"ruamel.yaml)"
+                )
             convert_dict = key not in self.dict_keys_fields
             fields[key] = self._detect_type(value, convert_dict)
         return fields
@@ -109,7 +121,8 @@ class MetadataGenerator:
                 else:
                     return DDict(*types)
 
-        # null interpreted as is and will be processed later on Union merge stage
+        # null interpreted as is and will be processed later on Union merge
+        # stage
         elif value is None:
             return Null
 
@@ -136,27 +149,55 @@ class MetadataGenerator:
             for name, field in model.items():
                 if name not in fields:
                     # New field
-                    field = field if first or isinstance(field, DOptional) else DOptional(field)
+                    field = (
+                        field
+                        if first or isinstance(field, DOptional)
+                        else DOptional(field)
+                    )
                 else:
                     field_original = fields[name]
                     fields_diff.remove(name)
                     if isinstance(field_original, DOptional):
                         # Existing optional field
-                        if field_original == field or field_original.type == field:
+                        if (
+                            field_original == field
+                            or field_original.type == field
+                        ):
                             continue
                         field_original = field_original.type
-                        field = DOptional(DUnion(
-                            *(field.types if isinstance(field, DUnion) else [field]),
-                            *(field_original.types if isinstance(field_original, DUnion) else [field_original])
-                        ))
+                        field = DOptional(
+                            DUnion(
+                                *(
+                                    field.types
+                                    if isinstance(field, DUnion)
+                                    else [field]
+                                ),
+                                *(
+                                    field_original.types
+                                    if isinstance(field_original, DUnion)
+                                    else [field_original]
+                                ),
+                            )
+                        )
                         if len(field.type) == 1:
                             field.type = field.type.types[0]
                     else:
-                        if field_original == field or (isinstance(field, DOptional) and field_original == field.type):
+                        if field_original == field or (
+                            isinstance(field, DOptional)
+                            and field_original == field.type
+                        ):
                             continue
                         field = DUnion(
-                            *(field.types if isinstance(field, DUnion) else [field]),
-                            *(field_original.types if isinstance(field_original, DUnion) else [field_original])
+                            *(
+                                field.types
+                                if isinstance(field, DUnion)
+                                else [field]
+                            ),
+                            *(
+                                field_original.types
+                                if isinstance(field_original, DUnion)
+                                else [field_original]
+                            ),
                         )
                         if len(field) == 1:
                             field = field.types[0]
@@ -171,12 +212,14 @@ class MetadataGenerator:
             first = False
         return fields
 
-    def optimize_type(self, meta: MetaData, process_model_ptr=False) -> MetaData:
+    def optimize_type(
+        self, meta: MetaData, process_model_ptr=False
+    ) -> MetaData:
         """
         Finds some redundant types and replace them with a simpler one
 
-        :param process_model_ptr: Control whether process ModelPtr instances or not.
-            Default is False to prevent recursion cycles.
+        :param process_model_ptr: Control whether process ModelPtr instances
+        or not. Default is False to prevent recursion cycles.
         """
         if isinstance(meta, dict):
             fields = {}
@@ -194,7 +237,9 @@ class MetadataGenerator:
                 t = t.type
             return meta.replace(t)
 
-        elif isinstance(meta, SingleType) and (process_model_ptr or not isinstance(meta, ModelPtr)):
+        elif isinstance(meta, SingleType) and (
+            process_model_ptr or not isinstance(meta, ModelPtr)
+        ):
             # Optimize nested type
             return meta.replace(self.optimize_type(meta.type))
 
@@ -240,19 +285,21 @@ class MetadataGenerator:
 
         for cls, iterable_types in ((DList, list_types), (DDict, dict_types)):
             if iterable_types:
-                other_types.append(cls(DUnion(*(
-                    t.type for t in iterable_types
-                ))))
+                other_types.append(
+                    cls(DUnion(*(t.type for t in iterable_types)))
+                )
 
         if str in str_types:
             other_types.append(str)
         elif str_types:
             str_types = self.str_types_registry.resolve(*str_types)
-            # Replace str pseudo-types with <class 'str'> when they can not be resolved into single type
-            other_types.append(str if len(str_types) > 1 else next(iter(str_types)))
+            # Replace str pseudo-types with <class 'str'> when they can not
+            # be resolved into single type
+            other_types.append(
+                str if len(str_types) > 1 else next(iter(str_types))
+            )
 
         types = [self.optimize_type(t) for t in other_types]
-
 
         if len(types) > 1:
             if Unknown in types:

@@ -1,1084 +1,1084 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "title": "Tests Online",
-        "description": "",
-        "version": "v1"
+  "basePath": "/api/v1",
+  "consumes": [
+    "application/json"
+  ],
+  "definitions": {
+    "Answer": {
+      "properties": {
+        "id": {
+          "readOnly": true,
+          "title": "ID",
+          "type": "integer"
+        },
+        "params_value": {
+          "items": {
+            "title": "Params value",
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "position": {
+          "maximum": 32767,
+          "minimum": -32768,
+          "title": "Position",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "params_value"
+      ],
+      "type": "object"
     },
-    "host": "localhost:8000",
-    "schemes": [
-        "http"
-    ],
-    "basePath": "/api/v1",
-    "consumes": [
-        "application/json"
-    ],
-    "produces": [
-        "application/json"
-    ],
-    "securityDefinitions": {
-        "basic": {
-            "type": "basic"
+    "AnswerReadOnly": {
+      "properties": {
+        "id": {
+          "readOnly": true,
+          "title": "ID",
+          "type": "integer"
         },
-        "api_key": {
-            "type": "apiKey",
-            "description": "Bearer <token>",
-            "name": "Authorization",
-            "in": "header"
+        "params_value": {
+          "items": {
+            "title": "Params value",
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "position": {
+          "maximum": 32767,
+          "minimum": -32768,
+          "title": "Position",
+          "type": "integer"
         }
+      },
+      "required": [
+        "params_value"
+      ],
+      "type": "object"
     },
-    "security": [
-        {
-            "api_key": []
+    "Question": {
+      "properties": {
+        "answers": {
+          "items": {
+            "$ref": "#/definitions/Answer"
+          },
+          "type": "array"
         },
-        {
-            "basic": []
+        "id": {
+          "readOnly": true,
+          "title": "ID",
+          "type": "integer"
+        },
+        "position": {
+          "maximum": 32767,
+          "minimum": -32768,
+          "title": "Position",
+          "type": "integer"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "\u0422\u0435\u043a\u0441\u0442",
+          "type": "string"
         }
-    ],
-    "paths": {
-        "/auth/token/obtain/": {
-            "post": {
-                "operationId": "auth_token_obtain_create",
-                "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/TokenObtainPair"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/TokenObtainPair"
-                        }
-                    }
-                },
-                "tags": [
-                    "auth"
-                ]
-            },
-            "parameters": []
-        },
-        "/auth/token/refresh/": {
-            "post": {
-                "operationId": "auth_token_refresh_create",
-                "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/TokenRefresh"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/TokenRefresh"
-                        }
-                    }
-                },
-                "tags": [
-                    "auth"
-                ]
-            },
-            "parameters": []
-        },
-        "/auth/token/verify/": {
-            "post": {
-                "operationId": "auth_token_verify_create",
-                "description": "Takes a token and indicates if it is valid.  This view provides no\ninformation about a token's fitness for a particular use.",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/TokenVerify"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/TokenVerify"
-                        }
-                    }
-                },
-                "tags": [
-                    "auth"
-                ]
-            },
-            "parameters": []
-        },
-        "/debug/500/": {
-            "get": {
-                "operationId": "debug_500_list",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "tags": [
-                    "debug"
-                ]
-            },
-            "parameters": []
-        },
-        "/debug/echo/": {
-            "get": {
-                "operationId": "debug_echo_list",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "tags": [
-                    "debug"
-                ]
-            },
-            "parameters": []
-        },
-        "/debug/info/": {
-            "get": {
-                "operationId": "debug_info_list",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    }
-                },
-                "tags": [
-                    "debug"
-                ]
-            },
-            "parameters": []
-        },
-        "/tests/": {
-            "get": {
-                "operationId": "tests_list",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "A page number within the paginated result set.",
-                        "required": false,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "required": [
-                                "count",
-                                "results"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "count": {
-                                    "type": "integer"
-                                },
-                                "next": {
-                                    "type": "string",
-                                    "format": "uri",
-                                    "x-nullable": true
-                                },
-                                "previous": {
-                                    "type": "string",
-                                    "format": "uri",
-                                    "x-nullable": true
-                                },
-                                "results": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/TestReadOnlyShort"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "post": {
-                "operationId": "tests_create",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Test"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Test"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "parameters": []
-        },
-        "/tests/{hash}/": {
-            "get": {
-                "operationId": "tests_read",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/TestReadOnly"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "put": {
-                "operationId": "tests_update",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Test"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Test"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "patch": {
-                "operationId": "tests_partial_update",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Test"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Test"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "delete": {
-                "operationId": "tests_delete",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "parameters": [
-                {
-                    "name": "hash",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                }
-            ]
-        },
-        "/tests/{test_hash}/questions/": {
-            "get": {
-                "operationId": "tests_questions_list",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "A page number within the paginated result set.",
-                        "required": false,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "required": [
-                                "count",
-                                "results"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "count": {
-                                    "type": "integer"
-                                },
-                                "next": {
-                                    "type": "string",
-                                    "format": "uri",
-                                    "x-nullable": true
-                                },
-                                "previous": {
-                                    "type": "string",
-                                    "format": "uri",
-                                    "x-nullable": true
-                                },
-                                "results": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/QuestionReadOnly"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "post": {
-                "operationId": "tests_questions_create",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Question"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Question"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "parameters": [
-                {
-                    "name": "test_hash",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                }
-            ]
-        },
-        "/tests/{test_hash}/questions/{id}/": {
-            "get": {
-                "operationId": "tests_questions_read",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/QuestionReadOnly"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "put": {
-                "operationId": "tests_questions_update",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Question"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Question"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "patch": {
-                "operationId": "tests_questions_partial_update",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Question"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Question"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "delete": {
-                "operationId": "tests_questions_delete",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "parameters": [
-                {
-                    "name": "id",
-                    "in": "path",
-                    "description": "A unique integer value identifying this Question.",
-                    "required": true,
-                    "type": "integer"
-                },
-                {
-                    "name": "test_hash",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                }
-            ]
-        },
-        "/tests/{test_hash}/questions/{question_pk}/answers/": {
-            "get": {
-                "operationId": "tests_questions_answers_list",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "A page number within the paginated result set.",
-                        "required": false,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "required": [
-                                "count",
-                                "results"
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "count": {
-                                    "type": "integer"
-                                },
-                                "next": {
-                                    "type": "string",
-                                    "format": "uri",
-                                    "x-nullable": true
-                                },
-                                "previous": {
-                                    "type": "string",
-                                    "format": "uri",
-                                    "x-nullable": true
-                                },
-                                "results": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/AnswerReadOnly"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "post": {
-                "operationId": "tests_questions_answers_create",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Answer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Answer"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "parameters": [
-                {
-                    "name": "question_pk",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                },
-                {
-                    "name": "test_hash",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                }
-            ]
-        },
-        "/tests/{test_hash}/questions/{question_pk}/answers/{id}/": {
-            "get": {
-                "operationId": "tests_questions_answers_read",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/AnswerReadOnly"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "put": {
-                "operationId": "tests_questions_answers_update",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Answer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Answer"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "patch": {
-                "operationId": "tests_questions_answers_partial_update",
-                "description": "",
-                "parameters": [
-                    {
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Answer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/Answer"
-                        }
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "delete": {
-                "operationId": "tests_questions_answers_delete",
-                "description": "",
-                "parameters": [],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    }
-                },
-                "tags": [
-                    "tests"
-                ]
-            },
-            "parameters": [
-                {
-                    "name": "id",
-                    "in": "path",
-                    "description": "A unique integer value identifying this Answer.",
-                    "required": true,
-                    "type": "integer"
-                },
-                {
-                    "name": "question_pk",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                },
-                {
-                    "name": "test_hash",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                }
-            ]
-        }
+      },
+      "required": [
+        "text",
+        "answers"
+      ],
+      "type": "object"
     },
-    "definitions": {
-        "TokenObtainPair": {
-            "required": [
-                "username",
-                "password"
-            ],
-            "type": "object",
-            "properties": {
-                "username": {
-                    "title": "Username",
-                    "type": "string",
-                    "minLength": 1
-                },
-                "password": {
-                    "title": "Password",
-                    "type": "string",
-                    "minLength": 1
-                }
-            }
+    "QuestionReadOnly": {
+      "properties": {
+        "answers": {
+          "items": {
+            "$ref": "#/definitions/AnswerReadOnly"
+          },
+          "readOnly": true,
+          "type": "array"
         },
-        "TokenRefresh": {
-            "required": [
-                "refresh"
-            ],
-            "type": "object",
-            "properties": {
-                "refresh": {
-                    "title": "Refresh",
-                    "type": "string",
-                    "minLength": 1
-                }
-            }
+        "id": {
+          "readOnly": true,
+          "title": "ID",
+          "type": "integer"
         },
-        "TokenVerify": {
-            "required": [
-                "token"
-            ],
-            "type": "object",
-            "properties": {
-                "token": {
-                    "title": "Token",
-                    "type": "string",
-                    "minLength": 1
-                }
-            }
+        "position": {
+          "maximum": 32767,
+          "minimum": -32768,
+          "title": "Position",
+          "type": "integer"
         },
-        "TestReadOnlyShort": {
-            "required": [
-                "title"
-            ],
-            "type": "object",
-            "properties": {
-                "id": {
-                    "title": "ID",
-                    "type": "integer",
-                    "readOnly": true
-                },
-                "url": {
-                    "title": "Url",
-                    "type": "string",
-                    "format": "uri",
-                    "readOnly": true
-                },
-                "hash": {
-                    "title": "Hash",
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 1
-                },
-                "title": {
-                    "title": "Title",
-                    "type": "string",
-                    "maxLength": 256,
-                    "minLength": 1
-                },
-                "params": {
-                    "type": "array",
-                    "items": {
-                        "title": "Params",
-                        "type": "string",
-                        "maxLength": 256,
-                        "minLength": 1
-                    }
-                },
-                "stats_restriction": {
-                    "title": "Statistic restriction",
-                    "type": "string",
-                    "enum": [
-                        "off",
-                        "any",
-                        "auth_only",
-                        "private"
-                    ]
-                },
-                "owner": {
-                    "title": "Owner",
-                    "type": "string",
-                    "readOnly": true
-                }
-            }
-        },
-        "Answer": {
-            "required": [
-                "params_value"
-            ],
-            "type": "object",
-            "properties": {
-                "id": {
-                    "title": "ID",
-                    "type": "integer",
-                    "readOnly": true
-                },
-                "position": {
-                    "title": "Position",
-                    "type": "integer",
-                    "maximum": 32767,
-                    "minimum": -32768
-                },
-                "params_value": {
-                    "type": "array",
-                    "items": {
-                        "title": "Params value",
-                        "type": "number"
-                    }
-                }
-            }
-        },
-        "Question": {
-            "required": [
-                "text",
-                "answers"
-            ],
-            "type": "object",
-            "properties": {
-                "id": {
-                    "title": "ID",
-                    "type": "integer",
-                    "readOnly": true
-                },
-                "position": {
-                    "title": "Position",
-                    "type": "integer",
-                    "maximum": 32767,
-                    "minimum": -32768
-                },
-                "text": {
-                    "title": "\u0422\u0435\u043a\u0441\u0442",
-                    "type": "string",
-                    "minLength": 1
-                },
-                "answers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Answer"
-                    }
-                }
-            }
-        },
-        "Test": {
-            "required": [
-                "title",
-                "description",
-                "questions"
-            ],
-            "type": "object",
-            "properties": {
-                "id": {
-                    "title": "ID",
-                    "type": "integer",
-                    "readOnly": true
-                },
-                "hash": {
-                    "title": "Hash",
-                    "type": "string",
-                    "readOnly": true,
-                    "minLength": 1
-                },
-                "title": {
-                    "title": "Title",
-                    "type": "string",
-                    "maxLength": 256,
-                    "minLength": 1
-                },
-                "description": {
-                    "title": "Description",
-                    "type": "string",
-                    "minLength": 1
-                },
-                "is_private": {
-                    "title": "Is private?",
-                    "type": "boolean"
-                },
-                "params": {
-                    "type": "array",
-                    "items": {
-                        "title": "Params",
-                        "type": "string",
-                        "maxLength": 256,
-                        "minLength": 1
-                    }
-                },
-                "params_defaults": {
-                    "type": "array",
-                    "items": {
-                        "title": "Params defaults",
-                        "type": "number"
-                    }
-                },
-                "stats_restriction": {
-                    "title": "Statistic restriction",
-                    "type": "string",
-                    "enum": [
-                        "off",
-                        "any",
-                        "auth_only",
-                        "private"
-                    ]
-                },
-                "stats_restriction_display": {
-                    "title": "Stats restriction display",
-                    "type": "string",
-                    "readOnly": true,
-                    "minLength": 1
-                },
-                "owner": {
-                    "title": "Owner",
-                    "type": "string",
-                    "readOnly": true
-                },
-                "questions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Question"
-                    }
-                }
-            }
-        },
-        "AnswerReadOnly": {
-            "required": [
-                "params_value"
-            ],
-            "type": "object",
-            "properties": {
-                "id": {
-                    "title": "ID",
-                    "type": "integer",
-                    "readOnly": true
-                },
-                "position": {
-                    "title": "Position",
-                    "type": "integer",
-                    "maximum": 32767,
-                    "minimum": -32768
-                },
-                "params_value": {
-                    "type": "array",
-                    "items": {
-                        "title": "Params value",
-                        "type": "number"
-                    }
-                }
-            }
-        },
-        "QuestionReadOnly": {
-            "required": [
-                "text"
-            ],
-            "type": "object",
-            "properties": {
-                "id": {
-                    "title": "ID",
-                    "type": "integer",
-                    "readOnly": true
-                },
-                "position": {
-                    "title": "Position",
-                    "type": "integer",
-                    "maximum": 32767,
-                    "minimum": -32768
-                },
-                "text": {
-                    "title": "\u0422\u0435\u043a\u0441\u0442",
-                    "type": "string",
-                    "minLength": 1
-                },
-                "answers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AnswerReadOnly"
-                    },
-                    "readOnly": true
-                }
-            }
-        },
-        "TestReadOnly": {
-            "required": [
-                "title",
-                "description",
-                "stats_restriction_display",
-                "owner"
-            ],
-            "type": "object",
-            "properties": {
-                "id": {
-                    "title": "ID",
-                    "type": "integer",
-                    "readOnly": true
-                },
-                "hash": {
-                    "title": "Hash",
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 1
-                },
-                "title": {
-                    "title": "Title",
-                    "type": "string",
-                    "maxLength": 256,
-                    "minLength": 1
-                },
-                "description": {
-                    "title": "Description",
-                    "type": "string",
-                    "minLength": 1
-                },
-                "is_private": {
-                    "title": "Is private?",
-                    "type": "boolean"
-                },
-                "params": {
-                    "type": "array",
-                    "items": {
-                        "title": "Params",
-                        "type": "string",
-                        "maxLength": 256,
-                        "minLength": 1
-                    }
-                },
-                "params_defaults": {
-                    "type": "array",
-                    "items": {
-                        "title": "Params defaults",
-                        "type": "number"
-                    }
-                },
-                "stats_restriction": {
-                    "title": "Statistic restriction",
-                    "type": "string",
-                    "enum": [
-                        "off",
-                        "any",
-                        "auth_only",
-                        "private"
-                    ]
-                },
-                "stats_restriction_display": {
-                    "title": "Stats restriction display",
-                    "type": "string",
-                    "minLength": 1
-                },
-                "owner": {
-                    "title": "Owner",
-                    "type": "integer"
-                },
-                "questions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/QuestionReadOnly"
-                    },
-                    "readOnly": true
-                }
-            }
+        "text": {
+          "minLength": 1,
+          "title": "\u0422\u0435\u043a\u0441\u0442",
+          "type": "string"
         }
+      },
+      "required": [
+        "text"
+      ],
+      "type": "object"
+    },
+    "Test": {
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "hash": {
+          "minLength": 1,
+          "readOnly": true,
+          "title": "Hash",
+          "type": "string"
+        },
+        "id": {
+          "readOnly": true,
+          "title": "ID",
+          "type": "integer"
+        },
+        "is_private": {
+          "title": "Is private?",
+          "type": "boolean"
+        },
+        "owner": {
+          "readOnly": true,
+          "title": "Owner",
+          "type": "string"
+        },
+        "params": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Params",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "params_defaults": {
+          "items": {
+            "title": "Params defaults",
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/definitions/Question"
+          },
+          "type": "array"
+        },
+        "stats_restriction": {
+          "enum": [
+            "off",
+            "any",
+            "auth_only",
+            "private"
+          ],
+          "title": "Statistic restriction",
+          "type": "string"
+        },
+        "stats_restriction_display": {
+          "minLength": 1,
+          "readOnly": true,
+          "title": "Stats restriction display",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "questions"
+      ],
+      "type": "object"
+    },
+    "TestReadOnly": {
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "hash": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Hash",
+          "type": "string"
+        },
+        "id": {
+          "readOnly": true,
+          "title": "ID",
+          "type": "integer"
+        },
+        "is_private": {
+          "title": "Is private?",
+          "type": "boolean"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "integer"
+        },
+        "params": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Params",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "params_defaults": {
+          "items": {
+            "title": "Params defaults",
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/definitions/QuestionReadOnly"
+          },
+          "readOnly": true,
+          "type": "array"
+        },
+        "stats_restriction": {
+          "enum": [
+            "off",
+            "any",
+            "auth_only",
+            "private"
+          ],
+          "title": "Statistic restriction",
+          "type": "string"
+        },
+        "stats_restriction_display": {
+          "minLength": 1,
+          "title": "Stats restriction display",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "stats_restriction_display",
+        "owner"
+      ],
+      "type": "object"
+    },
+    "TestReadOnlyShort": {
+      "properties": {
+        "hash": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Hash",
+          "type": "string"
+        },
+        "id": {
+          "readOnly": true,
+          "title": "ID",
+          "type": "integer"
+        },
+        "owner": {
+          "readOnly": true,
+          "title": "Owner",
+          "type": "string"
+        },
+        "params": {
+          "items": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Params",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "stats_restriction": {
+          "enum": [
+            "off",
+            "any",
+            "auth_only",
+            "private"
+          ],
+          "title": "Statistic restriction",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "format": "uri",
+          "readOnly": true,
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "type": "object"
+    },
+    "TokenObtainPair": {
+      "properties": {
+        "password": {
+          "minLength": 1,
+          "title": "Password",
+          "type": "string"
+        },
+        "username": {
+          "minLength": 1,
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "username",
+        "password"
+      ],
+      "type": "object"
+    },
+    "TokenRefresh": {
+      "properties": {
+        "refresh": {
+          "minLength": 1,
+          "title": "Refresh",
+          "type": "string"
+        }
+      },
+      "required": [
+        "refresh"
+      ],
+      "type": "object"
+    },
+    "TokenVerify": {
+      "properties": {
+        "token": {
+          "minLength": 1,
+          "title": "Token",
+          "type": "string"
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "type": "object"
     }
+  },
+  "host": "localhost:8000",
+  "info": {
+    "description": "",
+    "title": "Tests Online",
+    "version": "v1"
+  },
+  "paths": {
+    "/auth/token/obtain/": {
+      "parameters": [],
+      "post": {
+        "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
+        "operationId": "auth_token_obtain_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TokenObtainPair"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TokenObtainPair"
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/token/refresh/": {
+      "parameters": [],
+      "post": {
+        "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+        "operationId": "auth_token_refresh_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TokenRefresh"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TokenRefresh"
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/token/verify/": {
+      "parameters": [],
+      "post": {
+        "description": "Takes a token and indicates if it is valid.  This view provides no\ninformation about a token's fitness for a particular use.",
+        "operationId": "auth_token_verify_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TokenVerify"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TokenVerify"
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/debug/500/": {
+      "get": {
+        "description": "",
+        "operationId": "debug_500_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "debug"
+        ]
+      },
+      "parameters": []
+    },
+    "/debug/echo/": {
+      "get": {
+        "description": "",
+        "operationId": "debug_echo_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "debug"
+        ]
+      },
+      "parameters": []
+    },
+    "/debug/info/": {
+      "get": {
+        "description": "",
+        "operationId": "debug_info_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "debug"
+        ]
+      },
+      "parameters": []
+    },
+    "/tests/": {
+      "get": {
+        "description": "",
+        "operationId": "tests_list",
+        "parameters": [
+          {
+            "description": "A page number within the paginated result set.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "results": {
+                  "items": {
+                    "$ref": "#/definitions/TestReadOnlyShort"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "parameters": [],
+      "post": {
+        "description": "",
+        "operationId": "tests_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Test"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Test"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      }
+    },
+    "/tests/{hash}/": {
+      "delete": {
+        "description": "",
+        "operationId": "tests_delete",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "get": {
+        "description": "",
+        "operationId": "tests_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TestReadOnly"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "hash",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "description": "",
+        "operationId": "tests_partial_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Test"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Test"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "put": {
+        "description": "",
+        "operationId": "tests_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Test"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Test"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      }
+    },
+    "/tests/{test_hash}/questions/": {
+      "get": {
+        "description": "",
+        "operationId": "tests_questions_list",
+        "parameters": [
+          {
+            "description": "A page number within the paginated result set.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "results": {
+                  "items": {
+                    "$ref": "#/definitions/QuestionReadOnly"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "test_hash",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "description": "",
+        "operationId": "tests_questions_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Question"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Question"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      }
+    },
+    "/tests/{test_hash}/questions/{id}/": {
+      "delete": {
+        "description": "",
+        "operationId": "tests_questions_delete",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "get": {
+        "description": "",
+        "operationId": "tests_questions_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QuestionReadOnly"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "parameters": [
+        {
+          "description": "A unique integer value identifying this Question.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "integer"
+        },
+        {
+          "in": "path",
+          "name": "test_hash",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "description": "",
+        "operationId": "tests_questions_partial_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Question"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Question"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "put": {
+        "description": "",
+        "operationId": "tests_questions_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Question"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Question"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      }
+    },
+    "/tests/{test_hash}/questions/{question_pk}/answers/": {
+      "get": {
+        "description": "",
+        "operationId": "tests_questions_answers_list",
+        "parameters": [
+          {
+            "description": "A page number within the paginated result set.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "results": {
+                  "items": {
+                    "$ref": "#/definitions/AnswerReadOnly"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "question_pk",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "in": "path",
+          "name": "test_hash",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "description": "",
+        "operationId": "tests_questions_answers_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      }
+    },
+    "/tests/{test_hash}/questions/{question_pk}/answers/{id}/": {
+      "delete": {
+        "description": "",
+        "operationId": "tests_questions_answers_delete",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "get": {
+        "description": "",
+        "operationId": "tests_questions_answers_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AnswerReadOnly"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "parameters": [
+        {
+          "description": "A unique integer value identifying this Answer.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "integer"
+        },
+        {
+          "in": "path",
+          "name": "question_pk",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "in": "path",
+          "name": "test_hash",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "description": "",
+        "operationId": "tests_questions_answers_partial_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      },
+      "put": {
+        "description": "",
+        "operationId": "tests_questions_answers_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        },
+        "tags": [
+          "tests"
+        ]
+      }
+    }
+  },
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "security": [
+    {
+      "api_key": []
+    },
+    {
+      "basic": []
+    }
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "description": "Bearer <token>",
+      "in": "header",
+      "name": "Authorization",
+      "type": "apiKey"
+    },
+    "basic": {
+      "type": "basic"
+    }
+  },
+  "swagger": "2.0"
 }

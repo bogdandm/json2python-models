@@ -1,6 +1,6 @@
-"""
-Path of Exile Stash API http://www.pathofexile.com/developer/docs/api-resource-public-stash-tabs
-"""
+"""Path of Exile Stash API http://www.pathofexile.com/developer/docs/api
+-resource-public-stash-tabs"""
+
 from datetime import datetime
 
 import requests
@@ -20,7 +20,7 @@ def stash_tabs():
 def main():
     tabs = stash_tabs()
     dump_response("pathofexile", "tabs", tabs)
-    tabs = tabs['stashes']
+    tabs = tabs["stashes"]
 
     print(f"Start model generation (data len = {len(tabs)})")
     start_t = datetime.now()
@@ -37,12 +37,12 @@ def main():
     # print("\n" + "=" * 20, end='')
 
     structure = compose_models_flat(reg.models_map)
-    # print('\n', json_format([structure[0], {str(a): str(b) for a, b in structure[1].items()}]))
-    # print("=" * 20)
+    # print('\n', json_format([structure[0], {str(a): str(b) for a,
+    # b in structure[1].items()}])) print("=" * 20)
 
     print(generate_code(structure, PydanticModelCodeGenerator))
     print(f"{(datetime.now() - start_t).total_seconds():.4f} seconds")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

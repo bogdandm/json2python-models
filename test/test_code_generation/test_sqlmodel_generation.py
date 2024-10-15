@@ -1,3 +1,7 @@
+from test.test_code_generation.test_models_code_generator import (
+    model_factory,
+    trim,
+)
 from typing import Dict, List
 
 import pytest
@@ -15,7 +19,6 @@ from json_to_models.dynamic_typing import (
 from json_to_models.models.base import generate_code
 from json_to_models.models.sqlmodel import SqlModelCodeGenerator
 from json_to_models.models.structure import sort_fields
-from test.test_code_generation.test_models_code_generator import model_factory, trim
 
 # Data structure:
 # pytest.param id -> {
@@ -24,103 +27,85 @@ from test.test_code_generation.test_models_code_generator import model_factory, 
 # }
 test_data = {
     "base": {
-        "model": ("Test", {
-            "foo": int,
-            "Bar": int,
-            "baz": float
-        }),
+        "model": ("Test", {"foo": int, "Bar": int, "baz": float}),
         "fields_data": {
-            "foo": {
-                "name": "foo",
-                "type": "int"
-            },
+            "foo": {"name": "foo", "type": "int"},
             "Bar": {
                 "name": "bar",
                 "type": "int",
-                "body": 'Field(..., alias="Bar")'
+                "body": 'Field(..., alias="Bar")',
             },
-            "baz": {
-                "name": "baz",
-                "type": "float"
-            }
+            "baz": {"name": "baz", "type": "float"},
         },
         "fields": {
             "imports": "",
             "fields": [
-                f"foo: int",
-                f'bar: int = Field(..., alias="Bar")',
-                f"baz: float",
-            ]
+                "foo: int",
+                'bar: int = Field(..., alias="Bar")',
+                "baz: float",
+            ],
         },
-        "generated": trim(f"""
+        "generated": trim(
+            """
         from sqlmodel import Field, SQLModel
-        
-        
+
+
         # Warn! This generated code does not respect SQLModel Relationship and foreign_key, please add them manually.
         class Test(SQLModel, table=True):
             foo: int
             bar: int = Field(..., alias="Bar")
             baz: float
-        """)
+        """
+        ),
     },
     "complex": {
-        "model": ("Test", {
-            "foo": int,
-            "baz": DOptional(DList(DList(str))),
-            "bar": DOptional(IntString),
-            "qwerty": FloatString,
-            "asdfg": DOptional(int),
-            "dict": DDict(int),
-            "not": bool,
-            "1day": int,
-            "день_недели": str,
-        }),
-        "fields_data": {
-            "foo": {
-                "name": "foo",
-                "type": "int"
+        "model": (
+            "Test",
+            {
+                "foo": int,
+                "baz": DOptional(DList(DList(str))),
+                "bar": DOptional(IntString),
+                "qwerty": FloatString,
+                "asdfg": DOptional(int),
+                "dict": DDict(int),
+                "not": bool,
+                "1day": int,
+                "день_недели": str,
             },
+        ),
+        "fields_data": {
+            "foo": {"name": "foo", "type": "int"},
             "baz": {
                 "name": "baz",
                 "type": "Optional[List[List[str]]]",
-                "body": "[]"
+                "body": "[]",
             },
-            "bar": {
-                "name": "bar",
-                "type": "Optional[int]",
-                "body": "None"
-            },
-            "qwerty": {
-                "name": "qwerty",
-                "type": "float"
-            },
-            "asdfg": {
-                "name": "asdfg",
-                "type": "Optional[int]",
-                "body": "None"
-            },
+            "bar": {"name": "bar", "type": "Optional[int]", "body": "None"},
+            "qwerty": {"name": "qwerty", "type": "float"},
+            "asdfg": {"name": "asdfg", "type": "Optional[int]", "body": "None"},
             "dict": {
                 "name": "dict_",
                 "type": "Dict[str, int]",
-                "body": 'Field(..., alias="dict")'
+                "body": 'Field(..., alias="dict")',
             },
             "not": {
                 "name": "not_",
                 "type": "bool",
-                "body": 'Field(..., alias="not")'
+                "body": 'Field(..., alias="not")',
             },
             "1day": {
                 "name": "one_day",
                 "type": "int",
-                "body": 'Field(..., alias="1day")'
+                "body": 'Field(..., alias="1day")',
             },
             "день_недели": {
                 "name": "den_nedeli",
                 "type": "str",
-                "body": 'Field(..., alias="день_недели")'
-            }
+                "body": 'Field(..., alias="день_недели")',
+            },
         },
-        "generated": trim(f"""
+        "generated": trim(
+            """
         from sqlmodel import Field, SQLModel
         from typing import Dict, List, Optional
 
@@ -136,18 +121,23 @@ test_data = {
             baz: Optional[List[List[str]]] = []
             bar: Optional[int] = None
             asdfg: Optional[int] = None
-        """)
+        """
+        ),
     },
     "converters": {
-        "model": ("Test", {
-            "a": int,
-            "b": IntString,
-            "c": DOptional(FloatString),
-            "d": DList(DList(DList(IntString))),
-            "e": DDict(IntString),
-            "u": DUnion(DDict(IntString), DList(DList(IntString))),
-        }),
-        "generated": trim("""
+        "model": (
+            "Test",
+            {
+                "a": int,
+                "b": IntString,
+                "c": DOptional(FloatString),
+                "d": DList(DList(DList(IntString))),
+                "e": DDict(IntString),
+                "u": DUnion(DDict(IntString), DList(DList(IntString))),
+            },
+        ),
+        "generated": trim(
+            """
         from sqlmodel import Field, SQLModel
         from typing import Dict, List, Optional, Union
 
@@ -160,15 +150,13 @@ test_data = {
             e: Dict[str, int]
             u: Union[Dict[str, int], List[List[int]]]
             c: Optional[float] = None
-        """)
+        """
+        ),
     },
     "sql_models": {
-        "model": ("Test", {
-            "id": int,
-            "name": str,
-            "x": DList(int)
-        }),
-        "generated": trim("""
+        "model": ("Test", {"id": int, "name": str, "x": DList(int)}),
+        "generated": trim(
+            """
         from sqlmodel import Field, SQLModel
         from typing import List
 
@@ -178,17 +166,14 @@ test_data = {
             id: int = Field(..., primary_key=True)
             name: str
             x: List[int]
-        """)
-    }
+        """
+        ),
+    },
 }
 
 test_data_unzip = {
     test: [
-        pytest.param(
-            model_factory(*data["model"]),
-            data[test],
-            id=id
-        )
+        pytest.param(model_factory(*data["model"]), data[test], id=id)
         for id, data in test_data.items()
         if test in data
     ]
@@ -202,7 +187,9 @@ def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
     required, optional = sort_fields(value)
     for is_optional, fields in enumerate((required, optional)):
         for field in fields:
-            field_imports, data = gen.field_data(field, value.type[field], bool(is_optional))
+            field_imports, data = gen.field_data(
+                field, value.type[field], bool(is_optional)
+            )
             assert data == expected[field]
 
 
@@ -220,11 +207,8 @@ def test_fields_attr(value: ModelMeta, expected: dict):
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated_attr(value: ModelMeta, expected: str):
     generated = generate_code(
-        (
-            [{"model": value, "nested": []}],
-            {}
-        ),
+        ([{"model": value, "nested": []}], {}),
         SqlModelCodeGenerator,
-        class_generator_kwargs={}
+        class_generator_kwargs={},
     )
     assert generated.rstrip() == expected, generated

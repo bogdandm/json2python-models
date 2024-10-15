@@ -11,7 +11,11 @@ from json_to_models.registry import ModelRegistry
 
 
 def load_data() -> dict:
-    with (Path(__file__) / ".." / ".." / "large_data_set.json").resolve().open() as f:
+    with (
+        (Path(__file__) / ".." / ".." / "large_data_set.json")
+        .resolve()
+        .open() as f
+    ):
         data = json.load(f)
     return data
 
@@ -22,7 +26,7 @@ def main():
     start_t = datetime.now()
     gen = MetadataGenerator(
         dict_keys_regex=[r"^\d+(?:\.\d+)?$", r"^(?:[\w ]+/)+[\w ]+\.[\w ]+$"],
-        dict_keys_fields=["assets"]
+        dict_keys_fields=["assets"],
     )
     reg = ModelRegistry()
     fields = gen.generate(data)
@@ -34,13 +38,21 @@ def main():
     code = generate_code(structure, AttrsModelCodeGenerator)
     print(code)
 
-    print("=" * 10, f"{(datetime.now() - start_t).total_seconds():.4f} seconds", "=" * 10,
-          "\nPress enter to continue...\n")
+    print(
+        "=" * 10,
+        f"{(datetime.now() - start_t).total_seconds():.4f} seconds",
+        "=" * 10,
+        "\nPress enter to continue...\n",
+    )
     input()
     structure_flat = compose_models_flat(reg.models_map)
-    code = generate_code(structure_flat, DataclassModelCodeGenerator, class_generator_kwargs={"meta": True})
+    code = generate_code(
+        structure_flat,
+        DataclassModelCodeGenerator,
+        class_generator_kwargs={"meta": True},
+    )
     print(code)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

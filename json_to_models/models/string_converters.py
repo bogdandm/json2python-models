@@ -2,7 +2,6 @@ from functools import wraps
 from inspect import isclass
 from typing import Any, Callable, List, Optional, Tuple
 
-from . import ClassType
 from ..dynamic_typing import (
     BaseType,
     DDict,
@@ -13,29 +12,37 @@ from ..dynamic_typing import (
     ModelMeta,
     ModelPtr,
     StringLiteral,
-    StringSerializable
+    StringSerializable,
 )
 from ..dynamic_typing.base import NoneType
+from . import ClassType
 
 
-def convert_strings(str_field_paths: List[str], class_type: Optional[ClassType] = None,
-                    method: Optional[str] = None) -> Callable[[type], type]:
+def convert_strings(
+    str_field_paths: List[str],
+    class_type: Optional[ClassType] = None,
+    method: Optional[str] = None,
+) -> Callable[[type], type]:
     """
-    Decorator factory. Set up post-init method to convert strings fields values into StringSerializable types
+    Decorator factory. Set up post-init method to convert strings fields
+    values into StringSerializable types
 
-    If field contains complex data type path should be consist of field name and dotted list of tokens:
+    If field contains complex data type path should be consisted of field
+    name and dotted list of tokens:
 
     * `S` - string component
     * `O` - Optional
     * `L` - List
     * `D` - Dict
 
-    So if field `'bar'` has type `Optional[List[List[IntString]]]` field path would be `'bar#O.L.L.S'`
+    So if field `'bar'` has type `Optional[List[List[IntString]]]` field path
+    would be `'bar#O.L.L.S'`
 
     ! If type is too complex i.e. Union[List[IntString], List[List[IntString]]]
     you can't specify field path and such field would be ignored
 
-    To specify name of post-init method you should provide it by class_type argument or directly by method argument:
+    To specify name of post-init method you should provide it by class_type
+    argument or directly by method argument:
 
     >>> convert_strings([...], class_type=ClassType.Attrs)
 
@@ -43,15 +50,16 @@ def convert_strings(str_field_paths: List[str], class_type: Optional[ClassType] 
 
     >>> convert_strings([...], method="__attrs_post_init__")
 
-    :param str_field_paths: Paths of StringSerializable fields (field name or field name + typing path)
+    :param str_field_paths: Paths of StringSerializable fields (field name or
+    field name + typing path)
     :param class_type: attrs | dataclass - type of decorated class
     :param method: post-init method name
     :return: Class decorator
     """
     method = {
-        ClassType.Attrs: '__attrs_post_init__',
-        ClassType.Dataclass: '__post_init__',
-        None: method
+        ClassType.Attrs: "__attrs_post_init__",
+        ClassType.Dataclass: "__post_init__",
+        None: method,
     }.get(class_type)
 
     def decorator(cls: type) -> type:
@@ -76,7 +84,8 @@ def convert_strings(str_field_paths: List[str], class_type: Optional[ClassType] 
 
 def post_init_converters(str_fields: List[str], wrap_fn=None):
     """
-    Method factory. Return post_init method to convert string into StringSerializable types
+    Method factory. Return post_init method to convert string into
+    StringSerializable types
     To override generated __post_init__ you can call it directly:
 
     >>> def __post_init__(self):
@@ -92,16 +101,16 @@ def post_init_converters(str_fields: List[str], wrap_fn=None):
         # `L` - List
         # `D` - Dict
         for name in str_fields:
-            if '#' in name:
-                name, path_str = name.split('#')
-                path: List[str] = path_str.split('.')
+            if "#" in name:
+                name, path_str = name.split("#")
+                path: List[str] = path_str.split(".")
             else:
-                path = ['S']
+                path = ["S"]
 
             new_value = _process_string_field_value(
                 path=path,
                 value=getattr(self, name),
-                current_type=self.__annotations__[name]
+                current_type=self.__annotations__[name],
             )
             setattr(self, name, new_value)
 
@@ -111,32 +120,38 @@ def post_init_converters(str_fields: List[str], wrap_fn=None):
     return __post_init__
 
 
-def _process_string_field_value(path: List[str], value: Any, current_type: Any, optional=False) -> Any:
+def _process_string_field_value(
+    path: List[str], value: Any, current_type: Any, optional=False
+) -> Any:
     token, *path = path
-    if token == 'S':
+    if token == "S":
         try:
             value = current_type.to_internal_value(value)
         except (ValueError, TypeError) as e:
             if not optional:
                 raise e
         return value
-    elif token == 'O':
+    elif token == "O":
         return _process_string_field_value(
             path=path,
             value=value,
             current_type=current_type.__args__[0],
-            optional=True
+            optional=True,
         )
-    elif token == 'L':
+    elif token == "L":
         t = current_type.__args__[0]
         return [
-            _process_string_field_value(path, item, current_type=t, optional=optional)
+            _process_string_field_value(
+                path, item, current_type=t, optional=optional
+            )
             for item in value
         ]
-    elif token == 'D':
+    elif token == "D":
         t = current_type.__args__[1]
         return {
-            key: _process_string_field_value(path, item, current_type=t, optional=optional)
+            key: _process_string_field_value(
+                path, item, current_type=t, optional=optional
+            )
             for key, item in value.items()
         }
     else:
@@ -158,20 +173,20 @@ def get_string_field_paths(model: ModelMeta) -> List[Tuple[str, List[str]]]:
 
         # Walk through nested types
         paths: List[List[str]] = []
-        tokens: List[Tuple[MetaData, List[str]]] = [(t, ['#'])]
+        tokens: List[Tuple[MetaData, List[str]]] = [(t, ["#"])]
         while tokens:
             tmp_type, path = tokens.pop()
             if isclass(tmp_type):
                 if issubclass(tmp_type, StringSerializable):
-                    paths.append(path + ['S'])
+                    paths.append(path + ["S"])
             elif isinstance(tmp_type, BaseType):
                 cls = type(tmp_type)
                 if cls is DOptional:
-                    token = 'O'
+                    token = "O"
                 elif cls is DList:
-                    token = 'L'
+                    token = "L"
                 elif cls is DDict:
-                    token = 'D'
+                    token = "D"
                 elif cls in (DUnion, ModelPtr):
                     # We could not resolve Union
                     paths = []
@@ -181,7 +196,9 @@ def get_string_field_paths(model: ModelMeta) -> List[Tuple[str, List[str]]]:
                 elif cls in (StringLiteral,):
                     continue
                 else:
-                    raise TypeError(f"Unsupported meta-type for converter path {cls}")
+                    raise TypeError(
+                        f"Unsupported meta-type for converter path {cls}"
+                    )
 
                 for nested_type in tmp_type:
                     tokens.append((nested_type, path + [token]))
@@ -190,7 +207,7 @@ def get_string_field_paths(model: ModelMeta) -> List[Tuple[str, List[str]]]:
             continue
 
         path = paths.pop()
-        if path == 'S':
+        if path == "S":
             str_fields.append((name, []))
         else:
             str_fields.append((name, path))

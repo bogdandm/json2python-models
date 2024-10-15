@@ -1,6 +1,5 @@
 from typing import List, Optional, Tuple
 
-from .base import GenericModelCodeGenerator, KWAGRS_TEMPLATE, sort_kwargs, template
 from ..dynamic_typing import (
     DDict,
     DList,
@@ -11,24 +10,29 @@ from ..dynamic_typing import (
     Null,
     StringLiteral,
     StringSerializable,
-    Unknown
+    Unknown,
+)
+from .base import (
+    KWAGRS_TEMPLATE,
+    GenericModelCodeGenerator,
+    sort_kwargs,
+    template,
 )
 
-DEFAULT_ORDER = (
-    "*",
-)
+DEFAULT_ORDER = ("*",)
 
 
 class PydanticModelCodeGenerator(GenericModelCodeGenerator):
-    PYDANTIC_FIELD = template("Field({{ default }}{% if kwargs %}, KWAGRS_TEMPLATE{% endif %})"
-                              .replace('KWAGRS_TEMPLATE', KWAGRS_TEMPLATE))
+    PYDANTIC_FIELD = template(
+        "Field({{ default }}{% if kwargs %}, KWAGRS_TEMPLATE{% endif %})".replace(
+            "KWAGRS_TEMPLATE", KWAGRS_TEMPLATE
+        )
+    )
     default_types_style = {
         StringSerializable: {
             StringSerializable.TypeStyle.use_actual_type: True
         },
-        StringLiteral: {
-            StringLiteral.TypeStyle.use_literals: True
-        }
+        StringLiteral: {StringLiteral.TypeStyle.use_literals: True},
     }
 
     def __init__(self, model: ModelMeta, **kwargs):
@@ -36,17 +40,16 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
         :param model: ModelMeta instance
         :param kwargs:
         """
-        kwargs['post_init_converters'] = False
+        kwargs["post_init_converters"] = False
         super().__init__(model, **kwargs)
 
-    def generate(self, nested_classes: List[str] = None, extra: str = "", **kwargs) \
-            -> Tuple[ImportPathList, str]:
-        imports, body = super(PydanticModelCodeGenerator, self).generate(
-            bases='BaseModel',
-            nested_classes=nested_classes,
-            extra=extra
+    def generate(
+        self, nested_classes: List[str] = None, extra: str = "", **kwargs
+    ) -> Tuple[ImportPathList, str]:
+        imports, body = super().generate(
+            bases="BaseModel", nested_classes=nested_classes, extra=extra
         )
-        imports.append(('pydantic', ['BaseModel', 'Field']))
+        imports.append(("pydantic", ["BaseModel", "Field"]))
         return imports, body
 
     def _filter_fields(self, fields):
@@ -59,7 +62,9 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
             filtered.append(field)
         return filtered
 
-    def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
+    def field_data(
+        self, name: str, meta: MetaData, optional: bool
+    ) -> Tuple[ImportPathList, dict]:
         """
         Form field data for template
 
@@ -82,14 +87,16 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
         body_kwargs = self._get_field_kwargs(name, meta, optional, data)
         if body_kwargs:
             data["body"] = self.PYDANTIC_FIELD.render(
-                default=default or '...',
-                kwargs=sort_kwargs(body_kwargs, DEFAULT_ORDER)
+                default=default or "...",
+                kwargs=sort_kwargs(body_kwargs, DEFAULT_ORDER),
             )
         elif default is not None:
             data["body"] = default
         return imports, data
 
-    def _get_field_kwargs(self, name: str, meta: MetaData, optional: bool, data: dict):
+    def _get_field_kwargs(
+        self, name: str, meta: MetaData, optional: bool, data: dict
+    ):
         body_kwargs = {}
         if name != data["name"]:
             body_kwargs["alias"] = f'"{name}"'

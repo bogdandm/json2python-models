@@ -1,6 +1,7 @@
 .idea/
 .pytest_cache/
 venv/
+.venv
 /test.py
 /json2python-models-*/
 
@@ -23,3 +24,4 @@ build/
 dist/
 lib/
 *.egg-info/
+bin

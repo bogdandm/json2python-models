@@ -1,8 +1,12 @@
 import pytest
 
 from json_to_models.dynamic_typing import IsoTimeString
-from json_to_models.dynamic_typing.string_serializable import (FloatString, IntString, StringSerializable,
-                                                               StringSerializableRegistry)
+from json_to_models.dynamic_typing.string_serializable import (
+    FloatString,
+    IntString,
+    StringSerializable,
+    StringSerializableRegistry,
+)
 from json_to_models.generator import MetadataGenerator
 
 r = StringSerializableRegistry()

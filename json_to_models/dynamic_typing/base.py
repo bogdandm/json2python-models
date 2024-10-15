@@ -5,13 +5,15 @@ ImportPathList = List[Tuple[str, Union[Iterable[str], str, None]]]
 
 
 class BaseType:
-    def __iter__(self) -> Iterable['MetaData']:
+    def __iter__(self) -> Iterable["MetaData"]:
         """
         Yields nested metadata items
         """
         raise NotImplementedError()
 
-    def replace(self, t: Union['MetaData', List['MetaData']], **kwargs) -> 'BaseType':
+    def replace(
+        self, t: Union["MetaData", List["MetaData"]], **kwargs
+    ) -> "BaseType":
         """
         Replace nested type in-place
 
@@ -21,8 +23,9 @@ class BaseType:
         """
         raise NotImplementedError()
 
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
-            -> Tuple[ImportPathList, str]:
+    def to_typing_code(
+        self, types_style: Dict[Union["BaseType", Type["BaseType"]], dict]
+    ) -> Tuple[ImportPathList, str]:
         """
         Return typing code that represents this metadata and import path of classes that are used in this code
 
@@ -33,9 +36,9 @@ class BaseType:
 
     @classmethod
     def get_options_for_type(
-            cls,
-            t: Union['BaseType', Type['BaseType']],
-            types_style: Dict[Union['BaseType', Type['BaseType']], dict]
+        cls,
+        t: Union["BaseType", Type["BaseType"]],
+        types_style: Dict[Union["BaseType", Type["BaseType"]], dict],
     ) -> dict:
         t_cls = t if isclass(t) else type(t)
         mro = t_cls.__mro__
@@ -54,7 +57,7 @@ class BaseType:
         :return: hash string
         """
         # NOTE: Do not override __hash__ function because BaseType instances isn't immutable
-        if not getattr(self, '_hash', None):
+        if not getattr(self, "_hash", None):
             self._hash = self._to_hash_string()
         return self._hash
 
@@ -66,7 +69,7 @@ class BaseType:
         """
         raise NotImplementedError()
 
-    def iter_child(self) -> Generator['MetaData', Any, None]:
+    def iter_child(self) -> Generator["MetaData", Any, None]:
         yield self
         for child in self:
             if isinstance(child, BaseType):
@@ -81,15 +84,16 @@ class UnknownType(BaseType):
     def __str__(self):
         return "Unknown"
 
-    def __iter__(self) -> Iterable['MetaData']:
+    def __iter__(self) -> Iterable["MetaData"]:
         return iter(tuple())
 
-    def replace(self, t: 'MetaData', **kwargs) -> 'UnknownType':
+    def replace(self, t: "MetaData", **kwargs) -> "UnknownType":
         return self
 
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
-            -> Tuple[ImportPathList, str]:
-        return ([('typing', 'Any')], 'Any')
+    def to_typing_code(
+        self, types_style: Dict[Union["BaseType", Type["BaseType"]], dict]
+    ) -> Tuple[ImportPathList, str]:
+        return ([("typing", "Any")], "Any")
 
     def to_hash_string(self) -> str:
         return "Unknown"
@@ -101,15 +105,16 @@ class NoneType(BaseType):
     def __str__(self):
         return "NoneType"
 
-    def __iter__(self) -> Iterable['MetaData']:
+    def __iter__(self) -> Iterable["MetaData"]:
         return iter(tuple())
 
-    def replace(self, t: 'MetaData', **kwargs) -> 'NoneType':
+    def replace(self, t: "MetaData", **kwargs) -> "NoneType":
         return self
 
-    def to_typing_code(self, types_style: Dict[Union['BaseType', Type['BaseType']], dict]) \
-            -> Tuple[ImportPathList, str]:
-        return ([], 'None')
+    def to_typing_code(
+        self, types_style: Dict[Union["BaseType", Type["BaseType"]], dict]
+    ) -> Tuple[ImportPathList, str]:
+        return ([], "None")
 
     def to_hash_string(self) -> str:
         return "NoneType"

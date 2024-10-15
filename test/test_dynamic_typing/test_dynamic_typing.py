@@ -6,35 +6,25 @@ from json_to_models.dynamic_typing import DUnion, StringLiteral, get_hash_string
 
 # *args | MetaData
 test_dunion = [
-    pytest.param(
-        [int, int],
-        DUnion(int),
-        id="unique_types"
-    ),
-    pytest.param(
-        [int, DUnion(int)],
-        DUnion(int),
-        id="nested_union_&_merge"
-    ),
+    pytest.param([int, int], DUnion(int), id="unique_types"),
+    pytest.param([int, DUnion(int)], DUnion(int), id="nested_union_&_merge"),
     pytest.param(
         [str, DUnion(int, DUnion(float, complex))],
         DUnion(int, float, complex, str),
-        id="complex_merge"
+        id="complex_merge",
     ),
     pytest.param(
-        [str, StringLiteral({'a'})],
-        DUnion(str),
-        id="str_literal_to_string"
+        [str, StringLiteral({"a"})], DUnion(str), id="str_literal_to_string"
     ),
     pytest.param(
-        [StringLiteral({'b'}), StringLiteral({'a'})],
-        DUnion(StringLiteral({'a', 'b'})),
-        id="str_literal_merge"
+        [StringLiteral({"b"}), StringLiteral({"a"})],
+        DUnion(StringLiteral({"a", "b"})),
+        id="str_literal_merge",
     ),
     pytest.param(
         [StringLiteral({str(i)}) for i in range(100)],
         DUnion(str),
-        id="str_literal_too_much"
+        id="str_literal_too_much",
     ),
 ]
 
@@ -46,9 +36,9 @@ def test_dunion_creation(value, expected):
 
 
 def test_hash_string():
-    a = {'a': int}
-    b = {'b': int}
-    c = {'a': float}
+    a = {"a": int}
+    b = {"b": int}
+    c = {"a": float}
     assert len(set(map(get_hash_string, (a, b, c)))) == 3
 
     union = DUnion(str, float)

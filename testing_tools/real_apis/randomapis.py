@@ -1,9 +1,10 @@
-"""
-Example uses the following APIs:
+"""Example uses the following APIs:
 - CHRONICLING API (https://chroniclingamerica.loc.gov/about/api/)
 - Launch Library Reading V2 API (https://ll.thespacedevs.com/2.0.0/swagger)
-- University Domains and Names Data List (https://github.com/Hipo/university-domains-list)
-"""
+- University Domains and Names Data List (
+https://github.com/Hipo/university-domains-list
+)"""
+
 import requests
 
 from json_to_models.generator import MetadataGenerator
@@ -15,16 +16,23 @@ from testing_tools.real_apis import dump_response
 
 
 def chroniclingamerica(tag="michigan"):
-    return requests.get(f"http://chroniclingamerica.loc.gov/search/titles/results/?terms={tag}&format=json").json()
+    return requests.get(
+        f"http://chroniclingamerica.loc.gov/search/titles/results/?terms="
+        f"{tag}&format=json"
+    ).json()
 
 
 def launchlibrary():
-    return requests.get(f"https://ll.thespacedevs.com/2.0.0/dashboard/starship/").json()
+    return requests.get(
+        "https://ll.thespacedevs.com/2.0.0/dashboard/starship/"
+    ).json()
 
 
 def university_domains():
-    return requests.get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/"
-                        "world_universities_and_domains.json").json()
+    return requests.get(
+        "https://raw.githubusercontent.com/Hipo/university-domains-list/master/"
+        "world_universities_and_domains.json"
+    ).json()
 
 
 def main():
@@ -56,5 +64,5 @@ def main():
     print(generate_code(structure, AttrsModelCodeGenerator))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

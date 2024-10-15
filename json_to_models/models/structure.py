@@ -1,15 +1,16 @@
 from typing import Dict, Iterable, List, Set, Tuple
 
+from ..dynamic_typing import BaseType, DOptional, ModelMeta, ModelPtr
 from . import Index, ModelsStructureType
 from .utils import ListEx, PositionsDict
-from ..dynamic_typing import BaseType, DOptional, ModelMeta, ModelPtr
 
 
 def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
     """
     Generate nested sorted models structure for internal usage.
 
-    :return: List of root models data, Map(child model -> root model) for absolute ref generation
+    :return: List of root models data, Map(child model -> root model) for
+    absolute ref generation
     """
     root_models = ListEx()
     root_nested_ix = 0
@@ -18,7 +19,8 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
             "model": model,
             "nested": ListEx(),
             "roots": list(extract_root(model)),  # Indexes of root level models
-        } for key, model in models_map.items()
+        }
+        for key, model in models_map.items()
     }
     # TODO: Test path_injections
     path_injections: Dict[ModelMeta, ModelMeta] = {}
@@ -29,18 +31,25 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
         if not pointers:
             # Root level model
             if not has_root_pointers:
-                raise Exception(f'Model {model.name} has no pointers')
+                raise Exception(f"Model {model.name} has no pointers")
             root_models.append(structure_hash_table[key])
         else:
             parents = {ptr.parent.index for ptr in pointers}
             struct = structure_hash_table[key]
             # Model is using by other models
-            if has_root_pointers or len(parents) > 1 and len(struct["roots"]) > 1:
+            if (
+                has_root_pointers
+                or len(parents) > 1
+                and len(struct["roots"]) > 1
+            ):
                 # Model is using by different root models
                 try:
                     root_models.insert_before(
                         struct,
-                        *(structure_hash_table[parent_key] for parent_key in struct["roots"])
+                        *(
+                            structure_hash_table[parent_key]
+                            for parent_key in struct["roots"]
+                        ),
                     )
                 except ValueError:
                     root_models.insert(root_nested_ix, struct)
@@ -59,12 +68,16 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
     return root_models, path_injections
 
 
-def compose_models_flat(models_map: Dict[Index, ModelMeta]) -> ModelsStructureType:
+def compose_models_flat(
+    models_map: Dict[Index, ModelMeta]
+) -> ModelsStructureType:
     """
-    Generate flat sorted (by nesting level, ASC) models structure for internal usage.
+    Generate flat sorted (by nesting level, ASC) models structure for
+    internal usage.
 
     :param models_map: Mapping (model index -> model meta instance).
-    :return: List of root models data, Map(child model -> root model) for absolute ref generation
+    :return: List of root models data, Map(child model -> root model) for
+    absolute ref generation
     """
     root_models = ListEx()
     positions: PositionsDict[Index, int] = PositionsDict()
@@ -74,7 +87,8 @@ def compose_models_flat(models_map: Dict[Index, ModelMeta]) -> ModelsStructureTy
             "model": model,
             "nested": ListEx(),
             "roots": list(extract_root(model)),  # Indexes of root level models
-        } for key, model in models_map.items()
+        }
+        for key, model in models_map.items()
     }
 
     for key, model in models_map.items():
@@ -83,7 +97,7 @@ def compose_models_flat(models_map: Dict[Index, ModelMeta]) -> ModelsStructureTy
         if not pointers:
             # Root level model
             if not has_root_pointers:
-                raise Exception(f'Model {model.name} has no pointers')
+                raise Exception(f"Model {model.name} has no pointers")
             root_models.insert(positions["root"], structure_hash_table[key])
             top_level_models.add(key)
             positions.update_position("root", PositionsDict.INC)
@@ -91,16 +105,27 @@ def compose_models_flat(models_map: Dict[Index, ModelMeta]) -> ModelsStructureTy
             parents = {ptr.parent.index for ptr in pointers}
             struct = structure_hash_table[key]
             # Model is using by other models
-            if has_root_pointers or len(parents) > 1 and len(struct["roots"]) >= 1:
+            if (
+                has_root_pointers
+                or len(parents) > 1
+                and len(struct["roots"]) >= 1
+            ):
                 # Model is using by different root models
                 if parents & top_level_models:
                     parents.add("root")
-                parents_positions = {positions[parent_key] for parent_key in parents
-                                     if parent_key in positions}
+                parents_positions = {
+                    positions[parent_key]
+                    for parent_key in parents
+                    if parent_key in positions
+                }
                 parents_joined = "#".join(sorted(parents))
                 if parents_joined in positions:
                     parents_positions.add(positions[parents_joined])
-                pos = max(parents_positions) if parents_positions else len(root_models)
+                pos = (
+                    max(parents_positions)
+                    if parents_positions
+                    else len(root_models)
+                )
                 positions.update_position(parents_joined, pos + 1)
             else:
                 # Model is using by only one model
@@ -122,7 +147,8 @@ def filter_pointers(model: ModelMeta) -> Iterable[ModelPtr]:
 
 def extract_root(model: ModelMeta) -> Set[Index]:
     """
-    Return set of indexes of root models that are use given `model` directly or through another nested model.
+    Return set of indexes of root models that are use given `model` directly
+    or through another nested model.
     """
     seen: Set[Index] = set()
     nodes: List[ModelPtr] = list(filter_pointers(model))
@@ -137,7 +163,9 @@ def extract_root(model: ModelMeta) -> Set[Index]:
     return roots
 
 
-def sort_fields(model_meta: ModelMeta, unicode_fix=False) -> Tuple[List[str], List[str]]:
+def sort_fields(
+    model_meta: ModelMeta, unicode_fix=False
+) -> Tuple[List[str], List[str]]:
     """
     Split fields into required and optional groups
 
@@ -150,9 +178,10 @@ def sort_fields(model_meta: ModelMeta, unicode_fix=False) -> Tuple[List[str], Li
     for key, meta in fields.items():
         if isinstance(meta, DOptional):
             optional.append(key)
-        elif unicode_fix and isinstance(meta, BaseType) and any(
-                isinstance(node, ModelMeta)
-                for node in meta.iter_child()
+        elif (
+            unicode_fix
+            and isinstance(meta, BaseType)
+            and any(isinstance(node, ModelMeta) for node in meta.iter_child())
         ):
             required_2.append(key)
         else:

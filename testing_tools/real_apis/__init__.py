@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-BASE_PATH = (Path(__file__) / '..').resolve().absolute()
+BASE_PATH = (Path(__file__) / "..").resolve().absolute()
 
 
 def dump_response(app, name, data):

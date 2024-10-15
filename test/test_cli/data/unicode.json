@@ -1,22 +1,22 @@
 {
-    "_id": "5b45bd7bfdc0754510853734",
-    "名称": "MaVol_screen",
-    "路径": "https://gitlab.com/jinniu-stra/strawman/tree/master/src/screen/MaVol_screen",
-    "标识符": "02180706mav001",
-    "备注": "",
-    "雷达图": {
-        "盈利": "4.83",
-        "抗风险": "4.28",
-        "稳定": "4.83",
-        "择股": "5.0"
-    },
-    "原理说明": "对均线和成交量进行评估选股。",
-    "中文名称": "一阳穿多均",
-    "套装配置": "",
-    "入选理由": "该股近期在60日均线之上，当前同时上穿5、10、20和30日均线，成交量是前一日的2倍，短期强势",
-    "策略话术": "",
-    "策略优势": "",
-    "状态": "稳定在线",
-    "装备详情": "http://bbs.jinniuai.com/t/topic/69",
-    "截止时间": "2019-06-11 00:00:00"
+  "_id": "5b45bd7bfdc0754510853734",
+  "\u4e2d\u6587\u540d\u79f0": "\u4e00\u9633\u7a7f\u591a\u5747",
+  "\u5165\u9009\u7406\u7531": "\u8be5\u80a1\u8fd1\u671f\u572860\u65e5\u5747\u7ebf\u4e4b\u4e0a\uff0c\u5f53\u524d\u540c\u65f6\u4e0a\u7a7f5\u300110\u300120\u548c30\u65e5\u5747\u7ebf\uff0c\u6210\u4ea4\u91cf\u662f\u524d\u4e00\u65e5\u76842\u500d\uff0c\u77ed\u671f\u5f3a\u52bf",
+  "\u539f\u7406\u8bf4\u660e": "\u5bf9\u5747\u7ebf\u548c\u6210\u4ea4\u91cf\u8fdb\u884c\u8bc4\u4f30\u9009\u80a1\u3002",
+  "\u540d\u79f0": "MaVol_screen",
+  "\u5907\u6ce8": "",
+  "\u5957\u88c5\u914d\u7f6e": "",
+  "\u622a\u6b62\u65f6\u95f4": "2019-06-11 00:00:00",
+  "\u6807\u8bc6\u7b26": "02180706mav001",
+  "\u72b6\u6001": "\u7a33\u5b9a\u5728\u7ebf",
+  "\u7b56\u7565\u4f18\u52bf": "",
+  "\u7b56\u7565\u8bdd\u672f": "",
+  "\u88c5\u5907\u8be6\u60c5": "http://bbs.jinniuai.com/t/topic/69",
+  "\u8def\u5f84": "https://gitlab.com/jinniu-stra/strawman/tree/master/src/screen/MaVol_screen",
+  "\u96f7\u8fbe\u56fe": {
+    "\u6297\u98ce\u9669": "4.28",
+    "\u62e9\u80a1": "5.0",
+    "\u76c8\u5229": "4.83",
+    "\u7a33\u5b9a": "4.83"
+  }
 }

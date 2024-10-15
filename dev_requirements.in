@@ -1,0 +1,8 @@
+-c core_requirements.txt
+
+black
+isort
+jupyterlab
+jupyterlab-code-formatter
+ruff
+twine

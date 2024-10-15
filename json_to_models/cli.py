@@ -9,7 +9,17 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Tuple,
+    Type,
+    Union,
+)
 
 from .models.sqlmodel import SqlModelCodeGenerator
 
@@ -31,31 +41,47 @@ from .models.dataclasses import DataclassModelCodeGenerator
 from .models.pydantic import PydanticModelCodeGenerator
 from .models.structure import compose_models, compose_models_flat
 from .registry import (
-    ModelCmp, ModelFieldsEquals, ModelFieldsNumberMatch, ModelFieldsPercentMatch, ModelRegistry
+    ModelCmp,
+    ModelFieldsEquals,
+    ModelFieldsNumberMatch,
+    ModelFieldsPercentMatch,
+    ModelRegistry,
 )
 from .utils import convert_args
 
 STRUCTURE_FN_TYPE = Callable[[Dict[str, ModelMeta]], ModelsStructureType]
-bool_js_style = lambda s: {"true": True, "false": False}.get(s, None)
+
+
+def bool_js_style(s: str):
+    """
+    Quick function intended to convert string representations of boolean
+    values into Python bool types.
+    """
+    return {"true": True, "false": False}.get(s, None)
 
 
 class Cli:
     MODEL_CMP_MAPPING = {
-        "percent": convert_args(ModelFieldsPercentMatch, lambda s: float(s) / 100),
+        "percent": convert_args(
+            ModelFieldsPercentMatch, lambda s: float(s) / 100
+        ),
         "number": convert_args(ModelFieldsNumberMatch, int),
-        "exact": ModelFieldsEquals
+        "exact": ModelFieldsEquals,
     }
 
     STRUCTURE_FN_MAPPING: Dict[str, STRUCTURE_FN_TYPE] = {
         "nested": compose_models,
-        "flat": compose_models_flat
+        "flat": compose_models_flat,
     }
 
     MODEL_GENERATOR_MAPPING: Dict[str, Type[GenericModelCodeGenerator]] = {
         "base": convert_args(GenericModelCodeGenerator),
         "attrs": convert_args(AttrsModelCodeGenerator, meta=bool_js_style),
-        "dataclasses": convert_args(DataclassModelCodeGenerator, meta=bool_js_style,
-                                    post_init_converters=bool_js_style),
+        "dataclasses": convert_args(
+            DataclassModelCodeGenerator,
+            meta=bool_js_style,
+            post_init_converters=bool_js_style,
+        ),
         "pydantic": convert_args(PydanticModelCodeGenerator),
         "sqlmodel": convert_args(SqlModelCodeGenerator),
     }
@@ -67,9 +93,11 @@ class Cli:
         self.strings_converters: bool = False  # --strings-converters
         self.max_literals: int = -1  # --max-strings-literals
         self.merge_policy: List[ModelCmp] = []  # --merge
-        self.structure_fn: STRUCTURE_FN_TYPE = None  # -s
-        self.model_generator: Type[GenericModelCodeGenerator] = None  # -f & --code-generator
-        self.model_generator_kwargs: Dict[str, Any] = None
+        self.structure_fn: STRUCTURE_FN_TYPE | None = None  # -s
+        self.model_generator: Type[GenericModelCodeGenerator] | None = (
+            None  # -f & --code-generator
+        )
+        self.model_generator_kwargs: Dict[str, Any] | None = None
 
         self.argparser = self._create_argparser()
 
@@ -90,7 +118,9 @@ class Cli:
         disable_unicode_conversion = namespace.disable_unicode_conversion
         self.strings_converters = namespace.strings_converters
         self.max_literals = namespace.max_strings_literals
-        merge_policy = [m.split("_") if "_" in m else m for m in namespace.merge]
+        merge_policy = [
+            m.split("_") if "_" in m else m for m in namespace.merge
+        ]
         structure = namespace.structure
         framework = namespace.framework
         code_generator = namespace.code_generator
@@ -102,17 +132,28 @@ class Cli:
         for name in namespace.disable_str_serializable_types:
             registry.remove_by_name(name)
 
-        self.setup_models_data(namespace.model or (), namespace.list or (), parser)
+        self.setup_models_data(
+            namespace.model or (), namespace.list or (), parser
+        )
         self.validate(merge_policy, framework, code_generator)
-        self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs_raw,
-                      dict_keys_regex, dict_keys_fields, disable_unicode_conversion, preamble)
+        self.set_args(
+            merge_policy,
+            structure,
+            framework,
+            code_generator,
+            code_generator_kwargs_raw,
+            dict_keys_regex,
+            dict_keys_fields,
+            disable_unicode_conversion,
+            preamble,
+        )
 
     def run(self):
         if self.enable_datetime:
             register_datetime_classes()
         generator = MetadataGenerator(
             dict_keys_regex=self.dict_keys_regex,
-            dict_keys_fields=self.dict_keys_fields
+            dict_keys_fields=self.dict_keys_fields,
         )
         registry = ModelRegistry(*self.merge_policy)
         for name, data in self.models_data.items():
@@ -125,7 +166,7 @@ class Cli:
             structure,
             self.model_generator,
             class_generator_kwargs=self.model_generator_kwargs,
-            preamble=self.preamble
+            preamble=self.preamble,
         )
         if self.output_file:
             with open(self.output_file, "w", encoding="utf-8") as f:
@@ -136,9 +177,10 @@ class Cli:
 
     @property
     def version_string(self):
+        now_time = datetime.now().ctime()
         return (
             'r"""\n'
-            f'generated by json2python-models v{VERSION} at {datetime.now().ctime()}\n'
+            f"generated by json2python-models v{VERSION} at {now_time}\n"
             f'command: {" ".join(sys.argv)}\n'
             '"""\n'
         )
@@ -147,7 +189,8 @@ class Cli:
         """
         Validate parsed args
 
-        :param merge_policy: List of merge policies. Each merge policy is either string or string and policy arguments
+        :param merge_policy: List of merge policies. Each merge policy is
+        either string or string and policy arguments
         :param framework: Framework name (predefined code generator)
         :param code_generator: Code generator import string
         :return:
@@ -155,23 +198,37 @@ class Cli:
         for m in merge_policy:
             if isinstance(m, list):
                 if m[0] not in self.MODEL_CMP_MAPPING:
-                    raise ValueError(f"Invalid merge policy '{m[0]}', choices are {self.MODEL_CMP_MAPPING.keys()}")
+                    raise ValueError(
+                        f"Invalid merge policy '{m[0]}', choices are"
+                        f" {self.MODEL_CMP_MAPPING.keys()}"
+                    )
             elif m not in self.MODEL_CMP_MAPPING:
-                raise ValueError(f"Invalid merge policy '{m}', choices are {self.MODEL_CMP_MAPPING.keys()}")
+                raise ValueError(
+                    f"Invalid merge policy '{m}', choices are"
+                    f" {self.MODEL_CMP_MAPPING.keys()}"
+                )
 
-        if framework == 'custom' and code_generator is None:
-            raise ValueError("You should specify --code-generator to support custom generator")
-        elif framework != 'custom' and code_generator is not None:
-            raise ValueError("--code-generator argument has no effect without '--framework custom' argument")
+        if framework == "custom" and code_generator is None:
+            raise ValueError(
+                "You should specify --code-generator to support custom "
+                "generator"
+            )
+        elif framework != "custom" and code_generator is not None:
+            raise ValueError(
+                "--code-generator argument has no effect without '--framework "
+                "custom' argument"
+            )
 
     def setup_models_data(
-            self,
-            models: Iterable[Union[
+        self,
+        models: Iterable[
+            Union[
                 Tuple[str, str],
                 Tuple[str, str, str],
-            ]],
-            models_lists: Iterable[Tuple[str, str, str]],
-            parser: 'FileLoaders.T'
+            ]
+        ],
+        models_lists: Iterable[Tuple[str, str, str]],
+        parser: "FileLoaders.T",
     ):
         """
         Initialize lazy loaders for models data
@@ -182,11 +239,13 @@ class Cli:
         for model_tuple in models:
             if len(model_tuple) == 2:
                 model_name, path_raw = model_tuple
-                lookup = '-'
+                lookup = "-"
             elif len(model_tuple) == 3:
                 model_name, lookup, path_raw = model_tuple
             else:
-                raise RuntimeError('`--model` argument should contain exactly 2 or 3 strings')
+                raise RuntimeError(
+                    "`--model` argument should contain exactly 2 or 3 strings"
+                )
 
             for real_path in process_path(path_raw):
                 iterator = iter_json_file(parser(real_path), lookup)
@@ -195,19 +254,20 @@ class Cli:
         self.models_data = models_dict
 
     def set_args(
-            self,
-            merge_policy: List[Union[List[str], str]],
-            structure: str,
-            framework: str,
-            code_generator: str,
-            code_generator_kwargs_raw: List[str],
-            dict_keys_regex: List[str],
-            dict_keys_fields: List[str],
-            disable_unicode_conversion: bool,
-            preamble: str,
+        self,
+        merge_policy: List[Union[List[str], str]],
+        structure: str,
+        framework: str,
+        code_generator: str,
+        code_generator_kwargs_raw: List[str],
+        dict_keys_regex: List[str],
+        dict_keys_fields: List[str],
+        disable_unicode_conversion: bool,
+        preamble: str,
     ):
         """
-        Convert CLI args to python representation and set them to appropriate object attributes
+        Convert CLI args to python representation and set them to appropriate
+        object attributes
         """
         self.merge_policy.clear()
         for merge in merge_policy:
@@ -224,14 +284,14 @@ class Cli:
         if framework != "custom":
             self.model_generator = self.MODEL_GENERATOR_MAPPING[framework]
         else:
-            module, cls = code_generator.rsplit('.', 1)
+            module, cls = code_generator.rsplit(".", 1)
             m = importlib.import_module(module)
             self.model_generator = getattr(m, cls)
 
         self.model_generator_kwargs = dict(
             post_init_converters=self.strings_converters,
             convert_unicode=not disable_unicode_conversion,
-            max_literals=self.max_literals
+            max_literals=self.max_literals,
         )
         if code_generator_kwargs_raw:
             for item in code_generator_kwargs_raw:
@@ -242,7 +302,11 @@ class Cli:
                 name, value = item.split("=", 1)
                 self.model_generator_kwargs[name] = value
 
-        self.dict_keys_regex = [re.compile(rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
+        self.dict_keys_regex = (
+            [re.compile(rf"^{r}$") for r in dict_keys_regex]
+            if dict_keys_regex
+            else ()
+        )
         self.dict_keys_fields = dict_keys_fields or ()
         if preamble:
             preamble = preamble.strip()
@@ -256,70 +320,87 @@ class Cli:
         """
         parser = argparse.ArgumentParser(
             formatter_class=argparse.RawTextHelpFormatter,
-            description="Convert given json files into Python models."
+            description="Convert given json files into Python models.",
         )
 
         parser.add_argument(
-            "-m", "--model",
-            nargs="+", action="append", metavar=("<Model name> [<JSON lookup>] <File path or pattern>", ""),
-            help="Model name and its JSON data as path or unix-like path pattern.\n"
-                 "'*',  '**' or '?' patterns symbols are supported.\n\n"
-                 "JSON data could be array of models or single model\n\n"
-                 "If this file contains dict with nested list than you can pass\n"
-                 "<JSON lookup>. Deep lookups are supported by dot-separated path.\n"
-                 "If no lookup needed pass '-' as <JSON lookup> (default)\n\n"
+            "-m",
+            "--model",
+            nargs="+",
+            action="append",
+            metavar=("<Model name> [<JSON lookup>] <File path or pattern>", ""),
+            help="Model name and its JSON data as path or unix-like path "
+            "pattern.\n"
+            "'*',  '**' or '?' patterns symbols are supported.\n\n"
+            "JSON data could be array of models or single model\n\n"
+            "If this file contains dict with nested list than you can pass\n"
+            "<JSON lookup>. Deep lookups are supported by dot-separated path.\n"
+            "If no lookup needed pass '-' as <JSON lookup> (default)\n\n",
         )
         parser.add_argument(
-            "-i", "--input-format",
+            "-i",
+            "--input-format",
             default="json",
-            choices=['json', 'yaml', 'ini'],
-            help="Input files parser ('PyYaml' is required to parse yaml files)\n\n"
+            choices=["json", "yaml", "ini"],
+            help="Input files parser ('PyYaml' is required to parse yaml "
+            "files)\n\n",
         )
         parser.add_argument(
-            "-o", "--output",
-            metavar="FILE", default="",
-            help="Path to output file\n\n"
+            "-o",
+            "--output",
+            metavar="FILE",
+            default="",
+            help="Path to output file\n\n",
         )
         parser.add_argument(
-            "-f", "--framework",
+            "-f",
+            "--framework",
             default="base",
             choices=list(cls.MODEL_GENERATOR_MAPPING.keys()) + ["custom"],
             help="Model framework for which python code is generated.\n"
-                 "'base' (default) mean no framework so code will be generated without any decorators\n"
-                 "and additional meta-data.\n"
-                 "If you pass 'custom' you should specify --code-generator argument\n\n"
+            "'base' (default) mean no framework so code will be generated "
+            "without any decorators\n"
+            "and additional meta-data.\n"
+            "If you pass 'custom' you should specify --code-generator "
+            "argument\n\n",
         )
         parser.add_argument(
-            "-s", "--structure",
+            "-s",
+            "--structure",
             default="flat",
             choices=list(cls.STRUCTURE_FN_MAPPING.keys()),
-            help="Models composition style. By default nested models become nested Python classes.\n\n"
+            help="Models composition style. By default nested models become "
+            "nested Python classes.\n\n",
         )
         parser.add_argument(
             "--datetime",
             action="store_true",
             help="Enable datetime/date/time strings parsing.\n"
-                 "Warn.: This can lead to 6-7 times slowdown on large datasets.\n"
-                 "       Be sure that you really need this option.\n\n"
+            "Warn.: This can lead to 6-7 times slowdown on large datasets.\n"
+            "       Be sure that you really need this option.\n\n",
         )
         parser.add_argument(
             "--strings-converters",
             action="store_true",
-            help="Enable generation of string types converters (i.e. IsoDatetimeString or BooleanString).\n\n"
+            help="Enable generation of string types converters (i.e. "
+            "IsoDatetimeString or BooleanString).\n\n",
         )
         parser.add_argument(
             "--max-strings-literals",
             type=int,
             default=GenericModelCodeGenerator.DEFAULT_MAX_LITERALS,
-            metavar='NUMBER',
-            help="Generate Literal['foo', 'bar'] when field have less than NUMBER string constants as values.\n"
-                 f"Pass 0 to disable. By default NUMBER={GenericModelCodeGenerator.DEFAULT_MAX_LITERALS}"
-                 f" (some generator classes could override it)\n\n"
+            metavar="NUMBER",
+            help="Generate Literal['foo', 'bar'] when field have less than "
+            "NUMBER string constants as values.\n"
+            f"Pass 0 to disable. By default "
+            f"NUMBER={GenericModelCodeGenerator.DEFAULT_MAX_LITERALS}"
+            f" (some generator classes could override it)\n\n",
         )
         parser.add_argument(
-            "--disable-unicode-conversion", "--no-unidecode",
+            "--disable-unicode-conversion",
+            "--no-unidecode",
             action="store_true",
-            help="Disabling unicode conversion in fields and class names.\n\n"
+            help="Disabling unicode conversion in fields and class names.\n\n",
         )
 
         default_percent = f"{ModelFieldsPercentMatch.DEFAULT * 100:.0f}"
@@ -329,65 +410,83 @@ class Cli:
             default=["percent", "number"],
             nargs="+",
             help=(
-                f"Merge policy settings. Default is 'percent_{default_percent} number_{default_number}' (percent of field match\n"
+                f"Merge policy settings. Default is 'percent_{default_percent} "
+                f"number_{default_number}' (percent of field match\n"
                 "or number of fields match).\n"
                 "Possible values are:\n"
-                "'percent[_<percent>]' - two models had a certain percentage of matched field names.\n"
-                f"                        Default percent is {default_percent}%%. "
+                "'percent[_<percent>]' - two models had a certain percentage "
+                "of matched field names.\n"
+                f"Default percent is {default_percent}%%. "
                 "Custom value could be i.e. 'percent_95'.\n"
-                "'number[_<number>]'   - two models had a certain number of matched field names.\n"
-                f"                        Default number of fields is {default_number}.\n"
-                "'exact'               - two models should have exact same field names to merge.\n\n"
-            )
+                "'number[_<number>]'   - two models had a certain number of "
+                "matched field names.\n"
+                f"Default number of fields is {default_number}.\n"
+                "'exact' - two models should have exact same "
+                "field names to merge.\n\n"
+            ),
         )
         parser.add_argument(
-            "--dict-keys-regex", "--dkr",
-            nargs="+", metavar="RegEx",
+            "--dict-keys-regex",
+            "--dkr",
+            nargs="+",
+            metavar="RegEx",
             help="List of regular expressions (Python syntax).\n"
-                 "If all keys of some dict are match one of them\n"
-                 "then this dict will be marked as dict field but not nested model.\n"
-                 "Note: ^ and $ tokens will be added automatically but you have to\n"
-                 "escape other special characters manually.\n"
+            "If all keys of some dict are match one of them\n"
+            "then this dict will be marked as dict field but not nested "
+            "model.\n"
+            "Note: ^ and $ tokens will be added automatically but you have to\n"
+            "escape other special characters manually.\n",
         )
         parser.add_argument(
-            "--dict-keys-fields", "--dkf",
-            nargs="+", metavar="FIELD NAME",
-            help="List of model fields names that will be marked as dict fields\n\n"
+            "--dict-keys-fields",
+            "--dkf",
+            nargs="+",
+            metavar="FIELD NAME",
+            help="List of model fields names that will be marked as dict "
+            "fields\n\n",
         )
         parser.add_argument(
             "--code-generator",
             help="Absolute import path to GenericModelCodeGenerator subclass.\n"
-                 "Works in pair with '-f custom'\n\n"
+            "Works in pair with '-f custom'\n\n",
         )
         parser.add_argument(
             "--code-generator-kwargs",
             metavar="NAME=VALUE",
-            nargs="*", type=str,
+            nargs="*",
+            type=str,
             help="List of code generator arguments (for __init__ method).\n"
-                 "Each argument should be in following format:\n"
-                 "    argument_name=value or \"argument_name=value with space\"\n"
-                 "Boolean values should be passed in JS style: true | false"
-                 "\n\n"
+            "Each argument should be in following format:\n"
+            '    argument_name=value or "argument_name=value with space"\n'
+            "Boolean values should be passed in JS style: true | false"
+            "\n\n",
         )
         parser.add_argument(
             "--preamble",
             type=str,
-            help="Code to insert into the generated file after the imports and before the list of classes\n\n"
+            help="Code to insert into the generated file after the imports "
+            "and before the list of classes\n\n",
         )
         parser.add_argument(
             "--disable-str-serializable-types",
             metavar="TYPE",
             default=[],
-            nargs="*", type=str,
-            help="List of python types for which StringSerializable should be disabled, i.e:\n"
-                 "--disable-str-serializable-types float int\n"
-                 "Alternatively you could use the name of StringSerializable subclass itself (i.e. IntString)"
-                 "\n\n"
+            nargs="*",
+            type=str,
+            help="List of python types for which StringSerializable should be "
+            "disabled, i.e:\n"
+            "--disable-str-serializable-types float int\n"
+            "Alternatively you could use the name of StringSerializable "
+            "subclass itself (i.e. IntString)"
+            "\n\n",
         )
         parser.add_argument(
-            "-l", "--list",
-            nargs=3, action="append", metavar=("<Model name>", "<JSON lookup>", "<JSON file>"),
-            help="DEPRECATED, use --model argument instead"
+            "-l",
+            "--list",
+            nargs=3,
+            action="append",
+            metavar=("<Model name>", "<JSON lookup>", "<JSON file>"),
+            help="DEPRECATED, use --model argument instead",
         )
 
         return parser
@@ -397,7 +496,8 @@ def main():
     import os
 
     if os.getenv("TRAVIS", None) or os.getenv("FORCE_COVERAGE", None):
-        # Enable coverage if it is Travis-CI or env variable FORCE_COVERAGE set to true
+        # Enable coverage if it is Travis-CI or env variable FORCE_COVERAGE
+        # set to true
         import coverage
 
         coverage.process_startup()
@@ -418,8 +518,11 @@ class FileLoaders:
     @staticmethod
     def yaml(path: Path) -> Union[dict, list]:
         if yaml is None:
-            print('Yaml parser is not installed. To parse yaml files PyYaml (or ruamel.yaml) is required.')
-            raise ImportError('yaml')
+            print(
+                "Yaml parser is not installed. To parse yaml files PyYaml (or "
+                "ruamel.yaml) is required."
+            )
+            raise ImportError("yaml")
         with path.open() as fp:
             return yaml.safe_load(fp)
 
@@ -441,7 +544,7 @@ def dict_lookup(d: Union[dict, list], lookup: str) -> Union[dict, list]:
     :return: Nested value
     """
     while lookup and lookup != "-":
-        split = lookup.split('.', 1)
+        split = lookup.split(".", 1)
         if len(split) == 1:
             return d[split[0]]
         key, lookup = split
@@ -449,7 +552,9 @@ def dict_lookup(d: Union[dict, list], lookup: str) -> Union[dict, list]:
     return d
 
 
-def iter_json_file(data: Union[dict, list], lookup: str) -> Generator[Union[dict, list], Any, None]:
+def iter_json_file(
+    data: Union[dict, list], lookup: str
+) -> Generator[Union[dict, list], Any, None]:
     """
     Perform lookup and return generator over json list.
     Does not open file until iteration is started.
@@ -464,7 +569,10 @@ def iter_json_file(data: Union[dict, list], lookup: str) -> Generator[Union[dict
     elif isinstance(item, dict):
         yield item
     else:
-        raise TypeError(f'dict or list is expected at {lookup if lookup != "-" else "JSON root"}, not {type(item)}')
+        raise TypeError(
+            f'dict or list is expected at {lookup if lookup != "-" else
+            "JSON root"}, not {type(item)}'
+        )
 
 
 def process_path(path: str) -> Iterable[Path]:
@@ -473,11 +581,12 @@ def process_path(path: str) -> Iterable[Path]:
     If non-pattern path is given return tuple of one element: (path,)
     """
     split_path = path_split(path)
-    clean_path = list(itertools.takewhile(
-        lambda part: "*" not in part and "?" not in part,
-        split_path
-    ))
-    pattern_path = split_path[len(clean_path):]
+    clean_path = list(
+        itertools.takewhile(
+            lambda part: "*" not in part and "?" not in part, split_path
+        )
+    )
+    pattern_path = split_path[len(clean_path) :]
 
     if clean_path:
         clean_path = os.path.join(*clean_path)
@@ -493,7 +602,7 @@ def process_path(path: str) -> Iterable[Path]:
     if pattern_path:
         return path.glob(pattern_path)
     else:
-        return path,
+        return (path,)
 
 
 def path_split(path: str) -> List[str]:

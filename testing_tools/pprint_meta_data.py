@@ -1,6 +1,12 @@
 from inspect import isclass
 
-from json_to_models.dynamic_typing import ComplexType, ModelMeta, ModelPtr, SingleType, StringSerializable
+from json_to_models.dynamic_typing import (
+    ComplexType,
+    ModelMeta,
+    ModelPtr,
+    SingleType,
+    StringSerializable,
+)
 from json_to_models.generator import MetadataGenerator
 from json_to_models.registry import ModelRegistry
 from testing_tools.data import test_data
@@ -10,16 +16,18 @@ def _pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
     if empty_line:
         yield "\n"
         if lvl > 0:
-            yield '\t' * lvl
+            yield "\t" * lvl
     else:
-        print(end=' ')
+        print(end=" ")
     if key is not None:
         yield f"{key} -> "
 
     if isinstance(value, dict):
         yield "object:"
         for key, value in value.items():
-            yield from _pprint_gen(value, key, lvl=lvl + 1, ignore_ptr=ignore_ptr)
+            yield from _pprint_gen(
+                value, key, lvl=lvl + 1, ignore_ptr=ignore_ptr
+            )
 
     elif isinstance(value, list):
         for t in value:
@@ -32,13 +40,17 @@ def _pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
     elif isinstance(value, ModelMeta):
         yield str(value) + ":"
         for key, subvalue in value.type.items():
-            yield from _pprint_gen(subvalue, key, lvl=lvl + 1, ignore_ptr=ignore_ptr)
+            yield from _pprint_gen(
+                subvalue, key, lvl=lvl + 1, ignore_ptr=ignore_ptr
+            )
         if not value.type:
             yield " <empty>"
 
     elif isinstance(value, SingleType):
         yield f"{type(value).__name__}:"
-        yield from _pprint_gen(value.type, lvl=lvl, empty_line=False, ignore_ptr=ignore_ptr)
+        yield from _pprint_gen(
+            value.type, lvl=lvl, empty_line=False, ignore_ptr=ignore_ptr
+        )
 
     elif isinstance(value, ComplexType):
         yield f"{type(value).__name__}:"
@@ -57,13 +69,13 @@ def pretty_format_meta(value, ignore_ptr=False):
     return "".join(_pprint_gen(value, ignore_ptr=ignore_ptr))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gen = MetadataGenerator()
     reg = ModelRegistry()
     fields = gen.generate(*test_data)
     model = reg.process_meta_data(fields)
     print(pretty_format_meta(model))
-    print('\n' + '-' * 10, end='')
+    print("\n" + "-" * 10, end="")
 
     reg.merge_models(generator=gen)
     for model in reg.models:

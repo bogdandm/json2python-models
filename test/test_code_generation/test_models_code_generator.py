@@ -28,22 +28,10 @@ LITERAL_SOURCE = f"from {Literal.__module__}"
 # (string, indent lvl, indent string)
 # result
 test_indent_data = [
-    pytest.param(
-        ("1", 1, " " * 4),
-        "    1"
-    ),
-    pytest.param(
-        ("1\n2", 1, " " * 4),
-        "    1\n    2"
-    ),
-    pytest.param(
-        ("1\n2", 2, " " * 4),
-        "        1\n        2"
-    ),
-    pytest.param(
-        ("1\n    2", 2, " " * 4),
-        "        1\n            2"
-    ),
+    pytest.param(("1", 1, " " * 4), "    1"),
+    pytest.param(("1\n2", 1, " " * 4), "    1\n    2"),
+    pytest.param(("1\n2", 2, " " * 4), "        1\n        2"),
+    pytest.param(("1\n    2", 2, " " * 4), "        1\n            2"),
 ]
 
 
@@ -69,7 +57,9 @@ def trim(s: str):
             if not lines[i].strip():
                 del lines[i]
 
-        s = "\n".join(line[n:] if line[:n] == INDENT else line for line in lines)
+        s = "\n".join(
+            line[n:] if line[:n] == INDENT else line for line in lines
+        )
     return s
 
 
@@ -80,24 +70,11 @@ def trim(s: str):
 # }
 test_data = {
     "base": {
-        "model": ("Test", {
-            "foo": int,
-            "bar": int,
-            "baz": float
-        }),
+        "model": ("Test", {"foo": int, "bar": int, "baz": float}),
         "fields_data": {
-            "foo": {
-                "name": "foo",
-                "type": "int"
-            },
-            "bar": {
-                "name": "bar",
-                "type": "int"
-            },
-            "baz": {
-                "name": "baz",
-                "type": "float"
-            }
+            "foo": {"name": "foo", "type": "int"},
+            "bar": {"name": "bar", "type": "int"},
+            "baz": {"name": "baz", "type": "float"},
         },
         "fields": {
             "imports": "",
@@ -105,71 +82,69 @@ test_data = {
                 "foo: int",
                 "bar: int",
                 "baz: float",
-            ]
+            ],
         },
-        "generated": trim("""
+        "generated": trim(
+            """
         class Test:
             foo: int
             bar: int
             baz: float
-        """)
+        """
+        ),
     },
     "complex": {
-        "model": ("Test", {
-            "foo": int,
-            "baz": DOptional(DList(DList(str))),
-            "bar": IntString,
-            "d": DDict(Unknown)
-        }),
+        "model": (
+            "Test",
+            {
+                "foo": int,
+                "baz": DOptional(DList(DList(str))),
+                "bar": IntString,
+                "d": DDict(Unknown),
+            },
+        ),
         "fields_data": {
-            "foo": {
-                "name": "foo",
-                "type": "int"
-            },
-            "baz": {
-                "name": "baz",
-                "type": "Optional[List[List[str]]]"
-            },
-            "bar": {
-                "name": "bar",
-                "type": "IntString"
-            },
-            "d": {
-                "name": "d",
-                "type": "Dict[str, Any]"
-            }
+            "foo": {"name": "foo", "type": "int"},
+            "baz": {"name": "baz", "type": "Optional[List[List[str]]]"},
+            "bar": {"name": "bar", "type": "IntString"},
+            "d": {"name": "d", "type": "Dict[str, Any]"},
         },
         "fields": {
             "imports": "from json_to_models.dynamic_typing import IntString\n"
-                       "from typing import Any, Dict, List, Optional",
+            "from typing import Any, Dict, List, Optional",
             "fields": [
                 "foo: int",
                 "bar: IntString",
                 "d: Dict[str, Any]",
                 "baz: Optional[List[List[str]]]",
-            ]
+            ],
         },
-        "generated": trim("""
+        "generated": trim(
+            """
         from json_to_models.dynamic_typing import IntString
         from typing import Any, Dict, List, Optional
-        
-        
+
+
         class Test:
             foo: int
             bar: IntString
             d: Dict[str, Any]
             baz: Optional[List[List[str]]]
-        """)
+        """
+        ),
     },
     "literals": {
-        "model": ("Test", {
-            "a": StringLiteral({'basic'}),
-            "b": StringLiteral({'with space'}),
-            "c": StringLiteral({'with\ttab'}),
-            "d": StringLiteral({'with\nnew_line'}),
-            "e": StringLiteral({'with \'"qoutes"\''}),
-            "f": StringLiteral({'with \\ // slash'}),
-        }),
+        "model": (
+            "Test",
+            {
+                "a": StringLiteral({"basic"}),
+                "b": StringLiteral({"with space"}),
+                "c": StringLiteral({"with\ttab"}),
+                "d": StringLiteral({"with\nnew_line"}),
+                "e": StringLiteral({"with '\"qoutes\"'"}),
+                "f": StringLiteral({"with \\ // slash"}),
+            },
+        ),
         "fields": {
             "imports": f"{LITERAL_SOURCE} import Literal",
             "fields": [
@@ -178,10 +153,11 @@ test_data = {
                 'c: Literal["with\\ttab"]',
                 'd: Literal["with\\nnew_line"]',
                 'e: Literal["with \'\\"qoutes\\"\'"]',
-                'f: Literal["with \\\\ // slash"]'
-            ]
+                'f: Literal["with \\\\ // slash"]',
+            ],
         },
-        "generated": trim(f"""
+        "generated": trim(
+            f"""
         {LITERAL_SOURCE} import Literal
 
 
@@ -192,17 +168,14 @@ test_data = {
             d: Literal["with\\nnew_line"]
             e: Literal["with \'\\"qoutes\\"\'"]
             f: Literal["with \\\\ // slash"]
-        """)
-    }
+        """
+        ),
+    },
 }
 
 test_data_unzip = {
     test: [
-        pytest.param(
-            model_factory(*data["model"]),
-            data[test],
-            id=id
-        )
+        pytest.param(model_factory(*data["model"]), data[test], id=id)
         for id, data in test_data.items()
         if test in data
     ]
@@ -216,7 +189,9 @@ def test_fields_data(value: ModelMeta, expected: Dict[str, dict]):
     required, optional = sort_fields(value)
     for is_optional, fields in enumerate((required, optional)):
         for field in fields:
-            field_imports, data = gen.field_data(field, value.type[field], bool(is_optional))
+            field_imports, data = gen.field_data(
+                field, value.type[field], bool(is_optional)
+            )
             assert data == expected[field]
 
 
@@ -233,7 +208,9 @@ def test_fields(value: ModelMeta, expected: dict):
 
 @pytest.mark.parametrize("value,expected", test_data_unzip["generated"])
 def test_generated(value: ModelMeta, expected: str):
-    generated = generate_code(([{"model": value, "nested": []}], {}), GenericModelCodeGenerator)
+    generated = generate_code(
+        ([{"model": value, "nested": []}], {}), GenericModelCodeGenerator
+    )
     assert generated.rstrip() == expected, generated
 
 
@@ -254,92 +231,87 @@ def test_absolute_model_ref():
     wrapper = DList(DList(test_ptr))
     assert wrapper.to_typing_code({})[1] == "List[List['TestModel']]"
     with AbsoluteModelRef.inject({test_model: test_model}):
-        assert wrapper.to_typing_code({})[1] == "List[List['TestModel.TestModel']]"
+        assert (
+            wrapper.to_typing_code({})[1] == "List[List['TestModel.TestModel']]"
+        )
 
 
 test_unicode_data = [
     pytest.param(
-        model_factory("Test", {
-            "foo": int,
-            "bar": int,
-            "baz": float
-        }),
-        {'convert_unicode': True},
-        trim("""
+        model_factory("Test", {"foo": int, "bar": int, "baz": float}),
+        {"convert_unicode": True},
+        trim(
+            """
         class Test:
             foo: int
             bar: int
             baz: float
-        """),
-        id="test_pytest_setup"
+        """
+        ),
+        id="test_pytest_setup",
     ),
     pytest.param(
-        model_factory("Test", {
-            "поле1": int,
-            "bar": int,
-            "baz": float
-        }),
-        {'convert_unicode': True},
-        trim("""
+        model_factory("Test", {"поле1": int, "bar": int, "baz": float}),
+        {"convert_unicode": True},
+        trim(
+            """
         class Test:
             pole1: int
             bar: int
             baz: float
-        """),
-        id="test_field_on"
+        """
+        ),
+        id="test_field_on",
     ),
     pytest.param(
-        model_factory("Test", {
-            "поле1": int,
-            "bar": int,
-            "baz": float
-        }),
-        {'convert_unicode': False},
-        trim("""
+        model_factory("Test", {"поле1": int, "bar": int, "baz": float}),
+        {"convert_unicode": False},
+        trim(
+            """
         class Test:
             поле1: int
             bar: int
             baz: float
-        """),
-        id="test_field_off"
+        """
+        ),
+        id="test_field_off",
     ),
     pytest.param(
-        model_factory("Тест", {
-            "поле1": int,
-            "bar": int,
-            "baz": float
-        }),
-        {'convert_unicode': True},
-        trim("""
+        model_factory("Тест", {"поле1": int, "bar": int, "baz": float}),
+        {"convert_unicode": True},
+        trim(
+            """
         class Test:
             pole1: int
             bar: int
             baz: float
-        """),
-        id="test_field_on"
+        """
+        ),
+        id="test_field_on",
     ),
     pytest.param(
-        model_factory("Тест", {
-            "поле1": int,
-            "bar": int,
-            "baz": float
-        }),
-        {'convert_unicode': False},
-        trim("""
+        model_factory("Тест", {"поле1": int, "bar": int, "baz": float}),
+        {"convert_unicode": False},
+        trim(
+            """
         class Тест:
             поле1: int
             bar: int
             baz: float
-        """),
-        id="test_classname_off"
+        """
+        ),
+        id="test_classname_off",
     ),
 ]
 
 
 @pytest.mark.parametrize("value,kwargs,expected", test_unicode_data)
 def test_unicode(value: ModelMeta, kwargs: dict, expected: str):
-    generated = generate_code(([{"model": value, "nested": []}], {}),
-                              GenericModelCodeGenerator, class_generator_kwargs=kwargs)
+    generated = generate_code(
+        ([{"model": value, "nested": []}], {}),
+        GenericModelCodeGenerator,
+        class_generator_kwargs=kwargs,
+    )
     assert generated.rstrip() == expected, generated
 
 
@@ -351,82 +323,82 @@ def test_unicode(value: ModelMeta, kwargs: dict, expected: str):
 # )
 test_override_style_data = [
     pytest.param(
-        model_factory("M", {
-            "bar": StringLiteral({'bar', 'foo'})
-        }),
+        model_factory("M", {"bar": StringLiteral({"bar", "foo"})}),
         {},
-        trim(f"""
+        trim(
+            f"""
         {LITERAL_SOURCE} import Literal
-        
-        
+
+
         class M:
             bar: Literal["bar", "foo"]
-        """),
-        id='default_behaviour'
+        """
+        ),
+        id="default_behaviour",
     ),
     pytest.param(
-        model_factory("M", {
-            "bar": StringLiteral({'bar', 'foo'})
-        }),
-        {StringLiteral: {
-            StringLiteral.TypeStyle.use_literals: False
-        }},
-        trim("""
+        model_factory("M", {"bar": StringLiteral({"bar", "foo"})}),
+        {StringLiteral: {StringLiteral.TypeStyle.use_literals: False}},
+        trim(
+            """
         class M:
             bar: str
-        """),
-        id='disable_literal'
+        """
+        ),
+        id="disable_literal",
     ),
     pytest.param(
-        model_factory("M", {
-            "bar": IntString
-        }),
-        {IntString: {
-            IntString.TypeStyle.use_actual_type: True
-        }},
-        trim("""
+        model_factory("M", {"bar": IntString}),
+        {IntString: {IntString.TypeStyle.use_actual_type: True}},
+        trim(
+            """
         class M:
             bar: int
-        """),
-        id='string_serializable_use_actual_type'
+        """
+        ),
+        id="string_serializable_use_actual_type",
     ),
     pytest.param(
-        model_factory("M", {
-            "bar": IntString
-        }),
-        {StringSerializable: {
-            StringSerializable.TypeStyle.use_actual_type: True
-        }},
-        trim("""
+        model_factory("M", {"bar": IntString}),
+        {
+            StringSerializable: {
+                StringSerializable.TypeStyle.use_actual_type: True
+            }
+        },
+        trim(
+            """
         class M:
             bar: int
-        """),
-        id='string_serializable_use_actual_type_wildcard'
+        """
+        ),
+        id="string_serializable_use_actual_type_wildcard",
     ),
     pytest.param(
-        model_factory("M", {
-            "bar": IsoDateString
-        }),
-        {IsoDateString: {
-            IsoDateString.TypeStyle.use_actual_type: True
-        }},
-        trim("""
+        model_factory("M", {"bar": IsoDateString}),
+        {IsoDateString: {IsoDateString.TypeStyle.use_actual_type: True}},
+        trim(
+            """
         from datetime import date
-        
-        
+
+
         class M:
             bar: date
-        """),
-        id='string_serializable_use_actual_type_date'
+        """
+        ),
+        id="string_serializable_use_actual_type_date",
     ),
 ]
 
 
 @pytest.mark.parametrize("value,types_style,expected", test_override_style_data)
-def test_override_style(value: ModelMeta, types_style: Dict[Union['BaseType', Type['BaseType']], dict], expected: str):
+def test_override_style(
+    value: ModelMeta,
+    types_style: Dict[Union["BaseType", Type["BaseType"]], dict],
+    expected: str,
+):
     generated = generate_code(
         ([{"model": value, "nested": []}], {}),
         GenericModelCodeGenerator,
-        class_generator_kwargs=dict(types_style=types_style)
+        class_generator_kwargs=dict(types_style=types_style),
     )
     assert generated.rstrip() == expected, generated
