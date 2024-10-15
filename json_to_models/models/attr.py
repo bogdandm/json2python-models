@@ -75,7 +75,10 @@ class AttrsModelCodeGenerator(GenericModelCodeGenerator):
                     and issubclass(meta.type, StringSerializable)
                     and not self.post_init_converters
                 ):
-                    body_kwargs["converter"] = f"optional({meta.type.__name__})"
+                    body_kwargs["converter"] = (
+                        f"optional({
+                            meta.type.__name__})"
+                    )
                     imports.append(("attr.converter", "optional"))
         elif (
             isclass(meta)

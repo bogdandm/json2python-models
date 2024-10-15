@@ -176,4 +176,4 @@ def test_registry_pointers(models_registry: ModelRegistry, value, expected):
     for model, (index, parent) in zip(models_registry.models, expected.items()):
         assert model.index == index
         ptr = next(iter(model.pointers))
-        assert ptr.parent.index if ptr.parent else None == parent
+        assert ptr.parent.index if ptr.parent else parent is None

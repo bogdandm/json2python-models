@@ -14,20 +14,21 @@ from json_to_models.registry import ModelRegistry
 
 
 def test_list_ex():
-    l = ListEx(range(10))
-    assert l.safe_index("a") is None
-    assert l.safe_index(5) == 5
-    assert l._safe_indexes(*"abc") == []
-    assert l._safe_indexes(*range(20)) == list(range(10))
-    l.insert_before("a", 5, 3, 1)
-    assert l == [0, "a", *range(1, 10)]
-    l.insert_after("b", 5, 3, 1)
-    assert l == [0, "a", *range(1, 6), "b", *range(6, 10)]
+    list_obj = ListEx(range(10))
+    assert list_obj.safe_index("a") is None
+    assert list_obj.safe_index(5) == 5
+    assert list_obj._safe_indexes(*"abc") == []
+    assert list_obj._safe_indexes(*range(20)) == list(range(10))
+    list_obj.insert_before("a", 5, 3, 1)
+    assert list_obj == [0, "a", *range(1, 10)]
+    list_obj.insert_after("b", 5, 3, 1)
+    assert list_obj == [0, "a", *range(1, 6), "b", *range(6, 10)]
 
 
 # This test relies on model names as a some sort of models ids
 # and may fail if some logic of their generation will be changed
-# List of Tuple[root_model_name, JSON data] | Dict[model_name, Set[root_model_names]]
+# List of Tuple[root_model_name, JSON data] | Dict[model_name,
+# Set[root_model_names]]
 test_extract_root_data = [
     pytest.param(
         [
@@ -112,13 +113,16 @@ def _test_compose_models(
 
     check(root, expected)
 
-    name = lambda model: model.name if isinstance(model, ModelMeta) else model
+    def name(model):
+        return model.name if isinstance(model, ModelMeta) else model
+
     mapping = {name(model): name(parent) for model, parent in mapping.items()}
     assert mapping == expected_mapping
 
 
 # This test relies on model names as a some sort of models ids
-# List of Tuple[root_model_name, model-meta] | List[Tuple[model_name, nested_models]]]
+# List of Tuple[root_model_name, model-meta] | List[Tuple[model_name,
+# nested_models]]
 # where nested_models is a recursive definition
 test_compose_models_data = [
     pytest.param(

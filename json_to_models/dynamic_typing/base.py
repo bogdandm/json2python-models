@@ -27,9 +27,12 @@ class BaseType:
         self, types_style: Dict[Union["BaseType", Type["BaseType"]], dict]
     ) -> Tuple[ImportPathList, str]:
         """
-        Return typing code that represents this metadata and import path of classes that are used in this code
+        Return typing code that represents this metadata and import path of
+        classes that are used in this code
 
-        :param types_style: Hints for .to_typing_code() for different type wrappers
+        :param types_style: Hints for .to_typing_code() for different type
+        wrappers
+
         :return: ((module_name, (class_name, ...)), code)
         """
         raise NotImplementedError()
@@ -51,12 +54,14 @@ class BaseType:
     def to_hash_string(self) -> str:
         """
         Return unique string that can be used to generate hash of type instance.
-        Caches hash value by default. If subclass can mutate (by default it always can)
-        then it should define setters to safely invalidate cached value.
+        Caches hash value by default. If subclass can mutate (by default it
+        always can) then it should define setters to safely invalidate cached
+        value.
 
         :return: hash string
         """
-        # NOTE: Do not override __hash__ function because BaseType instances isn't immutable
+        # NOTE: Do not override __hash__ function because BaseType instances
+        # isn't immutable
         if not getattr(self, "_hash", None):
             self._hash = self._to_hash_string()
         return self._hash

@@ -52,7 +52,8 @@ test_data = base_test_data + [
     pytest.param(
         {
             "int": int,
-            "items": DList({"int": int, "items": DList(Unknown)}),  # Empty list
+            # Empty list
+            "items": DList({"int": int, "items": DList(Unknown)}),
         },
         [{"int": int, "items": DList({"int": int, "items": DList(cycle_ref)})}],
         id="cycle",

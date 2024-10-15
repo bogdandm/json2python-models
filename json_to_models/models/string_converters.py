@@ -170,7 +170,6 @@ def get_string_field_paths(model: ModelMeta) -> List[Tuple[str, List[str]]]:
     # `D` - Dict
     str_fields: List[Tuple[str, List[str]]] = []
     for name, t in model.type.items():
-
         # Walk through nested types
         paths: List[List[str]] = []
         tokens: List[Tuple[MetaData, List[str]]] = [(t, ["#"])]

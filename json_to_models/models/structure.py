@@ -69,7 +69,7 @@ def compose_models(models_map: Dict[str, ModelMeta]) -> ModelsStructureType:
 
 
 def compose_models_flat(
-    models_map: Dict[Index, ModelMeta]
+    models_map: Dict[Index, ModelMeta],
 ) -> ModelsStructureType:
     """
     Generate flat sorted (by nesting level, ASC) models structure for

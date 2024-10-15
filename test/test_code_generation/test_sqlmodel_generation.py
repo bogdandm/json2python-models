@@ -20,11 +20,6 @@ from json_to_models.models.base import generate_code
 from json_to_models.models.sqlmodel import SqlModelCodeGenerator
 from json_to_models.models.structure import sort_fields
 
-# Data structure:
-# pytest.param id -> {
-#   "model" -> (model_name, model_metadata),
-#   test_name -> expected, ...
-# }
 test_data = {
     "base": {
         "model": ("Test", {"foo": int, "Bar": int, "baz": float}),
@@ -50,7 +45,9 @@ test_data = {
         from sqlmodel import Field, SQLModel
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship and
+        # foreign_key, please add them manually.
+
         class Test(SQLModel, table=True):
             foo: int
             bar: int = Field(..., alias="Bar")
@@ -110,7 +107,9 @@ test_data = {
         from typing import Dict, List, Optional
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship and
+        # foreign_key, please add them manually.
+
         class Test(SQLModel, table=True):
             foo: int
             qwerty: float
@@ -142,7 +141,9 @@ test_data = {
         from typing import Dict, List, Optional, Union
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship and
+        # foreign_key, please add them manually.
+
         class Test(SQLModel, table=True):
             a: int
             b: int
@@ -161,7 +162,9 @@ test_data = {
         from typing import List
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship and
+        # foreign_key, please add them manually.
+
         class Test(SQLModel, table=True):
             id: int = Field(..., primary_key=True)
             name: str
@@ -187,7 +190,7 @@ def test_fields_data_attr(value: ModelMeta, expected: Dict[str, dict]):
     required, optional = sort_fields(value)
     for is_optional, fields in enumerate((required, optional)):
         for field in fields:
-            field_imports, data = gen.field_data(
+            _field_imports, data = gen.field_data(
                 field, value.type[field], bool(is_optional)
             )
             assert data == expected[field]

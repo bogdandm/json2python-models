@@ -5,11 +5,8 @@ City Lots San Francisco dataset (https://github.com/zemirco/sf-city-lots-json)
 import json
 from datetime import datetime
 
-try:
-    from tqdm import tqdm
-except ImportError:
-    tqdm = lambda x, **kwargs: x
 import requests
+from tqdm import tqdm
 
 from json_to_models.generator import MetadataGenerator
 from json_to_models.models.attr import AttrsModelCodeGenerator
@@ -43,6 +40,9 @@ def load_data() -> dict:
 
 
 def main():
+    """
+    Main application to run the test suite for large datasets from github.
+    """
     data = load_data()
 
     start_t = datetime.now()

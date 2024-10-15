@@ -571,7 +571,7 @@ def iter_json_file(
     else:
         raise TypeError(
             f'dict or list is expected at {lookup if lookup != "-" else
-            "JSON root"}, not {type(item)}'
+                                           "JSON root"}, not {type(item)}'
         )
 
 

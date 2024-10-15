@@ -16,7 +16,8 @@ from .base import BaseType, ImportPathList
 
 class StringSerializable(BaseType):
     """
-    Mixin for classes which are used to (de-)serialize some values in a string form
+    Mixin for classes which are used to (de-)serialize some values in a
+    string form
     """
 
     class TypeStyle:
@@ -48,8 +49,9 @@ class StringSerializable(BaseType):
         cls, types_style: Dict[Union["BaseType", Type["BaseType"]], dict]
     ) -> Tuple[ImportPathList, str]:
         """
-        Unlike other BaseType's subclasses it's a class method because StringSerializable instance is not parameterized
-        as a metadata instance but contains actual data
+        Unlike other BaseType's subclasses it's a class method because
+        StringSerializable instance is not parameterized as a metadata
+        instance but contains actual data
         """
         cls_name = cls.__name__
         options = cls.get_options_for_type(cls, types_style)
@@ -87,9 +89,11 @@ class StringSerializableRegistry:
         cls: type = None,
     ):
         """
-        Register decorated class in registry. Can be called as a method if cls argument is passed.
+        Register decorated class in registry. Can be called as a method if
+        cls argument is passed.
 
-        :param replace_types: List of classes that is the particular case of decorated one
+        :param replace_types: List of classes that is the particular case of
+        decorated one
         :param cls: StringSerializable class
         :return: decorator
         """
@@ -126,12 +130,14 @@ class StringSerializableRegistry:
         self, *types: T_StringSerializable
     ) -> Collection[T_StringSerializable]:
         """
-        Return set of StringSerializable classes which can represent all classes from types argument.
+        Return set of StringSerializable classes which can represent all
+        classes from types argument.
 
         :param types: Sequence of StringSerializable classes
         :return: Set of StringSerializable
         """
-        # TODO: Resolve common type of 2 different types (e.g str from float and bool)
+        # TODO: Resolve common type of 2 different types (e.g str from float
+        #  and bool)
         # Do it by getting all children of each class with their level then
         # merge it into one list and find one with min(max(levels) for c n
         # children)
@@ -180,7 +186,8 @@ class FloatString(StringSerializable, float):
 
 @registry.add()
 class BooleanString(StringSerializable, int):
-    # We can't extend bool class, but we can extend int with same result excepting isinstance and issubclass check
+    # We can't extend bool class, but we can extend int with same result
+    # excepting isinstance and issubclass check
     actual_type = bool
 
     @classmethod

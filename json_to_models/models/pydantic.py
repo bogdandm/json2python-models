@@ -24,9 +24,8 @@ DEFAULT_ORDER = ("*",)
 
 class PydanticModelCodeGenerator(GenericModelCodeGenerator):
     PYDANTIC_FIELD = template(
-        "Field({{ default }}{% if kwargs %}, KWAGRS_TEMPLATE{% endif %})".replace(
-            "KWAGRS_TEMPLATE", KWAGRS_TEMPLATE
-        )
+        "Field({{ default }}{% if kwargs %}, KWAGRS_TEMPLATE{% endif "
+        "%})".replace("KWAGRS_TEMPLATE", KWAGRS_TEMPLATE)  # noqa E501
     )
     default_types_style = {
         StringSerializable: {

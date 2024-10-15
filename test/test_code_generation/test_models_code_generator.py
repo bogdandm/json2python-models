@@ -189,7 +189,7 @@ def test_fields_data(value: ModelMeta, expected: Dict[str, dict]):
     required, optional = sort_fields(value)
     for is_optional, fields in enumerate((required, optional)):
         for field in fields:
-            field_imports, data = gen.field_data(
+            _field_imports, data = gen.field_data(
                 field, value.type[field], bool(is_optional)
             )
             assert data == expected[field]

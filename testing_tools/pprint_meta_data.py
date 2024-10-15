@@ -24,10 +24,8 @@ def _pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
 
     if isinstance(value, dict):
         yield "object:"
-        for key, value in value.items():
-            yield from _pprint_gen(
-                value, key, lvl=lvl + 1, ignore_ptr=ignore_ptr
-            )
+        for k, v in value.items():
+            yield from _pprint_gen(v, k, lvl=lvl + 1, ignore_ptr=ignore_ptr)
 
     elif isinstance(value, list):
         for t in value:
@@ -39,9 +37,9 @@ def _pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
 
     elif isinstance(value, ModelMeta):
         yield str(value) + ":"
-        for key, subvalue in value.type.items():
+        for key, sub_value in value.type.items():
             yield from _pprint_gen(
-                subvalue, key, lvl=lvl + 1, ignore_ptr=ignore_ptr
+                sub_value, key, lvl=lvl + 1, ignore_ptr=ignore_ptr
             )
         if not value.type:
             yield " <empty>"
@@ -66,6 +64,15 @@ def _pprint_gen(value, key=None, lvl=0, empty_line=True, ignore_ptr=False):
 
 
 def pretty_format_meta(value, ignore_ptr=False):
+    """
+    Formatter function to prettify metadata on printout/STDOUT
+    Args:
+        value:
+        ignore_ptr:
+
+    Returns:
+        str
+    """
     return "".join(_pprint_gen(value, ignore_ptr=ignore_ptr))
 
 

@@ -12,7 +12,15 @@ from json_to_models.cli import (
 )
 from json_to_models.utils import convert_args
 
-echo = lambda *args, **kwargs: (args, kwargs)
+
+def echo(*args, **kwargs):
+    """
+    A quick utility function to use with type conversion functions. Replaces
+    the previously assigned variable for a lambda function.
+    """
+    return args, kwargs
+
+
 test_dict = {
     "user": {
         "id": 1,

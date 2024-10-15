@@ -43,7 +43,8 @@ class ModelMeta(SingleType):
     def generate_name(self):
         """
         Generate model name based on fields to which his model is assigned.
-        Will overwrite existed name so check is_name_generated before call this method
+        Will overwrite existed name so check is_name_generated before call
+        this method
         """
         base_names = (
             inflection.singularize(inflection.underscore(ptr.parent_field_name))
@@ -61,7 +62,8 @@ class ModelMeta(SingleType):
     @classmethod
     def name_joiner(cls, *names: str) -> str:
         """
-        Join words to form a model name. Uses in different places so override WORDS_SEPARATOR to change it globally.
+        Join words to form a model name. Uses in different places so override
+        WORDS_SEPARATOR to change it globally.
         """
         return cls.WORDS_SEPARATOR.join(names)
 
@@ -83,7 +85,8 @@ class ModelMeta(SingleType):
 
     def set_raw_name(self, name, generated=False):
         """
-        Set model name and is_name_generated flag as is without any conversion made
+        Set model name and is_name_generated flag as is without any
+        conversion made
         """
         self._name = name
         self._name_generated = generated
@@ -162,7 +165,9 @@ ContextInjectionType = Dict[ModelMeta, Union[ModelMeta, str]]
 
 class AbsoluteModelRef:
     """
-    Model forward absolute references. Using ContextManager to inject real models paths into typing code.
+    Model forward absolute references. Using ContextManager to inject real
+    models paths into typing code.
+
     Forward reference is the typing string like ``List['MyModel']``.
     If the model is defined as child model and is used by another nested model
     than the reference to this model should be an absolute path:
@@ -175,8 +180,8 @@ class AbsoluteModelRef:
             data: 'Model.GenericChildModel'  # <--- this
 
     This information is only available at the models code generation stage
-    while typing code is generated from raw metadata and passing this absolute path as argument
-    to each ModelPtr would be annoying.
+    while typing code is generated from raw metadata and passing this
+    absolute path as argument to each ModelPtr would be annoying.
 
     Usage:
 

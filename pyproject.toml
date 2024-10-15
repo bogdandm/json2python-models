@@ -27,6 +27,7 @@ exclude = [
 line-length = 80
 
 [tool.ruff.lint]
+preview = true
 select = ["E", "F", "B"]
 #select = ["E", "F", "I", "PL", "I", "B"]
 ignore = ["B008"]
@@ -91,7 +92,8 @@ packages = { find = { exclude = ["test", "testing_tools"] } }
 
 [tool.setuptools.dynamic]
 dependencies = {file=["core_requirements.txt"]}
-optional-dependencies = {dev = { file = ['dev_requirements.txt'] }}
+optional-dependencies.dev = { file = ['dev_requirements.txt'] }
+optional-dependencies.test = { file = ["test_requirements.txt"]}
 version= {attr = "json_to_models.__version__"}
 readme = {file = ['README.md']}
 

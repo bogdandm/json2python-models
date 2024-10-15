@@ -3,7 +3,21 @@ from typing import Any, List, Optional, Tuple, Union
 
 import pytest
 
-from json_to_models.dynamic_typing import *
+from json_to_models.dynamic_typing import (
+    DList,
+    DOptional,
+    DTuple,
+    DUnion,
+    FloatString,
+    ImportPathList,
+    IntString,
+    MetaData,
+    ModelMeta,
+    ModelPtr,
+    Unknown,
+    compile_imports,
+    metadata_to_typing,
+)
 
 
 @pytest.mark.xfail(strict=True, raises=ValueError)
@@ -109,7 +123,7 @@ test_data = [
     pytest.param(model({"a": int}, "TestModel"), ("", "TestModel")),
     pytest.param(
         DOptional(model({"a": int}, "TestModel")),
-        ("from typing import Optional", Optional["TestModel"]),
+        ("from typing import Optional", Optional["TestModel"]),  # noqa F821
     ),
 ]
 

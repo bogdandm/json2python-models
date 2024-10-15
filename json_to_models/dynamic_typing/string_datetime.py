@@ -52,8 +52,9 @@ def is_date(s: str) -> Optional[date]:
     :param s: string
     :return: date or None
     """
-    # dateutil.parser.parse replaces missing parts of datetime with values from default value
-    # so if there is hour part in given string then d1 and d2 would be equal and string is not pure date
+    # dateutil.parser.parse replaces missing parts of datetime with values
+    # from default value so if there is hour part in given string then d1 and
+    # d2 would be equal and string is not pure date
     d1 = dateutil.parser.parse(s, default=_check_values_date[0])
     d2 = dateutil.parser.parse(s, default=_check_values_date[1])
     return None if d1 == d2 else d1.date()
@@ -76,8 +77,11 @@ def is_time(s: str) -> Optional[time]:
 
 class IsoDateString(StringSerializable, date):
     """
-    Parse date using dateutil.parser.isoparse. Representation format always is ``YYYY-MM-DD``.
-    You can override to_representation method to customize it. Just don't forget to call registry.remove(IsoDateString)
+    Parse date using dateutil.parser.isoparse. Representation format always
+    is ``YYYY-MM-DD``.
+
+    You can override to_representation method to customize it. Just don't
+    forget to call registry.remove(IsoDateString)
     """
 
     actual_type = date
@@ -99,8 +103,8 @@ class IsoDateString(StringSerializable, date):
 
 class IsoTimeString(StringSerializable, time):
     """
-    Parse time using dateutil.parser.parse. Representation format always is ``hh:mm:ss.ms``.
-    You can override to_representation method to customize it.
+    Parse time using dateutil.parser.parse. Representation format always is
+    ``hh:mm:ss.ms``. You can override to_representation method to customize it.
     """
 
     actual_type = time
@@ -123,7 +127,8 @@ class IsoTimeString(StringSerializable, time):
 class IsoDatetimeString(StringSerializable, datetime):
     """
     Parse datetime using dateutil.parser.isoparse.
-    Representation format always is ``YYYY-MM-DDThh:mm:ss.ms`` (datetime.isoformat method).
+    Representation format always is ``YYYY-MM-DDThh:mm:ss.ms`` (
+    datetime.isoformat method).
     """
 
     actual_type = datetime
@@ -143,8 +148,10 @@ class IsoDatetimeString(StringSerializable, datetime):
 
 def register_datetime_classes(registry: StringSerializableRegistry = registry):
     """
-    Register datetime classes in given registry (using default registry if no arguments is passed).
-    Date parsing is expensive operation so this classes are disabled by default
+    Register datetime classes in given registry (using default registry if no
+    arguments is passed).
+
+    Date parsing is expensive operation so these classes are disabled by default
     """
     registry.add(cls=IsoDateString)
     registry.add(cls=IsoTimeString)
