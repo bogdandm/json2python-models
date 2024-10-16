@@ -45,8 +45,8 @@ test_data = {
         from sqlmodel import Field, SQLModel
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and
-        # foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship
+        # and foreign_key, please add them manually.
 
         class Test(SQLModel, table=True):
             foo: int
@@ -107,8 +107,8 @@ test_data = {
         from typing import Dict, List, Optional
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and
-        # foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship
+        # and foreign_key, please add them manually.
 
         class Test(SQLModel, table=True):
             foo: int
@@ -141,8 +141,8 @@ test_data = {
         from typing import Dict, List, Optional, Union
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and
-        # foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship
+        # and foreign_key, please add them manually.
 
         class Test(SQLModel, table=True):
             a: int
@@ -162,8 +162,8 @@ test_data = {
         from typing import List
 
 
-        # Warn! This generated code does not respect SQLModel Relationship and
-        # foreign_key, please add them manually.
+        # Warn! This generated code does not respect SQLModel Relationship
+        # and foreign_key, please add them manually.
 
         class Test(SQLModel, table=True):
             id: int = Field(..., primary_key=True)

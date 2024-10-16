@@ -1,10 +1,10 @@
-import imp
 import json
 import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from test.test_cli.utils import create_module
 from time import time
 
 import pytest
@@ -29,15 +29,16 @@ with (test_data_path / "gists.json").open("r") as f:
 assert type(gists) is list and gists and type(gists[0]) is dict
 
 for item in gists:
-    with (tmp_path / f"{item['id']}.gist").open("w") as f:
-        json.dump(item, f)
+    with (tmp_path / f"{item['id']}.gist").open("w") as json_file:
+        json.dump(item, json_file)
 
 # detect script path
 setuptools_script = subprocess.call(["json2models"], shell=True) == 0
 if setuptools_script:
     executable = "json2models"
 else:
-    python_path = sys.executable.replace("\\", "/")
+    # python_path = sys.executable.replace("\\", "/")
+    python_path = sys.executable
     executable = f"{python_path} -m json_to_models"
 
 
@@ -55,100 +56,90 @@ def test_help():
 
 test_commands = [
     pytest.param(
-        f"""{executable}  -m Photo items "{test_data_path / 'photos.json'} "
-        """,
+        f"{executable} -m Photo items {test_data_path / 'photos.json'}",
         id="list1",
     ),
     pytest.param(
-        f"""{executable}  -l Photo items "{test_data_path / 'photos.json'} "
-        """,
+        f"{executable}  -l Photo items {test_data_path / 'photos.json'}",
         id="list1_legacy",
     ),
     pytest.param(
-        f"""{executable}  -m User "{test_data_path / 'users.json'} " """,
+        f"{executable}  -m User {test_data_path / 'users.json'}",
         id="list2",
     ),
     pytest.param(
-        f"""{executable}  -l User - "{test_data_path / 'users.json'} " """,
+        f"{executable}  -l User - {test_data_path / 'users.json'}",
         id="list2_legacy",
     ),
     pytest.param(
-        f"""{executable}  -m Photos "{test_data_path / 'photos.json'} " """,
+        f"{executable}  -m Photos {test_data_path / 'photos.json'}",
         id="model1",
     ),
     pytest.param(
-        f"""{executable}  -m Model items "{test_data_path / 'photos.json'}
-        " \
-                              -m Model - "
-        {test_data_path / 'users.json'} " """,
+        f"{executable} -m Model items {test_data_path / 'photos.json'} "
+        f"-m Model {test_data_path / 'users.json'}",
         id="duplicate_name",
     ),
     pytest.param(
-        f"""{executable}  -m Photo items "{test_data_path / 'photos.json'}
-        " \
-                                  -m Photos "
-        {test_data_path / 'photos.json'} " """,
+        f"{executable} -m Photo items {test_data_path / 'photos.json'} "
+        f"-m Photos {test_data_path / 'photos.json'}",
         id="list1_model1",
     ),
     pytest.param(
-        f"""{executable}  -m Photo items "{test_data_path / 'photos.json'}
-        " \
-                                  -m User "
-        {test_data_path / 'users.json'} " """,
+        f"{executable}  -m Photo items {test_data_path / 'photos.json'} "
+        f"-m User {test_data_path / 'users.json'}",
         id="list1_list2",
     ),
     pytest.param(
-        f"""{executable}  -m Gist "{tmp_path / '*.gist'} " --dkf files""",
+        f"{executable}  -m Gist {tmp_path / '*.gist'} --dkf files ",
         id="gists",
     ),
     pytest.param(
-        f"""{executable}  -m Gist "{tmp_path / '*.gist'}
-        " --dkf files --datetime""",
+        f"{executable}  -m Gist {tmp_path / '*.gist'} --dkf files "
+        f"--datetime ",
         id="gists_datetime",
     ),
     pytest.param(
-        f"""{executable}  -m Gist "{tmp_path / '*.gist'}
-        " --dkf files --merge percent number_10""",
+        f"{executable}  -m Gist {tmp_path / '*.gist'} --dkf files "
+        f"--merge percent number_10 ",
         id="gists_merge_policy",
     ),
     pytest.param(
-        f"""{executable}  -m Gist "{tmp_path / '*.gist'}
-        " --dkf files --merge exact""",
+        f"{executable}  -m Gist {tmp_path / '*.gist'} --dkf files "
+        f"--merge exact ",
         id="gists_no_merge",
     ),
     pytest.param(
-        f"""{executable}  -m Gist "{tmp_path / '*.gist'}
-        " --dkf files --datetime --strings-converters""",
+        f"{executable}  -m Gist {tmp_path / '*.gist'} --dkf files "
+        f"--datetime --strings-converters ",
         id="gists_strings_converters",
     ),
     pytest.param(
-        f"""{executable}  -m User "{test_data_path / 'users.json'}
-        " --strings-converters""",
+        f"{executable}  -m User {test_data_path / 'users.json'} "
+        f"--strings-converters",
         id="users_strings_converters",
     ),
     pytest.param(
-        f"""{executable}  -m SomeUnicode "{test_data_path / 'unicode.json'} "
-        """,
+        f"{executable} -m SomeUnicode {test_data_path / 'unicode.json'}",
         id="convert_unicode",
     ),
     pytest.param(
-        f"""{executable}  -m SomeUnicode "{test_data_path / 'unicode.json'}
-        " --no-unidecode""",
+        f"{executable}  -m SomeUnicode {test_data_path / 'unicode.json'} "
+        f"--no-unidecode",
         id="dont_convert_unicode",
     ),
     pytest.param(
-        f"""{executable}  -m SomeUnicode "{test_data_path / 'unicode.json'}
-        " --disable-unicode-conversion""",
+        f"{executable} -m SomeUnicode {test_data_path / 'unicode.json'} "
+        f"--disable-unicode-conversion",
         id="dont_convert_unicode_2",
     ),
     pytest.param(
-        f"""{executable}  -m YamlFile "
-        {test_data_path / 'spotify-swagger.yaml'} " -i yaml""",
+        f"{executable} -m YamlFile {test_data_path / 'spotify-swagger.yaml'} "
+        f"-i yaml",
         id="yaml_file",
     ),
     pytest.param(
-        f"""{executable}  -m IniFile "{test_data_path / 'file.ini'} " -i ini
-        """,
+        f"{executable} -m IniFile {test_data_path / 'file.ini'} -i ini ",
         id="ini_file",
     ),
 ]
@@ -158,26 +149,28 @@ def execute_test(command, output_file: Path = None, output=None) -> str:
     proc = subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    stdout, stderr = map(bytes.decode, proc.communicate())
+    stdout, stderr = map(
+        lambda std_output: bytes.decode(std_output, errors="ignore"),
+        proc.communicate(),
+    )
     if output_file:
         assert output is None
-        with output_file.open(encoding="utf-8") as f:
-            output = f.read()
+        with output_file.open(encoding="utf-8", errors="ignore") as file_obj:
+            output = file_obj.read()
     if output:
         stdout = output
     assert not stderr, stderr
     assert stdout, stdout
     assert proc.returncode == 0
-    # Note: imp package is deprecated but I can't find a way to create dummy
+    # Note: imp package is deprecated, but I can't find a way to create dummy
     # module using importlib
-    module = imp.new_module("test_model")
+    module = create_module("test_model")
     sys.modules["test_model"] = module
     try:
         exec(compile(stdout, "test_model.py", "exec"), module.__dict__)
     except Exception as e:
         assert not e, stdout
 
-    print(stdout)
     return stdout
 
 
@@ -238,15 +231,10 @@ def test_script_custom(command):
 
 @pytest.mark.parametrize("command", test_commands)
 def test_add_preamble(command):
-    PREAMBLE_TEXT = """
-# this is some test code
-# to be added to the file
-
-
-# let's see if it works
-
-
-    """
+    PREAMBLE_TEXT = (
+        "# this is some test code to be added to the file. Let's see if it "
+        "works"
+    )
     stdout = execute_test(command + ' --preamble "' + PREAMBLE_TEXT + '"')
     assert "let's see if it works" in stdout
 
@@ -260,14 +248,21 @@ def test_disable_some_string_types_smoke(command):
 @pytest.mark.parametrize("command", test_commands)
 def test_add_trim_preamble(command):
     def trim_header(line_string):
-        """remove the quoted command and everything from the first class
-        declaration onwards"""
+        """
+        remove the quoted command and everything from the first class
+        declaration onwards
+        Args:
+            line_string:
+
+        Returns:
+
+        """
         lines = line_string.splitlines()
         start = 0
         end = 0
         line_no = 0
         for line in lines:
-            if line.startswith('"""'):
+            if line.startswith('"'):
                 start = line_no
             if line.startswith("class "):
                 end = line_no
@@ -292,33 +287,33 @@ def test_add_trim_preamble(command):
 
 wrong_arguments_commands = [
     pytest.param(
-        f"""{executable}  -m Model items "{test_data_path / 'photos.json'}
-        " --merge unknown""",
+        f"{executable} -m Model items {test_data_path / 'photos.json'} "
+        f"--merge unknown",
         id="wrong_merge_policy",
     ),
     pytest.param(
-        f"""{executable}  -m Model items "{test_data_path / 'photos.json'}
-        " --merge unknown_10""",
+        f"{executable} -m Model items {test_data_path / 'photos.json'} "
+        f"--merge unknown_10",
         id="wrong_merge_policy",
     ),
     pytest.param(
-        f"""{executable}  -m Model items "{test_data_path / 'photos.json'}
-        " -f custom""",
+        f"{executable}  -m Model items {test_data_path / 'photos.json'} "
+        f"-f custom",
         id="custom_model_generator_without_class_link",
     ),
     pytest.param(
-        f"""{executable}  -m Model items "{test_data_path / 'photos.json'}
-        " --code-generator test""",
+        f"{executable}  -m Model items {test_data_path / 'photos.json'} "
+        f"--code-generator test",
         id="class_link_without_custom_model_generator_enabled",
     ),
     pytest.param(
-        f"""{executable}  -m Model items "{test_data_path / 'photos.json'}
-        " another_arg --code-generator test""",
+        f"{executable}  -m Model items {test_data_path / 'photos.json'} "
+        f"another_arg --code-generator test",
         id="4_args_model",
     ),
     pytest.param(
-        f"""{executable}  -m Model total "{test_data_path / 'photos.json'}
-        " --code-generator test""",
+        f"{executable}  -m Model total {test_data_path / 'photos.json'} "
+        f"--code-generator test",
         id="non_dict_or_list_data",
     ),
 ]
@@ -340,8 +335,8 @@ def test_script_output_file(command):
 
 cmds = [
     pytest.param(
-        f"""{executable}  -m User "{test_data_path / 'users.json'}
-        " -f pydantic --disable-str-serializable-types float int""",
+        f"{executable}  -m User {test_data_path / 'users.json'} -f "
+        f"pydantic --disable-str-serializable-types float int",
         id="users",
     )
 ]

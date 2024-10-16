@@ -17,13 +17,11 @@ class SqlModelCodeGenerator(PydanticModelCodeGenerator):
         )
         imports.append(("sqlmodel", ["SQLModel", "Field"]))
         body = (
-            """
-        # Warn! This generated code does not respect SQLModel Relationship
-        and foreign_key, please add them manually.
-        """.strip()
-            + "\n"
-            + body
-        )
+            f"# Warn! This generated code does not respect SQLModel "
+            f"Relationship and foreign_key, please add them manually."
+            f"\n\n{body}"
+        ).strip()
+
         return imports, body
 
     def convert_field_name(self, name):
