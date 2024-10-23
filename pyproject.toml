@@ -62,7 +62,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "json2python-models"
-version = "0.3.0"  # Replace this with the actual version from `json_to_models.__version__`
 description = "Python models (pydantic, attrs, dataclasses or custom) generator from JSON data with typing module support"
 readme = "README.md"
 license = { text = "MIT" }
@@ -70,6 +69,7 @@ requires-python = ">=3.7"
 authors = [
     { name = "bogdandm (Bogdan Kalashnikov)", email = "bogdan.dm1995@yandex.ru" }
 ]
+dynamic = ['version']
 
 [project.urls]
 "Repository" = "https://github.com/bogdandm/json2python-models"
@@ -94,7 +94,7 @@ packages = { find = { exclude = ["test", "testing_tools"] } }
 dependencies = {file=["core_requirements.txt"]}
 optional-dependencies.dev = { file = ['dev_requirements.txt'] }
 optional-dependencies.test = { file = ["test_requirements.txt"]}
-version= {attr = "json_to_models.__version__"}
+version = {attr = "json_to_models.__version__"}
 readme = {file = ['README.md']}
 
 [tool.setuptools.package-data]
