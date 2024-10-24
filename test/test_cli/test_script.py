@@ -1,12 +1,12 @@
-import imp
 import json
 import re
 import subprocess
 import sys
 import tempfile
+import types
+import uuid
 from pathlib import Path
 from time import time
-from typing import Tuple
 
 import pytest
 
@@ -95,6 +95,12 @@ test_commands = [
 ]
 
 
+def load_model(code):
+    module = types.ModuleType(uuid.uuid4().hex)
+    exec(code, module.__dict__)
+    return module
+
+
 def execute_test(command, output_file: Path = None, output=None) -> str:
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = map(bytes.decode, proc.communicate())
@@ -107,11 +113,8 @@ def execute_test(command, output_file: Path = None, output=None) -> str:
     assert not stderr, stderr
     assert stdout, stdout
     assert proc.returncode == 0
-    # Note: imp package is deprecated but I can't find a way to create dummy module using importlib
-    module = imp.new_module("test_model")
-    sys.modules["test_model"] = module
     try:
-        exec(compile(stdout, "test_model.py", "exec"), module.__dict__)
+        load_model(stdout)
     except Exception as e:
         assert not e, stdout
 
