@@ -1,12 +1,21 @@
 # Changelog
 
-## [Unreleased](https://github.com/bogdandm/json2python-models/tree/HEAD)
+## [v0.3.1](https://github.com/bogdandm/json2python-models/tree/v0.3.1) (2024-10-24)
 
-[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.3.0...HEAD)
+[Full Changelog](https://github.com/bogdandm/json2python-models/compare/v0.3.0...v0.3.1)
 
 **Implemented enhancements:**
 
+- is there a online version for this? [\#56](https://github.com/bogdandm/json2python-models/issues/56)
 - SQLModel support [\#49](https://github.com/bogdandm/json2python-models/issues/49)
+
+**Fixed bugs:**
+
+- Not able to install with pip \>24.1 version [\#57](https://github.com/bogdandm/json2python-models/issues/57)
+
+**Merged pull requests:**
+
+- Modernize project setup and setup cron action job [\#59](https://github.com/bogdandm/json2python-models/pull/59) ([bogdandm](https://github.com/bogdandm))
 
 ## [v0.3.0](https://github.com/bogdandm/json2python-models/tree/v0.3.0) (2023-01-02)
 
