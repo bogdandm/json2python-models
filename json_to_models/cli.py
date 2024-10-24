@@ -15,9 +15,12 @@ from .models.sqlmodel import SqlModelCodeGenerator
 
 try:
     import ruamel.yaml as yaml
+
+    yaml_load = yaml.YAML(typ='safe', pure=True).load
 except ImportError:
     try:
         import yaml
+        yaml_load = yaml.safe_load
     except ImportError:
         yaml = None
 
@@ -417,11 +420,11 @@ class FileLoaders:
 
     @staticmethod
     def yaml(path: Path) -> Union[dict, list]:
-        if yaml is None:
-            print('Yaml parser is not installed. To parse yaml files PyYaml (or ruamel.yaml) is required.')
+        if yaml_load is None:
+            print('Yaml parser is not installed. To parse yaml files ruamel.yaml (or PyYaml) is required.')
             raise ImportError('yaml')
         with path.open() as fp:
-            return yaml.safe_load(fp)
+            return yaml_load(fp)
 
     @staticmethod
     def ini(path: Path) -> dict:
