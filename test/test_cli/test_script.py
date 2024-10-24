@@ -95,9 +95,11 @@ test_commands = [
 ]
 
 
-def load_model(code):
-    module = types.ModuleType(uuid.uuid4().hex)
+def load_model(code, module_name=''):
+    module_name = module_name or uuid.uuid4().hex
+    module = types.ModuleType(module_name)
     exec(code, module.__dict__)
+    sys.modules[module_name] = module
     return module
 
 
