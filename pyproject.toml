@@ -41,7 +41,7 @@ readme = { file = ['README.md'] }
 "*" = ['*.txt.', '*.ini', ".coveragerc", "LICENSE", "*.md"]
 
 [tool.pytest.ini_options]
-#addopts = "-n 4"
+addopts = "-n 4"
 testpaths = ["tests"]
 markers = [
     "no_expected: testing data has no expected value",
