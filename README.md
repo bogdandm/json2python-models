@@ -444,9 +444,6 @@ class Swagger(BaseModel):
 
 ## Installation
 
-| **Beware**: this project supports only `python3.7` and higher. |
-| --- |
-
 To install it, use `pip`:
 
 `pip install json2python-models`
