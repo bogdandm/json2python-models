@@ -19,12 +19,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           pytest-args: '--cov-config .coveragerc --cov=json_to_models'
-      - name: Coverage
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          coverage xml
-          coveralls --service=github
+#      - name: Coverage
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          coverage xml
+#          coveralls --service=github
   # TODO: Fix codacy issue with token
   #        python-codacy-coverage -r coverage.xml
 
