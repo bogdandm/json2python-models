@@ -1,0 +1,33 @@
+name: 'Test'
+
+inputs:
+  python-version:
+    description: 'Python version to test with'
+    required: true
+    type: string
+  pytest-args:
+    description: 'pytest args to test with'
+    required: false
+    default: ''
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip build
+        python -m build
+        python -m pip install '.[test]'
+        python -m pip install wheel pytest pytest-cov pytest-xdist requests coveralls codacy-coverage
+        pip install --ignore-installed pytest>=4.4.0
+        pytest --version
+    - name: Test with pytest
+      shell: bash
+      run: |
+        pytest ${{ inputs.pytest-args }} -m "not no_expected" test/
