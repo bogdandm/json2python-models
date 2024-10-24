@@ -24,7 +24,7 @@ runs:
         python -m pip install --upgrade pip build
         python -m build
         python -m pip install '.[test]'
-        python -m pip install wheel pytest pytest-cov pytest-xdist requests coveralls codacy-coverage
+        python -m pip install wheel pytest pytest-cov pytest-xdist requests coveralls<4 codacy-coverage
         pip install --ignore-installed pytest>=4.4.0
         pytest --version
     - name: Test with pytest
