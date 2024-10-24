@@ -30,4 +30,4 @@ runs:
     - name: Test with pytest
       shell: bash
       run: |
-        pytest ${{ inputs.pytest-args }} -m "not no_expected" test/
+        pytest ${{ inputs.pytest-args }} -m "not no_expected" -n 8 test/

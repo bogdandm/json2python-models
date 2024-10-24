@@ -34,12 +34,8 @@ for item in gists:
         json.dump(item, f)
 
 # detect script path
-setuptools_script = subprocess.call(["json2models"], shell=True) == 0
-if setuptools_script:
-    executable = "json2models"
-else:
-    python_path = sys.executable.replace('\\', '/')
-    executable = f"{python_path} -m json_to_models"
+python_path = sys.executable.replace('\\', '/')
+executable = f"{python_path} -m coverage run -m json_to_models"
 
 
 def test_help():
