@@ -53,7 +53,7 @@ test_data = {
             ]
         },
         "generated": trim(f"""
-        from pydantic import BaseModel, Field
+        from pydantic.v1 import BaseModel, Field
         
         
         class Test(BaseModel):
@@ -120,7 +120,7 @@ test_data = {
             }
         },
         "generated": trim(f"""
-        from pydantic import BaseModel, Field
+        from pydantic.v1 import BaseModel, Field
         from typing import Dict, List, Optional
 
 
@@ -146,7 +146,7 @@ test_data = {
             "u": DUnion(DDict(IntString), DList(DList(IntString))),
         }),
         "generated": trim("""
-        from pydantic import BaseModel, Field
+        from pydantic.v1 import BaseModel, Field
         from typing import Dict, List, Optional, Union
 
 
