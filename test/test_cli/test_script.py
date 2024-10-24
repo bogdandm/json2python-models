@@ -115,10 +115,7 @@ def execute_test(command, output_file: Path = None, output=None) -> str:
     assert not stderr, stderr
     assert stdout, stdout
     assert proc.returncode == 0
-    try:
-        load_model(stdout)
-    except Exception as e:
-        assert not e, stdout
+    load_model(stdout)
 
     print(stdout)
     return stdout
