@@ -1,4 +1,3 @@
-import imp
 import json
 import sys
 from inspect import isclass
@@ -11,7 +10,7 @@ from json_to_models.models.base import generate_code
 from json_to_models.models.pydantic import PydanticModelCodeGenerator
 from json_to_models.models.structure import compose_models_flat
 from json_to_models.registry import ModelRegistry
-from .test_script import test_data_path
+from .test_script import test_data_path, load_model
 
 test_self_validate_pydantic_data = [
     pytest.param(test_data_path / "gists.json", list, id="gists.json"),
@@ -39,14 +38,9 @@ def test_self_validate_pydantic(data, data_type):
 
     structure = compose_models_flat(reg.models_map)
     code = generate_code(structure, PydanticModelCodeGenerator)
-    module = imp.new_module("test_models")
-    sys.modules["test_models"] = module
-    try:
-        exec(compile(code, "test_models.py", "exec"), module.__dict__)
-    except Exception as e:
-        assert not e, code
 
-    import test_models
+    test_models = load_model(code, 'test_models')
+
     for name in dir(test_models):
         cls = getattr(test_models, name)
         if isclass(cls) and issubclass(cls, pydantic.BaseModel):
