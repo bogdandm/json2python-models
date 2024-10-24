@@ -46,7 +46,7 @@ class PydanticModelCodeGenerator(GenericModelCodeGenerator):
             nested_classes=nested_classes,
             extra=extra
         )
-        imports.append(('pydantic', ['BaseModel', 'Field']))
+        imports.append(('pydantic.v1', ['BaseModel', 'Field']))
         return imports, body
 
     def _filter_fields(self, fields):
