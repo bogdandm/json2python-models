@@ -1,8 +1,7 @@
 import json
-import sys
 from inspect import isclass
 
-import pydantic
+import pydantic.v1 as pydantic
 import pytest
 
 from json_to_models.generator import MetadataGenerator
