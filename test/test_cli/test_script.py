@@ -44,7 +44,8 @@ else:
 
 def test_help():
     c = f"{executable} -h"
-    proc = subprocess.Popen(c, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(
+        c, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     assert not stderr, stderr
     assert stdout, stdout
@@ -53,11 +54,16 @@ def test_help():
 
 
 test_commands = [
-    pytest.param(f"""{executable} -m Photo items "{test_data_path / 'photos.json'}" """, id="list1"),
-    pytest.param(f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" """, id="list1_legacy"),
-    pytest.param(f"""{executable} -m User "{test_data_path / 'users.json'}" """, id="list2"),
-    pytest.param(f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2_legacy"),
-    pytest.param(f"""{executable} -m Photos "{test_data_path / 'photos.json'}" """, id="model1"),
+    pytest.param(
+        f"""{executable} -m Photo items "{test_data_path / 'photos.json'}" """, id="list1"),
+    pytest.param(
+        f"""{executable} -l Photo items "{test_data_path / 'photos.json'}" """, id="list1_legacy"),
+    pytest.param(
+        f"""{executable} -m User "{test_data_path / 'users.json'}" """, id="list2"),
+    pytest.param(
+        f"""{executable} -l User - "{test_data_path / 'users.json'}" """, id="list2_legacy"),
+    pytest.param(
+        f"""{executable} -m Photos "{test_data_path / 'photos.json'}" """, id="model1"),
     pytest.param(f"""{executable} -m Model items "{test_data_path / 'photos.json'}" \
                               -m Model - "{test_data_path / 'users.json'}" """, id="duplicate_name"),
 
@@ -104,7 +110,8 @@ def load_model(code, module_name=''):
 
 
 def execute_test(command, output_file: Path = None, output=None) -> str:
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(command, shell=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = map(bytes.decode, proc.communicate())
     if output_file:
         assert output is None
@@ -267,4 +274,78 @@ def test_disable_some_string_types(command):
     stdout = execute_test(command)
     assert 'lat: str' in stdout
     assert 'lng: str' in stdout
-    assert not any(re.match(r'\s+zipcode:.+int.+', line) for line in stdout.split('\n')), "zipcode should not be parsed as int"
+    assert not any(re.match(r'\s+zipcode:.+int.+', line)
+                   for line in stdout.split('\n')), "zipcode should not be parsed as int"
+
+
+# -- allow-words tests -------------------------------------------------------
+
+allow_words_commands = [
+    pytest.param(
+        f"""{executable} -m User "{test_data_path / 'users.json'}" --allow-words id""",
+        id="users_allow_id",
+    ),
+    pytest.param(
+        f"""{executable} -m Photo items "{test_data_path / 'photos.json'}" --allow-words id""",
+        id="photos_allow_id",
+    ),
+]
+
+
+@pytest.mark.parametrize("command", allow_words_commands)
+def test_allow_words_prevents_underscore(command):
+    """--allow-words should remove the trailing '_' from the listed field names."""
+    stdout = execute_test(command)
+    assert "id:" in stdout, "field 'id' should appear unmodified"
+    assert "id_:" not in stdout, "field 'id_' should not appear when 'id' is allowed"
+
+
+@pytest.mark.parametrize("command", allow_words_commands)
+def test_allow_words_pydantic(command):
+    """--allow-words should work with the pydantic framework."""
+    command += " -f pydantic"
+    stdout = execute_test(command)
+    assert "(BaseModel):" in stdout
+    assert "id:" in stdout
+    assert "id_:" not in stdout
+
+
+@pytest.mark.parametrize("command", allow_words_commands)
+def test_allow_words_attrs(command):
+    """--allow-words should work with the attrs framework."""
+    command += " -f attrs"
+    stdout = execute_test(command)
+    assert "@attr.s" in stdout
+    assert "id:" in stdout
+    assert "id_:" not in stdout
+
+
+@pytest.mark.parametrize("command", allow_words_commands)
+def test_allow_words_dataclasses(command):
+    """--allow-words should work with the dataclasses framework."""
+    command += " -f dataclasses"
+    stdout = execute_test(command)
+    assert "@dataclass" in stdout
+    assert "id:" in stdout
+    assert "id_:" not in stdout
+
+
+def test_default_behavior_appends_underscore():
+    """Without --allow-words the blacklisted 'id' field should be renamed to 'id_'."""
+    command = f"""{executable} -m User "{test_data_path / 'users.json'}" """
+    stdout = execute_test(command)
+    assert "id_:" in stdout, "field 'id' should be renamed to 'id_' by default"
+    assert "\n    id:" not in stdout, "field 'id' should not appear unmodified without --allow-words"
+
+
+def test_allow_words_multiple():
+    """Multiple words can be unblacklisted at once with --allow-words."""
+    # Create a temporary JSON file whose keys include several blacklisted names
+    tmp_json = tmp_path / "allow_words_multi.json"
+    tmp_json.write_text(json.dumps(
+        {"id": 1, "type": "user", "hash": "abc", "name": "John"}))
+    command = f"""{executable} -m Model "{tmp_json}" --allow-words id type hash"""
+    stdout = execute_test(command)
+    for word in ("id", "type", "hash"):
+        assert f"{word}:" in stdout, f"field '{word}' should appear unmodified"
+        assert f"{word}_:" not in stdout, f"field '{word}_' should not appear when allowed"

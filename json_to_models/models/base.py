@@ -24,8 +24,10 @@ KWAGRS_TEMPLATE = "{% for key, value in kwargs.items() %}" \
 keywords_set = set(keyword.kwlist)
 builtins_set = set(__builtins__.keys())
 other_common_names_set = {'datetime', 'time', 'date', 'defaultdict', 'schema'}
-blacklist_words = frozenset(keywords_set | builtins_set | other_common_names_set)
-ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+blacklist_words = frozenset(
+    keywords_set | builtins_set | other_common_names_set)
+ones = ['', 'one', 'two', 'three', 'four',
+        'five', 'six', 'seven', 'eight', 'nine']
 
 
 def template(pattern: str, indent: str = INDENT) -> Template:
@@ -73,7 +75,8 @@ class GenericModelCodeGenerator:
 
     STR_CONVERT_DECORATOR = template("convert_strings({{ str_fields }}{%% if kwargs %%}, %s{%% endif %%})"
                                      % KWAGRS_TEMPLATE)
-    FIELD: Template = template("{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
+    FIELD: Template = template(
+        "{{name}}: {{type}}{% if body %} = {{ body }}{% endif %}")
     DEFAULT_MAX_LITERALS = 10
     default_types_style = {
         StringLiteral: {
@@ -87,29 +90,36 @@ class GenericModelCodeGenerator:
             max_literals=DEFAULT_MAX_LITERALS,
             post_init_converters=False,
             convert_unicode=True,
-            types_style: Dict[Union['BaseType', Type['BaseType']], dict] = None
+            types_style: Dict[Union['BaseType',
+                                    Type['BaseType']], dict] = None,
+            allow_words: Iterable[str] = (),
     ):
         self.model = model
         self.post_init_converters = post_init_converters
         self.convert_unicode = convert_unicode
+        self.allow_words = frozenset(allow_words)
 
         resolved_types_style = copy.deepcopy(self.default_types_style)
         types_style = types_style or {}
         for t, style in types_style.items():
             resolved_types_style.setdefault(t, {})
             resolved_types_style[t].update(style)
-        resolved_types_style[StringLiteral][StringLiteral.TypeStyle.max_literals] = int(max_literals)
+        resolved_types_style[StringLiteral][StringLiteral.TypeStyle.max_literals] = int(
+            max_literals)
         self.types_style = resolved_types_style
 
-        self.model.set_raw_name(self.convert_class_name(self.model.name), generated=self.model.is_name_generated)
+        self.model.set_raw_name(self.convert_class_name(
+            self.model.name), generated=self.model.is_name_generated)
 
     @cached_method
     def convert_class_name(self, name):
-        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=False)
+        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=False,
+                             allow_words=self.allow_words)
 
     @cached_method
     def convert_field_name(self, name):
-        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=True)
+        return prepare_label(name, convert_unicode=self.convert_unicode, to_snake_case=True,
+                             allow_words=self.allow_words)
 
     def generate(self, nested_classes: List[str] = None, bases: str = None, extra: str = "") \
             -> Tuple[ImportPathList, str]:
@@ -142,9 +152,11 @@ class GenericModelCodeGenerator:
             if str_fields and decorator_kwargs:
                 imports.extend([
                     *decorator_imports,
-                    ('json_to_models.models.string_converters', ['convert_strings']),
+                    ('json_to_models.models.string_converters',
+                     ['convert_strings']),
                 ])
-                decorators.append(self.STR_CONVERT_DECORATOR.render(str_fields=str_fields, kwargs=decorator_kwargs))
+                decorators.append(self.STR_CONVERT_DECORATOR.render(
+                    str_fields=str_fields, kwargs=decorator_kwargs))
         return imports, decorators
 
     def field_data(self, name: str, meta: MetaData, optional: bool) -> Tuple[ImportPathList, dict]:
@@ -156,7 +168,8 @@ class GenericModelCodeGenerator:
         :param optional: Is field optional
         :return: imports, field data
         """
-        imports, typing = metadata_to_typing(meta, types_style=self.types_style)
+        imports, typing = metadata_to_typing(
+            meta, types_style=self.types_style)
 
         data = {
             "name": self.convert_field_name(name),
@@ -171,13 +184,15 @@ class GenericModelCodeGenerator:
 
         :return: imports, list of fields as string
         """
-        required, optional = sort_fields(self.model, unicode_fix=not self.convert_unicode)
+        required, optional = sort_fields(
+            self.model, unicode_fix=not self.convert_unicode)
         imports: ImportPathList = []
         strings: List[str] = []
         for is_optional, fields in enumerate((required, optional)):
             fields = self._filter_fields(fields)
             for field in fields:
-                field_imports, data = self.field_data(field, self.model.type[field], bool(is_optional))
+                field_imports, data = self.field_data(
+                    field, self.model.type[field], bool(is_optional))
                 imports.extend(field_imports)
                 strings.append(self.FIELD.render(**data))
         return imports, strings
@@ -256,7 +271,8 @@ def generate_code(structure: ModelsStructureType, class_generator: Type[GenericM
     """
     root, mapping = structure
     with AbsoluteModelRef.inject(mapping):
-        imports, classes = _generate_code(root, class_generator, class_generator_kwargs or {})
+        imports, classes = _generate_code(
+            root, class_generator, class_generator_kwargs or {})
         imports_str = ""
     if imports:
         imports_str = compile_imports(imports) + objects_delimiter
@@ -284,7 +300,8 @@ def sort_kwargs(kwargs: dict, ordering: Iterable[Iterable[str]]) -> dict:
     return sorted_dict
 
 
-def prepare_label(s: str, convert_unicode: bool, to_snake_case: bool) -> str:
+def prepare_label(s: str, convert_unicode: bool, to_snake_case: bool,
+                  allow_words: frozenset = frozenset()) -> str:
     if convert_unicode:
         s = unidecode(s)
     s = re.sub(r"\W", "", s)
@@ -293,6 +310,6 @@ def prepare_label(s: str, convert_unicode: bool, to_snake_case: bool) -> str:
             s = ones[int(s[0])] + "_" + s[1:]
     if to_snake_case:
         s = inflection.underscore(s)
-    if s in blacklist_words:
+    if s in (blacklist_words - allow_words):
         s += "_"
     return s

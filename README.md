@@ -573,6 +573,13 @@ Arguments:
     * **Example**:  `--disable-str-serializable-types float int BooleanString IsoDatetimeString`
     * **Optional**
 
+* `--allow-words` - List of words to remove from the keyword blacklist.
+    By default, field names that clash with Python keywords or built-ins (e.g. `id`, `type`, `hash`, `format`) are
+    renamed by appending `_` (e.g. `id_`). WARNING: reserved keywords may cause syntax errors if you allow them, so be careful with this option.
+    * **Format**: `--allow-words WORD [WORD ...]`
+    * **Example**: `--allow-words id type` — generates `id: int` and `type: str` instead of `id_: int` and `type_: str`
+    * **Optional**
+
 ### Low level API
 
 \-

@@ -71,7 +71,8 @@ class Cli:
         self.max_literals: int = -1  # --max-strings-literals
         self.merge_policy: List[ModelCmp] = []  # --merge
         self.structure_fn: STRUCTURE_FN_TYPE = None  # -s
-        self.model_generator: Type[GenericModelCodeGenerator] = None  # -f & --code-generator
+        # -f & --code-generator
+        self.model_generator: Type[GenericModelCodeGenerator] = None
         self.model_generator_kwargs: Dict[str, Any] = None
 
         self.argparser = self._create_argparser()
@@ -93,7 +94,8 @@ class Cli:
         disable_unicode_conversion = namespace.disable_unicode_conversion
         self.strings_converters = namespace.strings_converters
         self.max_literals = namespace.max_strings_literals
-        merge_policy = [m.split("_") if "_" in m else m for m in namespace.merge]
+        merge_policy = [
+            m.split("_") if "_" in m else m for m in namespace.merge]
         structure = namespace.structure
         framework = namespace.framework
         code_generator = namespace.code_generator
@@ -101,14 +103,16 @@ class Cli:
         dict_keys_regex: List[str] = namespace.dict_keys_regex
         dict_keys_fields: List[str] = namespace.dict_keys_fields
         preamble: str = namespace.preamble
+        allow_words: List[str] = namespace.allow_words
 
         for name in namespace.disable_str_serializable_types:
             registry.remove_by_name(name)
 
-        self.setup_models_data(namespace.model or (), namespace.list or (), parser)
+        self.setup_models_data(namespace.model or (),
+                               namespace.list or (), parser)
         self.validate(merge_policy, framework, code_generator)
         self.set_args(merge_policy, structure, framework, code_generator, code_generator_kwargs_raw,
-                      dict_keys_regex, dict_keys_fields, disable_unicode_conversion, preamble)
+                      dict_keys_regex, dict_keys_fields, disable_unicode_conversion, preamble, allow_words)
 
     def run(self):
         if self.enable_datetime:
@@ -158,14 +162,18 @@ class Cli:
         for m in merge_policy:
             if isinstance(m, list):
                 if m[0] not in self.MODEL_CMP_MAPPING:
-                    raise ValueError(f"Invalid merge policy '{m[0]}', choices are {self.MODEL_CMP_MAPPING.keys()}")
+                    raise ValueError(
+                        f"Invalid merge policy '{m[0]}', choices are {self.MODEL_CMP_MAPPING.keys()}")
             elif m not in self.MODEL_CMP_MAPPING:
-                raise ValueError(f"Invalid merge policy '{m}', choices are {self.MODEL_CMP_MAPPING.keys()}")
+                raise ValueError(
+                    f"Invalid merge policy '{m}', choices are {self.MODEL_CMP_MAPPING.keys()}")
 
         if framework == 'custom' and code_generator is None:
-            raise ValueError("You should specify --code-generator to support custom generator")
+            raise ValueError(
+                "You should specify --code-generator to support custom generator")
         elif framework != 'custom' and code_generator is not None:
-            raise ValueError("--code-generator argument has no effect without '--framework custom' argument")
+            raise ValueError(
+                "--code-generator argument has no effect without '--framework custom' argument")
 
     def setup_models_data(
             self,
@@ -189,7 +197,8 @@ class Cli:
             elif len(model_tuple) == 3:
                 model_name, lookup, path_raw = model_tuple
             else:
-                raise RuntimeError('`--model` argument should contain exactly 2 or 3 strings')
+                raise RuntimeError(
+                    '`--model` argument should contain exactly 2 or 3 strings')
 
             for real_path in process_path(path_raw):
                 iterator = iter_json_file(parser(real_path), lookup)
@@ -208,6 +217,7 @@ class Cli:
             dict_keys_fields: List[str],
             disable_unicode_conversion: bool,
             preamble: str,
+            allow_words: List[str] = (),
     ):
         """
         Convert CLI args to python representation and set them to appropriate object attributes
@@ -234,7 +244,8 @@ class Cli:
         self.model_generator_kwargs = dict(
             post_init_converters=self.strings_converters,
             convert_unicode=not disable_unicode_conversion,
-            max_literals=self.max_literals
+            max_literals=self.max_literals,
+            allow_words=allow_words,
         )
         if code_generator_kwargs_raw:
             for item in code_generator_kwargs_raw:
@@ -245,7 +256,8 @@ class Cli:
                 name, value = item.split("=", 1)
                 self.model_generator_kwargs[name] = value
 
-        self.dict_keys_regex = [re.compile(rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
+        self.dict_keys_regex = [re.compile(
+            rf"^{r}$") for r in dict_keys_regex] if dict_keys_regex else ()
         self.dict_keys_fields = dict_keys_fields or ()
         if preamble:
             preamble = preamble.strip()
@@ -392,6 +404,15 @@ class Cli:
             nargs=3, action="append", metavar=("<Model name>", "<JSON lookup>", "<JSON file>"),
             help="DEPRECATED, use --model argument instead"
         )
+        parser.add_argument(
+            "--allow-words",
+            metavar="WORD",
+            default=[],
+            nargs="+", type=str,
+            help="List of words to remove from the keyword blacklist.\n"
+                 "Prevents appending '_' to these field names.\n"
+                 "WARNING: reserved keywords may cause syntax errors if you allow them, so be careful with this option."
+        )
 
         return parser
 
@@ -421,7 +442,8 @@ class FileLoaders:
     @staticmethod
     def yaml(path: Path) -> Union[dict, list]:
         if yaml_load is None:
-            print('Yaml parser is not installed. To parse yaml files ruamel.yaml (or PyYaml) is required.')
+            print(
+                'Yaml parser is not installed. To parse yaml files ruamel.yaml (or PyYaml) is required.')
             raise ImportError('yaml')
         with path.open() as fp:
             return yaml_load(fp)
@@ -467,7 +489,8 @@ def iter_json_file(data: Union[dict, list], lookup: str) -> Generator[Union[dict
     elif isinstance(item, dict):
         yield item
     else:
-        raise TypeError(f'dict or list is expected at {lookup if lookup != "-" else "JSON root"}, not {type(item)}')
+        raise TypeError(
+            f'dict or list is expected at {lookup if lookup != "-" else "JSON root"}, not {type(item)}')
 
 
 def process_path(path: str) -> Iterable[Path]:
