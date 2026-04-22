@@ -1,5 +1,5 @@
 python-dateutil>=2.7
-inflection>=0.3
+inflection>=0.5.1
 unidecode>=1.0
 Jinja2>=2.10
 ordered-set==4.*
